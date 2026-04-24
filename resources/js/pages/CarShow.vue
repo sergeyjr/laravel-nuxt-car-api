@@ -3,10 +3,12 @@
 import {computed, onMounted} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useCarStore} from '@/stores/carStore'
+import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
 const router = useRouter()
 const carStore = useCarStore()
+const auth = useAuthStore()
 
 onMounted(() => {
     carStore.fetchCar(route.params.id)
@@ -29,29 +31,21 @@ const formatPrice = (price) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
 }
 
-const goBack = () => {
-    router.push('/cars')
-}
-
 </script>
 
 <template>
     <div class="container mt-4">
 
-        <!-- LOADING -->
         <div v-if="loading">Загрузка...</div>
 
-        <!-- NOT FOUND -->
         <div v-else-if="!car">
             Автомобиль не найден
         </div>
 
-        <!-- CONTENT -->
         <template v-else>
 
             <div class="row">
 
-                <!-- IMAGE -->
                 <div class="col-md-5">
                     <img
                         :src="carImage"
@@ -60,12 +54,10 @@ const goBack = () => {
                         alt="">
                 </div>
 
-                <!-- INFO -->
                 <div class="col-md-7">
 
                     <h2 class="mb-4">{{ car.title }}</h2>
 
-                    <p><strong>Цена:</strong> {{ formatPrice(car.price) }}</p>
                     <p><strong>Описание:</strong> {{ car.description }}</p>
 
                     <div v-if="car.option">
@@ -75,18 +67,23 @@ const goBack = () => {
                         <p><strong>Пробег:</strong> {{ car.option.mileage }}</p>
                     </div>
 
+                        <p v-if="auth.user">
+                            {{ formatPrice(car.price) }}
+                        </p>
+
+                        <p v-else class="text-muted">
+                            Авторизуйтесь, чтобы увидеть цену
+                        </p>
+
                 </div>
 
             </div>
 
             <hr>
 
-            <button
-                class="btn btn-secondary mt-3"
-                @click="goBack"
-            >
-                Назад
-            </button>
+            <router-link to="/cars" class="btn btn-outline-secondary">
+                В каталог
+            </router-link>
 
         </template>
 

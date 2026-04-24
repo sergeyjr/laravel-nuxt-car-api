@@ -1,13 +1,25 @@
 <script setup>
 
+import {onMounted, computed} from 'vue'
 import {useAuthStore} from '@/stores/authStore'
 import {useAuthActions} from '@/composables/useAuthActions'
+import {useCartStore} from '@/stores/cartStore'
 
 const auth = useAuthStore()
+const cart = useCartStore()
 
 const appName = import.meta.env.VITE_APP_NAME || 'My App'
+const {handleLogout} = useAuthActions()
 
-const { handleLogout } = useAuthActions()
+onMounted(() => {
+    if (auth.isAuth) {
+        cart.fetch()
+    }
+})
+
+const cartCount = computed(() => {
+    return Object.values(cart.items || {}).filter(Boolean).length
+})
 
 </script>
 
@@ -34,14 +46,41 @@ const { handleLogout } = useAuthActions()
                 <span class="text-white mx-2">|</span>
 
                 <router-link class="nav-link d-inline text-white" to="/page/about">
-                    About
+                    О проекте
                 </router-link>
 
                 <span class="text-white mx-2">|</span>
 
-                <router-link class="nav-link d-inline text-white" to="/dashboard">
-                    Личный кабинет
+                <router-link class="nav-link d-inline text-white" to="/page/info">
+                    Инфо (БД)
                 </router-link>
+
+                <template v-if="auth.isAuth">
+                    <span class="text-white mx-2">|</span>
+
+                    <router-link class="nav-link d-inline text-white" to="/dashboard">
+                        Личный кабинет
+                    </router-link>
+                </template>
+
+                <template v-if="auth.isAuth">
+                    <span class="text-white mx-2">|</span>
+
+                    <router-link
+                        class="nav-link d-inline text-white position-relative"
+                        to="/cart"
+                    >
+                        Корзина
+
+                        <span
+                            v-if="cartCount > 0"
+                            class="badge bg-danger ms-1"
+                            style="font-size: 11px;"
+                        >
+                            {{ cartCount }}
+                        </span>
+                    </router-link>
+                </template>
 
                 <span class="text-white mx-2">|</span>
 

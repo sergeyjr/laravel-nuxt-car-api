@@ -264,7 +264,7 @@ const formatDate = (date) => {
                 </div>
 
                 <router-link to="/dashboard" class="btn btn-outline-secondary">
-                    ← Назад
+                    Назад
                 </router-link>
 
             </div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SiteController;
 use App\Http\Middleware\FixJsonMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CartController;
 
 // DDD
 //use App\Http\Controllers\API\V1\ApiAuthController;
@@ -39,6 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/', [ProfileController::class, 'destroy']);
     });
 });
+
+Route::get('/cart', [CartController::class, 'index']);
+Route::post('/cart/add', [CartController::class, 'add']);
+Route::post('/cart/remove', [CartController::class, 'remove']);
+Route::post('/cart/update', [CartController::class, 'update']);
+Route::post('/cart/clear', [CartController::class, 'clear']);
 
 Route::prefix('v1')->group(function () {
 
