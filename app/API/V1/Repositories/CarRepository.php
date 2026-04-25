@@ -29,6 +29,7 @@ class CarRepository implements CarRepositoryInterface
                 'price' => $data['price'],
                 'photo_url' => $data['photo_url'],
                 'contacts' => $data['contacts'],
+                'user_id' => $data['user_id'] ?? null,
             ]);
 
             $car->save();
@@ -57,6 +58,8 @@ class CarRepository implements CarRepositoryInterface
                 'price' => $data['price'],
                 'photo_url' => $data['photo_url'],
                 'contacts' => $data['contacts'],
+                'user_id' => $data['user_id'] ?? null,
+
             ]);
 
             if (!empty($data['options'])) {

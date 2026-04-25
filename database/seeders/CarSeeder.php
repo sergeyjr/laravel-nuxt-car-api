@@ -39,7 +39,7 @@ class CarSeeder extends Seeder
 
         foreach ($this->cars as $car) {
 
-            $carId = DB::table('car')->insertGetId([
+            $carId = DB::table('cars')->insertGetId([
                 'title' => $car[0],
                 'description' => $car[1],
                 'price' => $car[2],
@@ -60,7 +60,7 @@ class CarSeeder extends Seeder
                 'mileage' => 50000,
             ];
 
-            DB::table('car_option')->insert($optionsArray);
+            DB::table('car_options')->insert($optionsArray);
 
         }
 

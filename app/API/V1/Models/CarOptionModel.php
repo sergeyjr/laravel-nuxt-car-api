@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CarOptionModel extends Model
 {
 
-    protected $table = 'cars_option';
+    protected $table = 'car_options';
 
-    // в таблице car_option нет полей created_at и updated_at
+    // в таблице car_options нет полей created_at и updated_at
     public $timestamps = false;
 
     protected $fillable = [

@@ -11,17 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
 
-        Schema::create('cars', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->decimal('price', 12, 2);
-            $table->string('photo_url');
-            $table->string('contacts');
-            $table->timestamps(); // created_at, updated_at
-        });
-
-        Schema::create('cars_option', function (Blueprint $table) {
+        Schema::create('car_options', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('car_id')->unique();
             $table->string('brand', 100);
@@ -43,8 +33,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('cars_option');
-        Schema::dropIfExists('cars');
+        Schema::dropIfExists('car_options');
     }
 
 };

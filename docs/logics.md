@@ -136,7 +136,7 @@ CarService
   ↓
 CarRepository (transaction)
   ↓
-DB (car + car_option)
+DB (car + car_options)
   ↓
 CarMapper
   ↓
@@ -146,9 +146,9 @@ ApiResponse
 ### Логика:
 
 1. валидация DTO
-2. создание записи `car`
+2. создание записи `cars`
 3. если передан `options`:
-    - создаётся `car_option`
+    - создаётся `car_options`
 4. загрузка связи
 5. маппинг в response DTO
 6. возврат результата

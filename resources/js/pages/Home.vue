@@ -1,42 +1,55 @@
 <script setup>
 
-import {ref, onMounted} from 'vue'
-import axios from 'axios'
-import {useAuthStore} from '@/stores/authStore'
+import {onMounted} from 'vue'
 import {useRouter} from 'vue-router'
+
+import {useAuthStore} from '@/stores/authStore'
 import {useAuthActions} from '@/composables/useAuthActions'
-import ContactMiniForm from '@/components/ContactMiniForm.vue'
+import {useCarStore} from '@/stores/carStore'
+import {useContactStore} from '@/stores/contactStore'
+
 import BaseButton from '@/components/BaseButton.vue'
 
+import {Navigation, Pagination} from 'swiper/modules'
 import {Swiper, SwiperSlide} from 'swiper/vue'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 
-import {useSwiper} from '@/composables/useSwiper'
+const auth = useAuthStore()
+const {handleLogout} = useAuthActions()
 
-const {swiperOptions} = useSwiper()
+const router = useRouter()
 
-const latestCars = ref([])
-const loadingCars = ref(false)
+const modules = [Navigation, Pagination]
 
-onMounted(async () => {
-    try {
-        loadingCars.value = true
-        const res = await axios.get('/api/cars/latest')
-        latestCars.value = res.data.data ?? res.data
-    } catch (e) {
-        console.error(e)
-    } finally {
-        loadingCars.value = false
+const swiperOptions = {
+    slidesPerView: 3,
+    slidesPerGroup: 3,
+    spaceBetween: 20,
+    navigation: true,
+    pagination: {
+        clickable: true
+    },
+    loop: true,
+    speed: 600,
+    breakpoints: {
+        320: {slidesPerView: 1, slidesPerGroup: 1},
+        768: {slidesPerView: 2, slidesPerGroup: 2},
+        1024: {slidesPerView: 3, slidesPerGroup: 3}
     }
+}
+
+const carStore = useCarStore()
+
+onMounted(() => {
+    carStore.fetchLatest()
 })
 
 const getImage = (car) => {
     if (!car.photo_url) return '/images/default_car.jpg'
-    if (car.photo_url.startsWith('http')) return car.photo_url
-    return car.photo_url
+    return car.photo_url.startsWith('http') ? car.photo_url : car.photo_url
 }
 
 const formatPrice = (price) => {
@@ -47,10 +60,7 @@ const openCar = (id) => {
     router.push(`/cars/show/${id}`)
 }
 
-const auth = useAuthStore()
-const router = useRouter()
-
-const {handleLogout} = useAuthActions()
+const contactStore = useContactStore()
 
 </script>
 
@@ -59,12 +69,11 @@ const {handleLogout} = useAuthActions()
 
         <div class="text-center mb-5">
             <h1 class="display-5 fw-bold">Главная страница</h1>
-            <p class="text-muted">Простой Laravel + Vue проект</p>
+            <p class="text-muted">Простой проект Laravel 13 + Vue 3</p>
         </div>
 
         <div class="row g-4">
 
-            <!-- STATUS -->
             <div class="col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
@@ -86,7 +95,6 @@ const {handleLogout} = useAuthActions()
                 </div>
             </div>
 
-            <!-- ACTIONS -->
             <div class="col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
@@ -143,15 +151,19 @@ const {handleLogout} = useAuthActions()
             <div class="col-12 mt-5">
                 <h2 class="mb-4">Новинки</h2>
 
-                <div v-if="loadingCars">
+                <div v-if="carStore.latestLoading">
                     Загрузка новинок...
                 </div>
 
                 <div v-else>
 
-                    <Swiper v-bind="swiperOptions" class="swiper-custom">
+                    <Swiper
+                        :modules="modules"
+                        v-bind="swiperOptions"
+                        class="swiper-custom"
+                    >
 
-                        <SwiperSlide v-for="car in latestCars" :key="car.id">
+                        <SwiperSlide v-for="car in carStore.latest" :key="car.id">
                             <div class="card h-100" style="cursor:pointer" @click="openCar(car.id)">
                                 <img
                                     :src="getImage(car)"
@@ -178,7 +190,67 @@ const {handleLogout} = useAuthActions()
                 </div>
             </div>
 
-            <ContactMiniForm />
+            <div class="col-6 offset-3 mt-5">
+
+                <h4 class="mb-3">Связаться с нами</h4>
+
+                <div v-if="contactStore.retryAfter" class="alert alert-warning">
+                    Подождите {{ contactStore.retryAfter }} сек перед повторной отправкой
+                </div>
+
+                <form @submit.prevent="contactStore.submit">
+
+                    <input
+                        class="form-control mb-2"
+                        placeholder="Имя"
+                        v-model="contactStore.form.name"
+                    />
+                    <small v-if="contactStore.errors.name" class="text-danger">
+                        {{ contactStore.errors.name }}
+                    </small>
+
+                    <input
+                        class="form-control mb-2"
+                        placeholder="Email"
+                        v-model="contactStore.form.email"
+                    />
+                    <small v-if="contactStore.errors.email" class="text-danger">
+                        {{ contactStore.errors.email }}
+                    </small>
+
+                    <input
+                        class="form-control mb-2"
+                        placeholder="Тема"
+                        v-model="contactStore.form.subject"
+                    />
+                    <small v-if="contactStore.errors.subject" class="text-danger">
+                        {{ contactStore.errors.subject }}
+                    </small>
+
+                    <textarea
+                        class="form-control mb-2"
+                        rows="4"
+                        placeholder="Сообщение"
+                        v-model="contactStore.form.body"
+                    ></textarea>
+                    <small v-if="contactStore.errors.body" class="text-danger">
+                        {{ contactStore.errors.body }}
+                    </small>
+
+                    <BaseButton
+                        class="w-100"
+                        type="submit"
+                        variant="primary"
+                        :loading="contactStore.loading"
+                        :disabled="contactStore.retryAfter > 0"
+                    >
+                        <template #loading>Отправка...</template>
+                        Отправить
+                    </BaseButton>
+
+                </form>
+
+            </div>
 
         </div>
 

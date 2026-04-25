@@ -16,6 +16,8 @@ class CarCreateRequest
 
     public ?array $options = null;
 
+    public ?int $user_id = null;
+
     public array $errors = [];
 
     public static function fromRequest(Request $request): self
@@ -29,6 +31,8 @@ class CarCreateRequest
         $dto->contacts = $request->has('contacts') ? (string)$request->input('contacts') : null;
 
         $dto->options = $request->has('options') ? $request->input('options') : null;
+
+        $dto->user_id = auth()->id();
 
         return $dto;
     }
@@ -76,6 +80,7 @@ class CarCreateRequest
             'photo_url' => $this->photo_url,
             'contacts' => $this->contacts,
             'options' => $this->options,
+            'user_id' => $this->user_id,
         ];
     }
 

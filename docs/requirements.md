@@ -106,19 +106,20 @@
 
 Используется PostgreSQL.
 
-#### Таблица `car`
+#### Таблица `cars`
 
 * id (serial, PK)
 * title (varchar)
 * description (text)
 * price (decimal)
 * photo_url (varchar)
+* user_id (integer, FK)
 * contacts (varchar)
 * created_at (timestamp)
 
 ---
 
-#### Таблица `car_option`
+#### Таблица `car_options`
 
 * id (serial, PK)
 * car_id (integer, FK)
@@ -133,7 +134,7 @@
 #### Связь
 
 ```
-car_option.car_id → car.id
+car_options.car_id → car.id
 ```
 
 Тип связи:

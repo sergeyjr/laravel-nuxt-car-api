@@ -16,6 +16,7 @@ class CarModel extends Model
         'price',
         'photo_url',
         'contacts',
+        'user_id',
     ];
 
     protected $casts = [

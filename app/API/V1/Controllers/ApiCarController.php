@@ -19,10 +19,11 @@ class ApiCarController extends Controller
     private CarService $service;
     private CarMapper $mapper;
 
-    public const string CAR_NOT_FOUND = 'Машина не найдена';
-    public const string DELETE_SUCCESS = 'Машина с ID :id удалена';
-    public const string ID_IS_REQUIRED = 'Требуется ID';
-    public const string VALIDATION_FAILED = 'Проверка не удалась';
+    public const CAR_NOT_FOUND = 'Машина не найдена';
+    public const DELETE_SUCCESS = 'Машина с ID :id удалена';
+    public const ID_IS_REQUIRED = 'Требуется ID';
+    public const VALIDATION_FAILED = 'Проверка не удалась';
+    public const ACCESS_DENIDED = 'Доступ запрещён';
 
     public function __construct(CarService $service, CarMapper $mapper)
     {
@@ -98,6 +99,10 @@ class ApiCarController extends Controller
             return $this->error(self::CAR_NOT_FOUND, 404);
         }
 
+        if (($car['user_id'] ?? null) !== auth()->id()) {
+            return $this->error(self::ACCESS_DENIDED, 403);
+        }
+
         return $this->success(
             $this->mapper->toResponse($car)
         );
@@ -118,14 +123,18 @@ class ApiCarController extends Controller
             ], 422);
         }
 
-        $car = $this->service->patchCar($id, $dto->toArray());
+        $result = $this->service->patchCar($id, $dto->toArray());
 
-        if (!$car) {
+        if ($result === 'not_found') {
             return $this->error(self::CAR_NOT_FOUND, 404);
         }
 
+        if ($result === 'forbidden') {
+            return $this->error(self::ACCESS_DENIDED, 403);
+        }
+
         return $this->success(
-            $this->mapper->toResponse($car)
+            $this->mapper->toResponse($result)
         );
     }
 
@@ -135,10 +144,14 @@ class ApiCarController extends Controller
             return $this->error(self::ID_IS_REQUIRED, 400);
         }
 
-        $deleted = $this->service->deleteCar($id);
+        $result = $this->service->deleteCar($id);
 
-        if (!$deleted) {
+        if ($result === 'not_found') {
             return $this->error(self::CAR_NOT_FOUND, 404);
+        }
+
+        if ($result === 'forbidden') {
+            return $this->error(self::ACCESS_DENIDED, 403);
         }
 
         return $this->success([

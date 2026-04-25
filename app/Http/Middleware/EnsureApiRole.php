@@ -7,8 +7,8 @@ use Closure;
 class EnsureApiRole
 {
 
-    public const string UNAUTHORIZED = 'Требуется авторизация.';
-    public const string FORBIDDEN = 'Доступ запрещен.';
+    public const UNAUTHORIZED = 'Требуется авторизация.';
+    public const FORBIDDEN = 'Доступ запрещен.';
 
     public function handle($request, Closure $next)
     {

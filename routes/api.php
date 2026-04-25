@@ -41,11 +41,18 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+// CART
+
 Route::get('/cart', [CartController::class, 'index']);
-Route::post('/cart/add', [CartController::class, 'add']);
-Route::post('/cart/remove', [CartController::class, 'remove']);
-Route::post('/cart/update', [CartController::class, 'update']);
-Route::post('/cart/clear', [CartController::class, 'clear']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/cart/add', [CartController::class, 'add']);
+    Route::post('/cart/remove', [CartController::class, 'remove']);
+    Route::post('/cart/update', [CartController::class, 'update']);
+    Route::post('/cart/clear', [CartController::class, 'clear']);
+});
+
+// API V1
 
 Route::prefix('v1')->group(function () {
 

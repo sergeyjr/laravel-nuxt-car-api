@@ -1,6 +1,7 @@
 // resources/js/router/index.js
 
 import {createRouter, createWebHistory} from 'vue-router'
+
 import {useAuthStore} from '@/stores/authStore'
 import {useAlertStore} from '@/stores/alertStore'
 
@@ -19,18 +20,24 @@ import Register from '@/pages/Register.vue'
 
 const routes = [
 
+    // Главная страница
     {path: '/', name: 'home', component: Home},
+
+    // Страницы без авторизации
     {path: '/cars', name: 'cars', component: CarsIndex},
     {path: '/cars/show/:id', name: 'car-show', component: CarShow},
-    {path: '/cart', name: 'cart', component: Cart},
     {path: '/contact', name: 'contact', component: Contact},
-    {path: '/dashboard', name: 'dashboard', component: Dashboard, meta: {requiresAuth: true}},
-    {path: '/dashboard/car/create', name: 'dashboard-car-create', component: CarCreate, meta: {requiresAuth: true}},
-    {path: '/dashboard/profile', name: 'dashboard-profile', component: Profile, meta: {requiresAuth: true}},
     {path: '/login', name: 'login', component: Login, meta: {guest: true}},
     {path: '/page/:code', name: 'page', component: Page},
     {path: '/register', name: 'register', component: Register, meta: {guest: true}},
 
+    // Страницы с авторизацией
+    {path: '/cart', name: 'cart', component: Cart, meta: {requiresAuth: true}},
+    {path: '/dashboard', name: 'dashboard', component: Dashboard, meta: {requiresAuth: true}},
+    {path: '/dashboard/car/create', name: 'dashboard-car-create', component: CarCreate, meta: {requiresAuth: true}},
+    {path: '/dashboard/profile', name: 'dashboard-profile', component: Profile, meta: {requiresAuth: true}},
+
+    // Ошибка 404 - страница не найдена
     {path: '/not-found', name: 'not-found', component: NotFound},
     {path: '/:pathMatch(.*)*', redirect: '/not-found'}
 

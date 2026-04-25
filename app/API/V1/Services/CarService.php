@@ -14,7 +14,7 @@ class CarService
 
     private CarRepositoryInterface $repository;
 
-    private const int CACHE_TTL = 600;
+    private const CACHE_TTL = 600;
 
     public function __construct(CarRepositoryInterface $repository)
     {
@@ -70,8 +70,18 @@ class CarService
         return $car;
     }
 
-    public function updateCar(int $id, array $data): ?array
+    public function updateCar(int $id, array $data): array|string|null
     {
+        $car = $this->repository->findById($id);
+
+        if (!$car) {
+            return 'not_found';
+        }
+
+        if (($car['user_id'] ?? null) !== auth()->id()) {
+            return 'forbidden';
+        }
+
         $options = null;
 
         if (!empty($data['options'])) {
@@ -82,6 +92,7 @@ class CarService
         $data['options'] = $options;
 
         $car = $this->repository->update($id, $data);
+
         try {
             Cache::forget("car:{$car['id']}");
         } catch (\Throwable $e) {
@@ -91,8 +102,18 @@ class CarService
         return $car;
     }
 
-    public function patchCar(int $id, array $data): ?array
+    public function patchCar(int $id, array $data): array|string|null
     {
+        $car = $this->repository->findById($id);
+
+        if (!$car) {
+            return 'not_found';
+        }
+
+        if (($car['user_id'] ?? null) !== auth()->id()) {
+            return 'forbidden';
+        }
+
         $options = null;
 
         if (!empty($data['options'])) {
@@ -115,8 +136,24 @@ class CarService
         return $car;
     }
 
-    public function deleteCar(int $id): bool
+    public function deleteCar(int $id): array|string|null
     {
+        $car = $this->repository->findById($id);
+
+        if (!$car) {
+            return 'not_found';
+        }
+
+        if (($car['user_id'] ?? null) !== auth()->id()) {
+            return 'forbidden';
+        }
+
+        try {
+            Cache::forget("car:{$car['id']}");
+        } catch (\Throwable $e) {
+            // логируем, но не падаем
+        }
+
         return $this->repository->delete($id);
     }
 

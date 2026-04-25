@@ -1,10 +1,10 @@
-import {defineStore} from "pinia";
-import axios from "axios";
+import {defineStore} from "pinia"
+import {api} from "@/api"
 
 function cleanItems(obj) {
     return Object.fromEntries(
         Object.entries(obj || {}).filter(([_, item]) => item != null)
-    );
+    )
 }
 
 export const useCartStore = defineStore("cart", {
@@ -26,23 +26,23 @@ export const useCartStore = defineStore("cart", {
     },
 
     actions: {
+
         saveToLocalStorage() {
-            localStorage.setItem('cartItems', JSON.stringify(this.items));
+            localStorage.setItem('cartItems', JSON.stringify(this.items))
         },
 
         async fetch(force = false) {
             try {
-                if (this.initialized) return
+                if (this.initialized && !force) return
 
-                // если уже есть данные — не грузим повторно
                 if (!force && Object.keys(this.items).length > 0) {
+                    this.initialized = true
                     return
                 }
 
-                const res = await axios.get("/api/cart")
+                const res = await api.get("/api/cart")
                 const serverItems = cleanItems(res.data)
 
-                // если сервер пустой — не затираем
                 if (Object.keys(serverItems).length > 0) {
                     this.items = serverItems
                     this.saveToLocalStorage()
@@ -56,60 +56,92 @@ export const useCartStore = defineStore("cart", {
         },
 
         async add(newItem) {
-            try {
-                await axios.post("/api/cart/add", newItem);
+            const id = newItem.id
+            const backup = JSON.parse(JSON.stringify(this.items))
 
-                if (this.items[newItem.id]) {
-                    this.items[newItem.id].qty += newItem.qty ?? 1
-                } else {
-                    this.items[newItem.id] = {
-                        id: newItem.id,
-                        name: newItem.name,
-                        price: newItem.price,
-                        qty: newItem.qty ?? 1,
-                        photo_url: newItem.photo_url || null
-                    }
+            if (this.items[id]) {
+                this.items[id].qty += newItem.qty ?? 1
+            } else {
+                this.items[id] = {
+                    id: newItem.id,
+                    name: newItem.name,
+                    price: newItem.price,
+                    qty: newItem.qty ?? 1,
+                    photo_url: newItem.photo_url || null
                 }
+            }
 
-                this.saveToLocalStorage();
+            this.saveToLocalStorage()
+
+            try {
+                await api.get('/sanctum/csrf-cookie')
+                await api.post("/api/cart/add", {
+                    id,
+                    qty: newItem.qty ?? 1
+                })
+                console.log('cart add success')
             } catch (error) {
-                console.error("Ошибка добавления в корзину:", error);
+                console.error("Ошибка добавления в корзину:", error)
+                this.items = backup
+                this.saveToLocalStorage()
             }
         },
 
         async update(id, qty) {
-            try {
-                await axios.post("/api/cart/update", {id, qty});
+            if (!id || qty < 1) return
 
-                if (this.items[id]) {
-                    this.items[id].qty = qty;
-                    this.saveToLocalStorage();
-                }
+            const backup = JSON.parse(JSON.stringify(this.items))
+
+            if (this.items[id]) {
+                this.items[id].qty = qty
+            }
+
+            this.saveToLocalStorage()
+
+            try {
+                await api.get('/sanctum/csrf-cookie')
+                await api.post("/api/cart/update", {id, qty})
+                console.log('cart update success')
             } catch (error) {
-                console.error("Ошибка обновления корзины:", error);
+                console.error("Ошибка обновления корзины:", error)
+                this.items = backup
+                this.saveToLocalStorage()
             }
         },
 
         async remove(id) {
-            try {
-                await axios.post("/api/cart/remove", {id});
+            const backup = JSON.parse(JSON.stringify(this.items))
 
-                delete this.items[id];
-                this.saveToLocalStorage();
+            delete this.items[id]
+            this.saveToLocalStorage()
+
+            try {
+                await api.get('/sanctum/csrf-cookie')
+                await api.post("/api/cart/remove", {id})
+                console.log('cart remove success')
             } catch (error) {
-                console.error("Ошибка удаления из корзины:", error);
+                console.error("Ошибка удаления из корзины:", error)
+                this.items = backup
+                this.saveToLocalStorage()
             }
         },
 
         async clear() {
-            try {
-                await axios.post("/api/cart/clear");
+            const backup = JSON.parse(JSON.stringify(this.items))
 
-                this.items = {};
-                this.saveToLocalStorage();
+            this.items = {}
+            this.saveToLocalStorage()
+
+            try {
+                await api.get('/sanctum/csrf-cookie')
+                await api.post("/api/cart/clear")
+                console.log('cart clear success')
             } catch (error) {
-                console.error("Ошибка очистки корзины:", error);
+                console.error("Ошибка очистки корзины:", error)
+                this.items = backup
+                this.saveToLocalStorage()
             }
         }
+
     }
-});
+})

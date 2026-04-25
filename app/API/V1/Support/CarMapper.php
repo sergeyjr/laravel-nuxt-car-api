@@ -20,6 +20,7 @@ class CarMapper
         $dto->price = $car['price'] ?? null;
         $dto->photo_url = $car['photo_url'] ?? null;
         $dto->contacts = $car['contacts'] ?? null;
+        $dto->user_id = $car['user_id'] ?? null;
 
         $dto->options = null;
 

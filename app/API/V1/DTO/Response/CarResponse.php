@@ -12,6 +12,8 @@ class CarResponse
     public string $photo_url;
     public string $contacts;
 
+    public ?int $user_id = null;
+
     public $options = null;
 
 }

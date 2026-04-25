@@ -12,7 +12,11 @@ export const useCarStore = defineStore('cars', {
 
         car: null,
         carLoading: false,
-        carCache: new Map()
+        carCache: new Map(),
+
+        latest: [],
+        latestLoaded: false,
+        latestLoading: false
     }),
 
     actions: {
@@ -91,6 +95,26 @@ export const useCarStore = defineStore('cars', {
                 this.car = null
             } finally {
                 this.carLoading = false
+            }
+        },
+
+        async fetchLatest() {
+
+            if (this.latestLoaded) return
+
+            this.latestLoading = true
+
+            try {
+                const {data} = await api.get('/api/cars/latest')
+
+                this.latest = data.data ?? data
+                this.latestLoaded = true
+
+            } catch (e) {
+                console.error('Ошибка загрузки новинок:', e)
+                this.latest = []
+            } finally {
+                this.latestLoading = false
             }
         }
 

@@ -134,7 +134,7 @@ function clear() {
                             class="btn btn-outline-danger btn-sm"
                             @click="remove(itemId)"
                         >
-                            Удалить
+                            X
                         </button>
 
                     </div>
