@@ -10,10 +10,12 @@ class DashboardController extends Controller
 
     public function api(CarService $carService): JsonResponse
     {
+        $carsCount = $carService->getCarsCount();
+
         return response()->json([
             'message' => 'Защищенные данные.',
             'user' => auth()->user(),
-            'carsCount' => $carService->getCarsCount(),
+            'count' => $carsCount,
         ]);
     }
 

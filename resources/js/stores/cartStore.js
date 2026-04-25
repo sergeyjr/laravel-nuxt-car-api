@@ -79,7 +79,7 @@ export const useCartStore = defineStore("cart", {
                     id,
                     qty: newItem.qty ?? 1
                 })
-                console.log('cart add success')
+                console.log('cart add success', newItem.qty ?? 1)
             } catch (error) {
                 console.error("Ошибка добавления в корзину:", error)
                 this.items = backup
@@ -101,7 +101,7 @@ export const useCartStore = defineStore("cart", {
             try {
                 await api.get('/sanctum/csrf-cookie')
                 await api.post("/api/cart/update", {id, qty})
-                console.log('cart update success')
+                console.log('cart update success', qty)
             } catch (error) {
                 console.error("Ошибка обновления корзины:", error)
                 this.items = backup
@@ -141,7 +141,29 @@ export const useCartStore = defineStore("cart", {
                 this.items = backup
                 this.saveToLocalStorage()
             }
+        },
+
+        async checkout() {
+            const backup = JSON.parse(JSON.stringify(this.items))
+            console.log('checkout')
+
+            try {
+                await api.get('/sanctum/csrf-cookie')
+                const res = await api.post("/api/orders/checkout")
+
+                this.items = {}
+                this.saveToLocalStorage()
+
+                return res.data
+
+            } catch (error) {
+                console.error("Ошибка оформления заказа:", error)
+                this.items = backup
+                this.saveToLocalStorage()
+                throw error
+            }
         }
+
 
     }
 })

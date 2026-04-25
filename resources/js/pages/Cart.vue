@@ -2,7 +2,9 @@
 
 import {onMounted, computed, ref} from "vue";
 import {useCartStore} from "@/stores/cartStore";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const cart = useCartStore();
 const isLoading = ref(true);
 
@@ -34,6 +36,21 @@ function remove(id) {
 function clear() {
     if (confirm('Вы уверены, что хотите очистить корзину?')) {
         cart.clear();
+    }
+}
+
+const submitOrder = async () => {
+    try {
+        if (confirm('Вы уверены, что хотите отправить заказ?')) {
+            isLoading.value = true
+            const res = await cart.checkout()
+            router.push(`/order-success/${res.order.id}`)
+        }
+    } catch (e) {
+        console.error(e)
+        alert('Ошибка при оформлении заказа')
+    } finally {
+        isLoading.value = false
     }
 }
 
@@ -71,9 +88,10 @@ function clear() {
                 class="col-12"
             >
                 <div class="card shadow-sm border-0">
-                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="card-body cart-row">
 
-                        <div class="d-flex align-items-center gap-3 flex-grow-1">
+                        <!-- ITEM INFO -->
+                        <div class="d-flex align-items-center gap-3">
 
                             <router-link :to="`/cars/show/${itemData.id}`">
                                 <img
@@ -99,39 +117,34 @@ function clear() {
                         </div>
 
                         <!-- QTY -->
-                        <div class="d-flex align-items-center gap-2">
-                            <button
-                                class="btn btn-outline-secondary btn-sm"
-                                @click="updateQty(itemId, itemData.qty - 1)"
-                            >
+                        <div class="d-flex align-items-center gap-2 justify-content-center">
+                            <button class="btn btn-outline-secondary btn-sm"
+                                    @click="updateQty(itemId, itemData.qty - 1)">
                                 −
                             </button>
 
                             <input
                                 type="text"
                                 class="form-control form-control-sm text-center"
-                                style="width: 70px;"
+                                style="width: 80px;"
                                 :value="itemData.qty"
                                 @input="updateInput(itemId, $event)"
-                                min="1"
                             />
 
-                            <button
-                                class="btn btn-outline-secondary btn-sm"
-                                @click="updateQty(itemId, itemData.qty + 1)"
-                            >
+                            <button class="btn btn-outline-secondary btn-sm"
+                                    @click="updateQty(itemId, itemData.qty + 1)">
                                 +
                             </button>
                         </div>
 
                         <!-- PRICE -->
-                        <div class="fw-bold">
+                        <div class="fw-bold text-end">
                             {{ new Intl.NumberFormat('ru-RU').format(itemData.price * itemData.qty) }} ₽
                         </div>
 
                         <!-- REMOVE -->
                         <button
-                            class="btn btn-outline-danger btn-sm"
+                            class="btn btn-outline-danger btn-sm justify-self-end"
                             @click="remove(itemId)"
                         >
                             X
@@ -144,7 +157,8 @@ function clear() {
 
         <!-- TOTAL -->
         <div v-if="Object.keys(items).length" class="mt-4">
-            <div class="card border-0 shadow-sm">
+
+            <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">Итого:</h4>
                     <h4 class="mb-0 text-success">
@@ -152,7 +166,26 @@ function clear() {
                     </h4>
                 </div>
             </div>
-        </div>
 
+            <button
+                class="btn btn-success w-100 py-2"
+                :disabled="isLoading"
+                @click="submitOrder"
+            >
+                Отправить заказ
+            </button>
+
+        </div>
     </div>
 </template>
+
+<style scoped>
+
+.cart-row {
+    display: grid;
+    grid-template-columns: 1fr 160px 140px 40px;
+    align-items: center;
+    gap: 16px;
+}
+
+</style>

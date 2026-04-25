@@ -2,80 +2,127 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Car;
+use App\Models\Cart;
+use App\Models\CartItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
-    
-    private function cart()
-    {
-        return Session::get('cart', []);
-    }
 
-    private function save($cart)
+    public function index(Request $request)
     {
-        Session::put('cart', $cart);
-    }
+        $cart = Cart::where('user_id', $request->user()->id)
+            ->with('items')
+            ->first();
 
-    public function index()
-    {
-        return response()->json($this->cart());
+        if (!$cart) {
+            return response()->json([]);
+        }
+
+        return response()->json(
+            $cart->items->mapWithKeys(function ($item) {
+                return [
+                    $item->car_id => [
+                        'id' => $item->car_id,
+                        'qty' => $item->qty,
+                        'price' => $item->price,
+                        'name' => $item->car->title ?? null
+                    ]
+                ];
+            })
+        );
     }
 
     public function add(Request $request)
     {
-        $cart = $this->cart();
+        $user = $request->user();
 
-        $id = $request->id;
+        $car = Car::findOrFail($request->id);
 
-        if (isset($cart[$id])) {
-            $cart[$id]['qty'] += $request->qty ?? 1;
+        $cart = Cart::firstOrCreate([
+            'user_id' => $user->id
+        ]);
+
+        $item = CartItem::where('cart_id', $cart->id)
+            ->where('car_id', $request->id)
+            ->first();
+
+        if ($item) {
+            $item->qty += $request->qty ?? 1;
+            $item->price = $car->price;
+            $item->save();
         } else {
-            $cart[$id] = [
-                'id' => $id,
-                'name' => $request->name,
-                'price' => $request->price,
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'car_id' => $request->id,
                 'qty' => $request->qty ?? 1,
-            ];
+                'price' => $car->price
+            ]);
         }
 
-        $this->save($cart);
-
-        return response()->json($cart);
+        return response()->json([
+            'message' => 'added'
+        ]);
     }
 
     public function update(Request $request)
     {
-        $cart = $this->cart();
+        $user = $request->user();
 
-        $id = $request->id;
+        $cart = Cart::firstOrCreate([
+            'user_id' => $user->id
+        ]);
 
-        if (isset($cart[$id])) {
-            $cart[$id]['qty'] = max(1, $request->qty);
+        $car = Car::findOrFail($request->id);
+
+        $item = CartItem::where('cart_id', $cart->id)
+            ->where('car_id', $car->id)
+            ->first();
+
+        if ($item) {
+            $item->qty = max(1, $request->qty);
+            $item->price = $car->price;
+            $item->save();
+        } else {
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'car_id' => $car->id,
+                'qty' => max(1, $request->qty),
+                'price' => $car->price
+            ]);
         }
 
-        $this->save($cart);
-
-        return response()->json($cart);
+        return response()->json([
+            'ok' => true
+        ]);
     }
 
     public function remove(Request $request)
     {
-        $cart = $this->cart();
+        $cart = Cart::where('user_id', $request->user()->id)->first();
 
-        unset($cart[$request->id]);
+        if (!$cart) {
+            return response()->json([]);
+        }
 
-        $this->save($cart);
+        CartItem::where('cart_id', $cart->id)
+            ->where('car_id', $request->id)
+            ->delete();
 
-        return response()->json($cart);
+        return response()->json(['ok' => true]);
     }
 
-    public function clear()
+    public function clear(Request $request)
     {
-        Session::forget('cart');
+        $cart = Cart::where('user_id', $request->user()->id)->first();
+
+        if ($cart) {
+            CartItem::where('cart_id', $cart->id)->delete();
+        }
 
         return response()->json([]);
     }
 
 }
+

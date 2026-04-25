@@ -1,22 +1,18 @@
 <script setup>
+import { computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useCarStore } from '@/stores/carStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useCartStore } from "@/stores/cartStore"
 
-import {computed, onMounted} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-import {useCarStore} from '@/stores/carStore'
-import {useAuthStore} from '@/stores/authStore'
-import {useCartStore} from "@/stores/cartStore"
-
-import BaseButton from "@/components/BaseButton.vue";
+import BaseButton from "@/components/BaseButton.vue"
 
 const route = useRoute()
 const router = useRouter()
+
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
-
-onMounted(() => {
-    store.fetchCar(route.params.id)
-})
 
 const car = computed(() => store.car)
 const loading = computed(() => store.carLoading)
@@ -35,7 +31,6 @@ const formatPrice = (price) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
 }
 
-
 const addToCart = (car) => {
     cart.add({
         id: car.id,
@@ -52,14 +47,39 @@ const isInCart = (carId) => {
     )
 }
 
-onMounted(() => {
-    store.fetch(1)
+const loadCar = async (id) => {
+    if (!id) return
 
-    if (auth.isAuth && Object.keys(cart.items).length === 0) {
+    store.clearCurrent?.()
+
+    try {
+        await store.fetchCar(id)
+
+        // если машина не пришла — редирект на 404
+        if (!store.car) {
+            await router.push({ name: 'not-found' })
+        }
+    } catch (e) {
+        if (e.response?.status === 404) {
+            await router.push({ name: 'not-found' })
+        } else {
+            store.clearCurrent?.()
+        }
+    }
+}
+
+onMounted(() => {
+    loadCar(route.params.id)
+
+    if (auth.isAuth && Object.keys(cart.items || {}).length === 0) {
         cart.fetch()
     }
 })
 
+watch(
+    () => route.params.id,
+    (newId) => loadCar(newId)
+)
 </script>
 
 <template>
@@ -84,7 +104,8 @@ onMounted(() => {
                         :src="carImage"
                         class="img-fluid rounded"
                         style="max-height: 400px; object-fit: contain;"
-                        alt="">
+                        alt=""
+                    >
                 </div>
 
                 <div class="col-12 col-md-7">
@@ -96,9 +117,11 @@ onMounted(() => {
                         <p><strong>Модель:</strong> {{ car.option.model }}</p>
                         <p><strong>Год:</strong> {{ car.option.year }}</p>
                         <p><strong>Пробег:</strong> {{ car.option.mileage }}</p>
+
                         <p v-if="auth.user">
                             <strong>Цена:</strong> {{ formatPrice(car.price) }}
                         </p>
+
                         <p v-else class="text-muted">
                             Авторизуйтесь, чтобы увидеть цену
                         </p>

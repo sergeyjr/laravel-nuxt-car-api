@@ -13,7 +13,10 @@ import Contact from '@/pages/Contact.vue'
 import Dashboard from '@/pages/Dashboard.vue'
 import Home from '@/pages/Home.vue'
 import Login from '@/pages/Login.vue'
+import MyOrders from '@/pages/MyOrders.vue'
 import NotFound from '@/pages/NotFound.vue'
+import OrderDetails from '@/pages/OrderDetails.vue'
+import OrderSuccess from '@/pages/OrderSuccess.vue'
 import Page from '@/pages/Page.vue'
 import Profile from '@/pages/Profile.vue'
 import Register from '@/pages/Register.vue'
@@ -36,6 +39,9 @@ const routes = [
     {path: '/dashboard', name: 'dashboard', component: Dashboard, meta: {requiresAuth: true}},
     {path: '/dashboard/car/create', name: 'dashboard-car-create', component: CarCreate, meta: {requiresAuth: true}},
     {path: '/dashboard/profile', name: 'dashboard-profile', component: Profile, meta: {requiresAuth: true}},
+    {path: '/order-success/:id', name: 'order-success', component: OrderSuccess, meta: {requiresAuth: true}},
+    {path: '/orders', name: 'orders', component: MyOrders, meta: {requiresAuth: true}},
+    {path: '/orders/:id', name: 'order-details', component: OrderDetails, meta: {requiresAuth: true}},
 
     // Ошибка 404 - страница не найдена
     {path: '/not-found', name: 'not-found', component: NotFound},

@@ -4,21 +4,12 @@ use App\API\V1\Controllers\ApiAuthController;
 use App\API\V1\Controllers\ApiCarController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SiteController;
 use App\Http\Middleware\FixJsonMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
-
-// DDD
-//use App\Http\Controllers\API\V1\ApiAuthController;
-//use App\Http\Controllers\API\V1\ApiCarController;
-//use App\Http\Controllers\Web\CarController;
-//use App\Http\Controllers\Web\DashboardController;
-//use App\Http\Controllers\Web\ProfileController;
-//use App\Http\Controllers\Web\SiteController;
-//use App\Http\Middleware\FixJsonMiddleware;
-//use Illuminate\Support\Facades\Route;
 
 Route::get('/cars', [CarController::class, 'list']);
 
@@ -26,30 +17,35 @@ Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
 
 Route::get('/cars/latest', [CarController::class, 'latest']);
 
-Route::get('/dashboard', [DashboardController::class, 'api']);
+Route::get('/dashboard/cars', [DashboardController::class, 'api']);
 
 Route::get('/page/{code}', [SiteController::class, 'page']);
 
 Route::post('/contact', [SiteController::class, 'sendContact'])
     ->middleware('throttle:contact_form');
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::prefix('profile')->group(function () {
-        Route::post('/update', [ProfileController::class, 'update']);
-        Route::post('/password', [ProfileController::class, 'password']);
-        Route::delete('/', [ProfileController::class, 'destroy']);
-    });
+Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
+    Route::delete('/', [ProfileController::class, 'destroy']);
+    Route::post('/password', [ProfileController::class, 'password']);
+    Route::post('/update', [ProfileController::class, 'update']);
 });
 
 // CART
 
-Route::get('/cart', [CartController::class, 'index']);
+Route::middleware('auth:sanctum')->prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'index']);
+    Route::post('/add', [CartController::class, 'add']);
+    Route::post('/remove', [CartController::class, 'remove']);
+    Route::post('/update', [CartController::class, 'update']);
+    Route::post('/clear', [CartController::class, 'clear']);
+});
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/cart/add', [CartController::class, 'add']);
-    Route::post('/cart/remove', [CartController::class, 'remove']);
-    Route::post('/cart/update', [CartController::class, 'update']);
-    Route::post('/cart/clear', [CartController::class, 'clear']);
+// ORDERS
+
+Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index']);
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::get('/{id}', [OrderController::class, 'show']);
 });
 
 // API V1

@@ -1,23 +1,34 @@
 <script setup>
-
-import {onMounted, computed} from 'vue'
-import {useAuthStore} from '@/stores/authStore'
-import {useDashboardStore} from '@/stores/dashboardStore'
+import { onMounted, computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useDashboardStore } from '@/stores/dashboardStore'
 
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
 
 const user = computed(() => auth.user)
 const isApiUser = computed(() => auth.user?.role === 'api')
-//const isUserLoaded = computed(() => auth.initialized)
+
+const ordersCount = computed(() => dashboard.ordersCount)
+
+const recentOrders = computed(() => dashboard.orders || [])
+
+const cartCount = computed(() =>
+    Object.values(dashboard.cart || {}).reduce(
+        (sum, item) => sum + (item.qty || 0),
+        0
+    )
+)
+
+const cartTotal = computed(() => dashboard.cartTotal || 0)
 
 onMounted(async () => {
     if (!auth.initialized) {
         await auth.initAuth()
     }
+
     await dashboard.fetchDashboard()
 })
-
 </script>
 
 <template>
@@ -28,11 +39,13 @@ onMounted(async () => {
         <div v-if="dashboard.loading">Загрузка...</div>
 
         <template v-else>
+
             <p class="mb-4">
                 Добро пожаловать, {{ user?.email || 'пользователь' }}
             </p>
 
             <div class="mb-4 d-flex gap-2 flex-wrap">
+
                 <router-link
                     v-if="isApiUser"
                     to="/dashboard/car/create"
@@ -47,10 +60,13 @@ onMounted(async () => {
                 >
                     Профиль
                 </router-link>
+
             </div>
 
             <!-- GRID -->
             <div class="row">
+
+                <!-- PROFILE -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
@@ -60,6 +76,7 @@ onMounted(async () => {
                     </div>
                 </div>
 
+                <!-- STATUS -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
@@ -69,15 +86,157 @@ onMounted(async () => {
                     </div>
                 </div>
 
+                <!-- CARS -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
                             <h5>Мои машины</h5>
-                            <p class="mb-0">{{ dashboard.carsCount }}</p>
+                            <p class="mb-0 fs-5 fw-bold">
+                                {{ dashboard.carsCount }}
+                            </p>
                         </div>
                     </div>
                 </div>
+
+                <!-- ORDERS -->
+                <div class="col-12 col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+
+                            <div>
+                                <h5>Мои заказы</h5>
+                                <p class="mb-1 text-muted">Всего заказов:</p>
+                                <p class="mb-0 fs-5 fw-bold text-primary">
+                                    {{ ordersCount }}
+                                </p>
+                            </div>
+
+                            <router-link
+                                to="/orders"
+                                class="btn btn-outline-primary mt-3"
+                            >
+                                Смотреть заказы
+                            </router-link>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CART -->
+                <div class="col-12 col-md-4 mb-3">
+                    <div class="card h-100">
+
+                        <div class="card-body d-flex flex-column justify-content-between">
+
+                            <div>
+                                <h5>Корзина</h5>
+
+                                <p class="mb-1 text-muted">
+                                    Товаров:
+                                </p>
+
+                                <p class="mb-2 fs-5 fw-bold">
+                                    {{ cartCount }}
+                                </p>
+
+                                <p class="mb-0 text-success fw-bold">
+                                    {{ new Intl.NumberFormat('ru-RU').format(cartTotal) }} ₽
+                                </p>
+                            </div>
+
+                            <router-link
+                                to="/cart"
+                                class="btn btn-outline-success mt-3"
+                            >
+                                Перейти в корзину
+                            </router-link>
+
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
+
+            <!-- RECENT ORDERS -->
+            <div class="mt-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Последние заказы</h4>
+
+                    <router-link
+                        to="/orders"
+                        class="btn btn-sm btn-outline-secondary"
+                    >
+                        Все заказы
+                    </router-link>
+                </div>
+
+                <!-- EMPTY -->
+                <div v-if="!recentOrders.length" class="alert alert-light">
+                    У вас пока нет заказов
+                </div>
+
+                <!-- LIST -->
+                <div v-else class="row g-3">
+
+                    <div
+                        v-for="order in recentOrders"
+                        :key="order.id"
+                        class="col-12 col-md-4"
+                    >
+                        <div class="card h-100 shadow-sm border-0">
+
+                            <div class="card-body d-flex flex-column justify-content-between">
+
+                                <div>
+                                    <h6 class="mb-1 text-truncate">
+                                        Заказ #{{ order.id }}
+                                    </h6>
+
+                                    <div class="text-muted small">
+                                        {{ new Date(order.created_at).toLocaleString('ru-RU') }}
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <span
+                                            class="badge"
+                                            :class="{
+                                                'bg-warning': order.status === 'pending',
+                                                'bg-success': order.status === 'paid',
+                                                'bg-danger': order.status === 'cancelled',
+                                                'bg-secondary': order.status === 'completed'
+                                            }"
+                                        >
+                                            {{ order.status }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 d-flex justify-content-between align-items-center">
+
+                                    <div class="fw-bold text-success">
+                                        {{ new Intl.NumberFormat('ru-RU').format(order.total) }} ₽
+                                    </div>
+
+                                    <router-link
+                                        :to="`/orders/${order.id}`"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        открыть
+                                    </router-link>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
         </template>
 
     </div>
