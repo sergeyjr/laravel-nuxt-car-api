@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * hp artisan testp --filter AuthTest
+ * php artisan test --filter AuthTest
  */
 class AuthTest extends TestCase
 {
