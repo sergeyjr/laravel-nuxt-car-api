@@ -13,25 +13,24 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $cart = Cart::where('user_id', $request->user()->id)
-            ->with('items')
+            ->with(['items' => function ($query) {
+                $query->orderBy('created_at', 'asc');
+            }])
             ->first();
 
         if (!$cart) {
             return response()->json([]);
         }
 
-        return response()->json(
-            $cart->items->mapWithKeys(function ($item) {
-                return [
-                    $item->car_id => [
-                        'id' => $item->car_id,
-                        'qty' => $item->qty,
-                        'price' => $item->price,
-                        'name' => $item->car->title ?? null
-                    ]
-                ];
-            })
-        );
+        return $cart->items->map(function ($item) {
+            return [
+                'id' => $item->car_id,
+                'qty' => $item->qty,
+                'price' => $item->price,
+                'name' => $item->car->title ?? null,
+                'photo_url' => $item->car->photo_url ?? null,
+            ];
+        });
     }
 
     public function add(Request $request)

@@ -2,7 +2,7 @@
 
 import {onMounted, computed, ref} from "vue";
 import {useCartStore} from "@/stores/cartStore";
-import { useRouter } from "vue-router";
+import {useRouter} from "vue-router";
 import BaseButton from "@/components/BaseButton.vue";
 
 const router = useRouter();
@@ -21,17 +21,27 @@ onMounted(async () => {
 const items = computed(() => cart.items);
 const total = computed(() => cart.total);
 
-function updateQty(id, qty) {
-    if (!isNaN(qty) && qty >= 1) {
-        cart.update(id, qty)
+function sanitizeQty(value) {
+    let qty = Number(value)
+
+    if (!Number.isInteger(qty)) {
+        qty = Math.floor(qty)
     }
+
+    if (isNaN(qty) || qty < 1) {
+        qty = 1
+    }
+
+    return qty
+}
+
+function updateQty(id, qty) {
+    cart.update(id, sanitizeQty(qty))
 }
 
 function updateInput(id, event) {
-    const qty = parseInt(event.target.value, 10)
-    if (!isNaN(qty) && qty >= 1) {
-        cart.update(id, qty)
-    }
+    const qty = sanitizeQty(event.target.value)
+    cart.update(id, qty)
 }
 
 function remove(id) {
@@ -142,7 +152,9 @@ const submitOrder = async () => {
                             </button>
 
                             <input
-                                type="text"
+                                type="number"
+                                min="1"
+                                step="1"
                                 class="form-control form-control-sm text-center"
                                 style="width: 80px;"
                                 :value="itemData.qty"
