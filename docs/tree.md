@@ -1,12 +1,13 @@
+```md
 # Laravel Project Structure (Clean Architecture)
 
-```text
 ├── app
 │   ├── API
 │   │   └── V1
 │   │       ├── Controllers
 │   │       │   ├── ApiAuthController.php
 │   │       │   └── ApiCarController.php
+│   │       │
 │   │       ├── DTO
 │   │       │   ├── Request
 │   │       │   │   ├── CarCreateRequest.php
@@ -14,36 +15,46 @@
 │   │       │   │   ├── CarPatchRequest.php
 │   │       │   │   ├── CarUpdateRequest.php
 │   │       │   │   └── PaginationRequest.php
+│   │       │   │
 │   │       │   └── Response
 │   │       │       ├── CarListResponse.php
 │   │       │       ├── CarOptionResponse.php
 │   │       │       └── CarResponse.php
+│   │       │
 │   │       ├── Exceptions
 │   │       │   ├── RepositoryException.php
 │   │       │   └── ServiceException.php
+│   │       │
 │   │       ├── Models
 │   │       │   ├── CarModel.php
 │   │       │   └── CarOptionModel.php
+│   │       │
 │   │       ├── Repositories
 │   │       │   ├── Interfaces
-│   │       │   │   ├── CarOptionRepositoryInterface.php
-│   │       │   │   └── CarRepositoryInterface.php
-│   │       │   ├── CarOptionRepository.php
-│   │       │   └── CarRepository.php
+│   │       │   │   ├── CarRepositoryInterface.php
+│   │       │   │   └── CarOptionRepositoryInterface.php
+│   │       │   │
+│   │       │   ├── CarRepository.php
+│   │       │   └── CarOptionRepository.php
+│   │       │
 │   │       ├── Services
 │   │       │   └── CarService.php
+│   │       │
 │   │       └── Support
 │   │           └── CarMapper.php
 │   │
 │   ├── Http
 │   │   ├── Controllers
+│   │   │   ├── Controller.php
 │   │   │   ├── AuthController.php
 │   │   │   ├── CarController.php
-│   │   │   ├── Controller.php
+│   │   │   ├── CartController.php
+│   │   │   ├── OrderController.php
 │   │   │   ├── DashboardController.php
 │   │   │   ├── FileController.php
 │   │   │   ├── ProfileController.php
 │   │   │   └── SiteController.php
+│   │   │
 │   │   └── Middleware
 │   │       ├── Authenticate.php
 │   │       ├── EnsureApiRole.php
@@ -52,16 +63,23 @@
 │   │
 │   ├── Models
 │   │   ├── Car.php
+│   │   ├── Cart.php
+│   │   ├── CartItem.php
 │   │   ├── Contact.php
+│   │   ├── Order.php
+│   │   ├── OrderItem.php
 │   │   ├── Page.php
 │   │   └── User.php
 │   │
+│   ├── Enums
+│   │   └── OrderStatus.php
+│   │
 │   └── Providers
 │       └── AppServiceProvider.php
-│
+
 ├── bootstrap
 │   └── app.php
-│
+
 ├── config
 │   ├── app.php
 │   ├── auth.php
@@ -73,33 +91,47 @@
 │   ├── queue.php
 │   ├── services.php
 │   └── session.php
-│
+
 ├── database
+│   ├── .gitignore
+│   ├── database.sqlite
+│   │
 │   ├── factories
-│   │   ├── ApiUserFactory.php
-│   │   └── UserFactory.php
+│   │   ├── UserFactory.php
+│   │   ├── CartFactory.php
+│   │   └── CartItemFactory.php
+│   │
 │   ├── migrations
-│   │   ├── 2026_03_13_212150_create_car_table.php
+│   │   ├── 0001_01_01_000000_create_users_table.php
+│   │   ├── 0001_01_01_000001_create_cache_table.php
+│   │   ├── 0001_01_01_000002_create_jobs_table.php
+│   │   ├── 2026_03_13_212150_create_cars_table.php
+│   │   ├── 2026_03_13_212151_create_car_options_table.php
 │   │   ├── 2026_04_02_104814_create_contacts_table.php
 │   │   ├── 2026_04_03_141751_create_personal_access_tokens_table.php
 │   │   ├── 2026_04_03_150641_add_role_to_users_table.php
 │   │   ├── 2026_04_03_172052_create_pages_table.php
-│   │   └── 2026_04_08_130356_add_avatar_to_users_table.php
+│   │   ├── 2026_04_08_130356_add_avatar_to_users_table.php
+│   │   ├── 2026_04_25_103714_create_carts_table.php
+│   │   ├── 2026_04_25_103733_create_cart_items_table.php
+│   │   ├── 2026_04_25_113902_create_orders_table.php
+│   │   └── 2026_04_25_113940_create_order_items_table.php
+│   │
 │   └── seeders
-│       ├── CarSeeder.php
 │       ├── DatabaseSeeder.php
-│       └── UserSeeder.php
-│
+│       ├── UserSeeder.php
+│       └── CarSeeder.php
+
 ├── lang
 │   └── ru
 │       ├── auth.php
 │       ├── pagination.php
 │       ├── passwords.php
 │       └── validation.php
-│
+
 ├── public
 │   └── index.php
-│
+
 ├── resources
 │   ├── css
 │   │   └── app.css
@@ -111,27 +143,35 @@
 │   │   ├── bootstrap.js
 │   │   ├── main.js
 │   │   │
+│   │   ├── plugins
+│   │   │   └── axios.js
+│   │   │
 │   │   ├── components
 │   │   │   ├── Alerts.vue
 │   │   │   ├── BaseButton.vue
 │   │   │   ├── BaseInput.vue
-│   │   │   └── Navbar.vue
+│   │   │   ├── Navbar.vue
+│   │   │   └── LogoutModal.vue
 │   │   │
 │   │   ├── composables
 │   │   │   └── useAuthActions.js
 │   │   │
 │   │   ├── pages
-│   │   │   ├── CarCreate.vue
-│   │   │   ├── CarShow.vue
-│   │   │   ├── CarsIndex.vue
-│   │   │   ├── Contact.vue
-│   │   │   ├── Dashboard.vue
 │   │   │   ├── Home.vue
 │   │   │   ├── Login.vue
-│   │   │   ├── NotFound.vue
-│   │   │   ├── Page.vue
+│   │   │   ├── Register.vue
+│   │   │   ├── Dashboard.vue
 │   │   │   ├── Profile.vue
-│   │   │   └── Register.vue
+│   │   │   ├── CarsIndex.vue
+│   │   │   ├── CarCreate.vue
+│   │   │   ├── CarShow.vue
+│   │   │   ├── Cart.vue
+│   │   │   ├── Contact.vue
+│   │   │   ├── Page.vue
+│   │   │   ├── MyOrders.vue
+│   │   │   ├── OrderDetails.vue
+│   │   │   ├── OrderSuccess.vue
+│   │   │   └── NotFound.vue
 │   │   │
 │   │   ├── router
 │   │   │   └── index.js
@@ -141,8 +181,10 @@
 │   │       ├── authStore.js
 │   │       ├── carFormStore.js
 │   │       ├── carStore.js
+│   │       ├── cartStore.js
 │   │       ├── contactStore.js
 │   │       ├── dashboardStore.js
+│   │       ├── orderStore.js
 │   │       ├── pageStore.js
 │   │       └── profileStore.js
 │
@@ -169,8 +211,8 @@
 │       │   └── main.blade.php
 │       │
 │       ├── pages
-│       │   ├── contact.blade.php
 │       │   ├── home.blade.php
+│       │   ├── contact.blade.php
 │       │   └── page.blade.php
 │       │
 │       └── partials
@@ -178,13 +220,13 @@
 │           ├── footer.blade.php
 │           ├── header.blade.php
 │           └── navbar.blade.php
-│
+
 ├── routes
 │   ├── api.php
 │   └── web.php
-│
+
 ├── .env
-├── phpunut.xml
+├── phpunit.xml
 ├── README.md
 └── vite.config.js
 ```

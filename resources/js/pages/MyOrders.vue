@@ -7,6 +7,7 @@ const store = useOrderStore()
 const router = useRouter()
 
 const orders = computed(() => store.orders || [])
+const loading = computed(() => store.loading)
 
 onMounted(async () => {
     await store.fetchOrders()
@@ -19,6 +20,15 @@ const formatPrice = (price) => {
 const goToOrder = (id) => {
     router.push(`/orders/${id}`)
 }
+
+const goBack = () => {
+    // нормальный fallback
+    if (window.history.length > 1) {
+        router.back()
+    } else {
+        router.push('/dashboard')
+    }
+}
 </script>
 
 <template>
@@ -27,14 +37,27 @@ const goToOrder = (id) => {
         <!-- HEADER -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Мои заказы</h2>
+
+            <button
+                class="btn btn-outline-secondary"
+                @click="goBack"
+            >
+                ← Назад
+            </button>
         </div>
 
-        <!-- EMPTY STATE -->
-        <div v-if="!orders.length" class="row">
+        <!-- LOADING -->
+        <div v-if="loading" class="alert alert-light">
+            Загружается...
+        </div>
+
+        <!-- EMPTY -->
+        <div v-else-if="!orders.length" class="row">
             <div class="col-12">
                 <div class="alert alert-light">
                     У вас пока нет заказов
                 </div>
+
                 <router-link
                     to="/dashboard"
                     class="btn btn-outline-secondary"
@@ -52,11 +75,10 @@ const goToOrder = (id) => {
                 :key="order.id"
                 class="col-12 col-md-6 col-lg-4"
             >
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-0 mb-3">
 
                     <div class="card-body d-flex flex-column justify-content-between">
 
-                        <!-- TOP -->
                         <div>
                             <h5 class="mb-1">
                                 Заказ #{{ order.id }}
@@ -67,21 +89,12 @@ const goToOrder = (id) => {
                             </div>
 
                             <div class="mt-2">
-                                <span
-                                    class="badge"
-                                    :class="{
-                                        'bg-warning': order.status === 'pending',
-                                        'bg-success': order.status === 'paid',
-                                        'bg-secondary': order.status === 'completed',
-                                        'bg-danger': order.status === 'cancelled'
-                                    }"
-                                >
+                                <span class="badge">
                                     {{ order.status }}
                                 </span>
                             </div>
                         </div>
 
-                        <!-- BOTTOM -->
                         <div class="mt-3 d-flex justify-content-between align-items-end">
 
                             <div>
@@ -106,6 +119,15 @@ const goToOrder = (id) => {
                     </div>
 
                 </div>
+            </div>
+
+            <div class="col-12 mt-3">
+                <button
+                    class="btn btn-outline-secondary"
+                    @click="router.back()"
+                >
+                    ← Назад
+                </button>
             </div>
 
         </div>

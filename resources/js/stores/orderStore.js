@@ -4,20 +4,44 @@ import {api} from "@/api"
 export const useOrderStore = defineStore("order", {
     state: () => ({
         currentOrder: null,
-        orders: []
+        orders: [],
+
+        loading: false,
+        error: null
     }),
 
     actions: {
 
         async fetchOrder(id) {
-            const res = await api.get(`/api/orders/${id}`)
-            this.currentOrder = res.data
+            this.loading = true
+            this.error = null
+
+            try {
+                const res = await api.get(`/api/orders/${id}`)
+                this.currentOrder = res.data
+            } catch (e) {
+                this.error = e
+                console.error(e)
+            } finally {
+                this.loading = false
+            }
         },
 
         async fetchOrders() {
-            const res = await api.get('/api/orders')
-            this.orders = res.data
+            this.loading = true
+            this.error = null
+
+            try {
+                const res = await api.get('/api/orders')
+                this.orders = res.data
+            } catch (e) {
+                this.error = e
+                console.error(e)
+            } finally {
+                this.loading = false
+            }
         }
 
     }
+
 })

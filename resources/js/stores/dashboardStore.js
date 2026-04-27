@@ -22,28 +22,16 @@ export const useDashboardStore = defineStore('dashboard', {
             this.loading = true
 
             try {
-                const [carsRes, ordersRes, cartRes] = await Promise.all([
-                    api.get('/api/dashboard/cars'),
-                    api.get('/api/orders'),
-                    api.get('/api/cart')
-                ])
 
-                // CARS
-                this.carsCount = carsRes.data.count || 0
+                const { data } = await api.get('/api/dashboard')
 
-                // ORDERS
-                this.ordersCount = ordersRes.data.length || 0
+                this.carsCount = data.carsCount || 0
 
-                this.orders = ordersRes.data
-                    .sort((a, b) =>
-                        new Date(b.created_at) - new Date(a.created_at)
-                    )
-                    .slice(0, 3)
+                this.ordersCount = data.ordersCount || 0
+                this.orders = data.orders || []
 
-                // CART
-                this.cart = cartRes.data.items || {}
-
-                this.cartTotal = cartRes.data.total || 0
+                this.cart = data.cart || {}
+                this.cartTotal = data.cartTotal || 0
 
                 this.loaded = true
 

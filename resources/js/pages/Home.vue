@@ -1,6 +1,6 @@
 <script setup>
 
-import {onMounted} from 'vue'
+import {computed, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
 
 import {useAuthStore} from '@/stores/authStore'
@@ -10,17 +10,24 @@ import {useContactStore} from '@/stores/contactStore'
 
 import BaseButton from '@/components/BaseButton.vue'
 
+const router = useRouter()
+
+// Статус пользователя, Быстрые действия
+
+const auth = useAuthStore()
+
+const {handleLogout} = useAuthActions()
+
+const user = computed(() => auth.user)
+
+// Новинки
+
 import {Navigation, Pagination} from 'swiper/modules'
 import {Swiper, SwiperSlide} from 'swiper/vue'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
-
-const auth = useAuthStore()
-const {handleLogout} = useAuthActions()
-
-const router = useRouter()
 
 const modules = [Navigation, Pagination]
 
@@ -60,6 +67,8 @@ const openCar = (id) => {
     router.push(`/cars/show/${id}`)
 }
 
+// Связаться с нами
+
 const contactStore = useContactStore()
 
 </script>
@@ -80,14 +89,14 @@ const contactStore = useContactStore()
                         <h4 class="card-title">Статус пользователя</h4>
 
                         <div v-if="auth.isAuth">
+                            <p class="text-muted">Добро пожаловать, {{ user?.name }}</p>
                             <p class="text-success mb-0">Вы авторизованы</p>
-                            <small class="text-muted">Добро пожаловать!</small>
                         </div>
 
                         <div v-else>
                             <p class="text-warning mb-0">Вы гость</p>
                             <small class="text-muted">
-                                Войдите, чтобы получить доступ ко всем функциям
+                                Войдите или зарегистрируйтесь, чтобы получить доступ ко всем функциям
                             </small>
                         </div>
 
@@ -194,61 +203,98 @@ const contactStore = useContactStore()
 
                 <h4 class="mb-3">Связаться с нами</h4>
 
+                <div v-if="contactStore.contexts.home.successMessage" class="alert alert-success">
+                    {{ contactStore.contexts.home.successMessage }}
+                </div>
+
+                <div v-if="contactStore.contexts.home.errorMessage" class="alert alert-danger">
+                    {{ contactStore.contexts.home.errorMessage }}
+                </div>
+
                 <div v-if="contactStore.retryAfter" class="alert alert-warning">
                     Подождите {{ contactStore.retryAfter }} сек перед повторной отправкой
                 </div>
 
                 <form @submit.prevent="contactStore.submit">
 
-                    <input
-                        class="form-control mb-2"
-                        placeholder="Имя"
-                        v-model="contactStore.form.name"
-                    />
-                    <small v-if="contactStore.errors.name" class="text-danger">
-                        {{ contactStore.errors.name }}
-                    </small>
+                    <div class="mb-3">
+                        <label class="form-label" for="contact-name">
+                            Имя <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            id="contact-name"
+                            type="text"
+                            class="form-control"
+                            :class="{ 'is-invalid': contactStore.errors.name }"
+                            v-model="contactStore.form.name"
+                            required
+                            autocomplete="name"
+                        >
+                        <small v-if="contactStore.errors.name" class="text-danger">
+                            {{ contactStore.errors.name }}
+                        </small>
+                    </div>
 
-                    <input
-                        class="form-control mb-2"
-                        placeholder="Email"
-                        v-model="contactStore.form.email"
-                    />
-                    <small v-if="contactStore.errors.email" class="text-danger">
-                        {{ contactStore.errors.email }}
-                    </small>
+                    <div class="mb-3">
+                        <label class="form-label" for="contact-email">
+                            Email <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            id="contact-email"
+                            type="email"
+                            class="form-control"
+                            :class="{ 'is-invalid': contactStore.errors.email }"
+                            v-model="contactStore.form.email"
+                            required
+                            autocomplete="email"
+                        >
+                        <small v-if="contactStore.errors.email" class="text-danger">
+                            {{ contactStore.errors.email }}
+                        </small>
+                    </div>
 
-                    <input
-                        class="form-control mb-2"
-                        placeholder="Тема"
-                        v-model="contactStore.form.subject"
-                    />
-                    <small v-if="contactStore.errors.subject" class="text-danger">
-                        {{ contactStore.errors.subject }}
-                    </small>
+                    <div class="mb-3">
+                        <label class="form-label" for="contact-subject">
+                            Тема сообщения <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            id="contact-subject"
+                            type="text"
+                            class="form-control"
+                            :class="{ 'is-invalid': contactStore.errors.subject }"
+                            v-model="contactStore.form.subject"
+                            required
+                        >
+                        <small v-if="contactStore.errors.subject" class="text-danger">
+                            {{ contactStore.errors.subject }}
+                        </small>
+                    </div>
 
-                    <textarea
-                        class="form-control mb-2"
-                        rows="4"
-                        placeholder="Сообщение"
-                        v-model="contactStore.form.body"
-                    ></textarea>
-                    <small v-if="contactStore.errors.body" class="text-danger">
-                        {{ contactStore.errors.body }}
-                    </small>
+                    <div class="mb-3">
+                        <label class="form-label" for="contact-body">
+                            Текст сообщения <span class="text-danger">*</span>
+                        </label>
+                        <textarea
+                            id="contact-body"
+                            class="form-control"
+                            :class="{ 'is-invalid': contactStore.errors.body }"
+                            rows="5"
+                            v-model="contactStore.form.body"
+                            required
+                        ></textarea>
+                        <small v-if="contactStore.errors.body" class="text-danger">
+                            {{ contactStore.errors.body }}
+                        </small>
+                    </div>
 
-                    <BaseButton
-                        class="w-100"
-                        type="submit"
-                        variant="primary"
-                        :loading="contactStore.loading"
-                        :disabled="contactStore.retryAfter > 0"
-                    >
-                        <template #loading>Отправка...</template>
-                        Отправить
+                    <BaseButton variant="primary" type="submit" class="w-100" :loading="contactStore.loading"
+                                :disabled="contactStore.retryAfter > 0">
+                        <template #loading>Отправляем...</template>
+                        Отправить сообщение
                     </BaseButton>
 
                 </form>
+
 
             </div>
 

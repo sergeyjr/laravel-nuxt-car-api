@@ -3,13 +3,13 @@
 use App\API\V1\Controllers\ApiAuthController;
 use App\API\V1\Controllers\ApiCarController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SiteController;
 use App\Http\Middleware\FixJsonMiddleware;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CartController;
 
 Route::get('/cars', [CarController::class, 'list']);
 
@@ -17,12 +17,14 @@ Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
 
 Route::get('/cars/latest', [CarController::class, 'latest']);
 
-Route::get('/dashboard/cars', [DashboardController::class, 'api']);
-
 Route::get('/page/{code}', [SiteController::class, 'page']);
 
 Route::post('/contact', [SiteController::class, 'sendContact'])
     ->middleware('throttle:contact_form');
+
+// DASHBOARD, PROFILE
+
+Route::middleware('auth:sanctum')->get('/dashboard', [DashboardController::class, 'api']);
 
 Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
     Route::delete('/', [ProfileController::class, 'destroy']);

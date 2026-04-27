@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, computed } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
-import { useDashboardStore } from '@/stores/dashboardStore'
+
+import {onMounted, computed} from 'vue'
+import {useAuthStore} from '@/stores/authStore'
+import {useDashboardStore} from '@/stores/dashboardStore'
 
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
@@ -29,6 +30,7 @@ onMounted(async () => {
 
     await dashboard.fetchDashboard()
 })
+
 </script>
 
 <template>
@@ -40,48 +42,25 @@ onMounted(async () => {
 
         <template v-else>
 
-            <p class="mb-4">
-                Добро пожаловать, {{ user?.email || 'пользователь' }}
-            </p>
-
-            <div class="mb-4 d-flex gap-2 flex-wrap">
-
-                <router-link
-                    v-if="isApiUser"
-                    to="/dashboard/car/create"
-                    class="btn btn-primary"
-                >
-                    Добавить авто
-                </router-link>
-
-                <router-link
-                    to="/dashboard/profile"
-                    class="btn btn-outline-secondary"
-                >
-                    Профиль
-                </router-link>
-
-            </div>
-
             <!-- GRID -->
             <div class="row">
 
                 <!-- PROFILE -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
-                        <div class="card-body">
-                            <h5>Мой профиль</h5>
-                            <p class="mb-0">{{ user?.name || 'User' }}</p>
-                        </div>
-                    </div>
-                </div>
+                        <div class="card-body d-flex flex-column justify-content-between">
 
-                <!-- STATUS -->
-                <div class="col-12 col-md-4 mb-3">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5>Статус</h5>
-                            <p class="mb-0 text-success">Active</p>
+                            <h5>Мой профиль</h5>
+                            <p>Добро пожаловать, {{ user?.name || 'пользователь' }}</p>
+                            <p>{{ user?.email || 'пользователь' }}</p>
+
+                            <router-link
+                                to="/dashboard/profile"
+                                class="btn btn-outline-secondary"
+                            >
+                                Мой профиль
+                            </router-link>
+
                         </div>
                     </div>
                 </div>
@@ -89,11 +68,27 @@ onMounted(async () => {
                 <!-- CARS -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
-                        <div class="card-body">
-                            <h5>Мои машины</h5>
-                            <p class="mb-0 fs-5 fw-bold">
-                                {{ dashboard.carsCount }}
-                            </p>
+                        <div class="card-body d-flex flex-column justify-content-between">
+
+                            <h5>Каталог</h5>
+
+                            <p class="mb-0">Машины: <span class="fw-bold">{{ dashboard.carsCount }}</span></p>
+
+                            <router-link
+                                v-if="isApiUser"
+                                to="/dashboard/car/create"
+                                class="btn btn-primary"
+                            >
+                                Добавить авто
+                            </router-link>
+
+                            <router-link
+                                to="/cars"
+                                class="btn btn-outline-primary mt-3"
+                            >
+                                Перейти в каталог
+                            </router-link>
+
                         </div>
                     </div>
                 </div>
@@ -105,10 +100,7 @@ onMounted(async () => {
 
                             <div>
                                 <h5>Мои заказы</h5>
-                                <p class="mb-1 text-muted">Всего заказов:</p>
-                                <p class="mb-0 fs-5 fw-bold text-primary">
-                                    {{ ordersCount }}
-                                </p>
+                                <p class="mb-1 text-muted">Всего заказов: {{ ordersCount }}</p>
                             </div>
 
                             <router-link
@@ -130,18 +122,10 @@ onMounted(async () => {
 
                             <div>
                                 <h5>Корзина</h5>
-
-                                <p class="mb-1 text-muted">
-                                    Товаров:
-                                </p>
-
-                                <p class="mb-2 fs-5 fw-bold">
-                                    {{ cartCount }}
-                                </p>
-
-                                <p class="mb-0 text-success fw-bold">
-                                    {{ new Intl.NumberFormat('ru-RU').format(cartTotal) }} ₽
-                                </p>
+                                <p class="mb-1 text-muted">Товаров: <span class="fw-bold">{{ cartCount }}</span></p>
+                                <p class="mb-0">Стоимость: <span class="fw-bold">{{
+                                        new Intl.NumberFormat('ru-RU').format(cartTotal)
+                                    }} &#8381;</span></p>
                             </div>
 
                             <router-link
@@ -163,27 +147,18 @@ onMounted(async () => {
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="mb-0">Последние заказы</h4>
-
-                    <router-link
-                        to="/orders"
-                        class="btn btn-sm btn-outline-secondary"
-                    >
-                        Все заказы
-                    </router-link>
                 </div>
 
-                <!-- EMPTY -->
                 <div v-if="!recentOrders.length" class="alert alert-light">
                     У вас пока нет заказов
                 </div>
 
-                <!-- LIST -->
                 <div v-else class="row g-3">
 
                     <div
                         v-for="order in recentOrders"
                         :key="order.id"
-                        class="col-12 col-md-4"
+                        class="col-12 col-md-6 col-lg-4"
                     >
                         <div class="card h-100 shadow-sm border-0">
 

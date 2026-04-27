@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useOrderStore } from '@/stores/orderStore'
+
+import {onMounted, computed} from 'vue'
+import {useRoute} from 'vue-router'
+import {useOrderStore} from '@/stores/orderStore'
 
 const route = useRoute()
 const store = useOrderStore()
@@ -11,6 +12,7 @@ const order = computed(() => store.currentOrder)
 onMounted(async () => {
     await store.fetchOrder(route.params.id)
 })
+
 </script>
 
 <template>

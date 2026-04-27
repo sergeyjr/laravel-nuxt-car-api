@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -18,7 +19,7 @@ class OrderController extends Controller
     {
         $user = $request->user();
 
-        return DB::transaction(function () use ($user) {
+        return DB::transaction(function () use ($request, $user) {
 
             // 1. получаем корзину
             $cart = Cart::where('user_id', $user->id)
@@ -31,19 +32,12 @@ class OrderController extends Controller
                 ], 422);
             }
 
-            if (Order::where('user_id', $user->id)
-                ->where('status', 'pending')
-                ->exists()) {
-                return response()->json([
-                    'message' => 'У вас уже есть активный заказ'
-                ], 422);
-            }
-
             // 2. создаём заказ
             $order = Order::create([
                 'user_id' => $user->id,
                 'total' => $cart->items->sum(fn($item) => $item->price * $item->qty),
-                'status' => 'pending',
+                'status' => OrderStatus::PendingPayment->value,
+                'comment' => $request->input('comment'),
             ]);
 
             // 3. переносим товары в order_items

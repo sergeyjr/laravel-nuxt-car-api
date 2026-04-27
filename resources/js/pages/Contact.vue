@@ -15,6 +15,14 @@ const store = useContactStore()
 
                 <h1 class="mb-4">Контактная форма</h1>
 
+                <div v-if="store.contexts.contactPage.successMessage" class="alert alert-success">
+                    {{ store.contexts.contactPage.successMessage }}
+                </div>
+
+                <div v-if="store.contexts.contactPage.errorMessage" class="alert alert-danger">
+                    {{ store.contexts.contactPage.errorMessage }}
+                </div>
+
                 <div v-if="store.retryAfter" class="alert alert-warning mt-4">
                     Подождите {{ store.retryAfter }} сек перед повторной отправкой
                 </div>

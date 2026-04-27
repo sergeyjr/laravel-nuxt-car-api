@@ -45,7 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $retryAfter = $e->getHeaders()['Retry-After'] ?? null;
             return response()->json([
                 'success' => false,
-                'message' => 'Слишком много попыток. Попробуйте позже.',
+                //'message' => 'Слишком много попыток. Попробуйте позже.',
                 'retry_after' => $retryAfter,
             ], 429);
         });

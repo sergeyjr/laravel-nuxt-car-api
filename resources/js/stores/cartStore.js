@@ -143,13 +143,16 @@ export const useCartStore = defineStore("cart", {
             }
         },
 
-        async checkout() {
+        async checkout(payload = {}) {
             const backup = JSON.parse(JSON.stringify(this.items))
             console.log('checkout')
 
             try {
                 await api.get('/sanctum/csrf-cookie')
-                const res = await api.post("/api/orders/checkout")
+
+                const res = await api.post("/api/orders/checkout", {
+                    comment: payload.comment || null
+                })
 
                 this.items = {}
                 this.saveToLocalStorage()
@@ -163,7 +166,6 @@ export const useCartStore = defineStore("cart", {
                 throw error
             }
         }
-
 
     }
 })

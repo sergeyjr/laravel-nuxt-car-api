@@ -6,6 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
 
+    /**
+     * Статусы заказов:
+     * pending_payment     → создан, ждёт оплаты
+     * processing          → оплачен, в обработке
+     * packed              → собран
+     * shipped             → отправлен
+     * completed           → завершён
+     * cancelled           → отменён
+     * refunded            → возвращён
+     */
+
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
@@ -14,8 +25,9 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
             $table->decimal('total', 12, 2)->default(0);
-            $table->string('status')->default('pending');
-            // pending | paid | cancelled | completed
+            $table->string('status')->default('pending_payment');
+            $table->string('payment_status')->nullable();
+            $table->string('shipping_status')->nullable();
             $table->text('comment')->nullable();
             $table->timestamps();
         });

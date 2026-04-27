@@ -3,10 +3,15 @@
 import {onMounted, computed, ref} from "vue";
 import {useCartStore} from "@/stores/cartStore";
 import { useRouter } from "vue-router";
+import BaseButton from "@/components/BaseButton.vue";
 
 const router = useRouter();
 const cart = useCartStore();
+
 const isLoading = ref(true);
+const isSubmitting = ref(false);
+
+const comment = ref('');
 
 onMounted(async () => {
     await cart.fetch();
@@ -30,7 +35,9 @@ function updateInput(id, event) {
 }
 
 function remove(id) {
-    cart.remove(id);
+    if (confirm('Удалить этот товар из корзины?')) {
+        cart.remove(id);
+    }
 }
 
 function clear() {
@@ -42,15 +49,18 @@ function clear() {
 const submitOrder = async () => {
     try {
         if (confirm('Вы уверены, что хотите отправить заказ?')) {
-            isLoading.value = true
-            const res = await cart.checkout()
+            isSubmitting.value = true
+
+            const res = await cart.checkout({
+                comment: comment.value
+            })
+
             router.push(`/order-success/${res.order.id}`)
         }
     } catch (e) {
         console.error(e)
-        alert('Ошибка при оформлении заказа')
     } finally {
-        isLoading.value = false
+        isSubmitting.value = false
     }
 }
 
@@ -72,12 +82,20 @@ const submitOrder = async () => {
             </button>
         </div>
 
-        <!-- LOADING / EMPTY -->
+        <!-- LOADING -->
         <div v-if="isLoading" class="alert alert-light">
             Загрузка корзины...
         </div>
-        <div v-else-if="!Object.keys(items).length" class="alert alert-light">
-            Корзина пуста
+
+        <!-- EMPTY -->
+        <div v-else-if="!Object.keys(items).length" class="alert alert-light text-center py-5">
+            <h5 class="mb-2">Корзина пуста</h5>
+            <p class="text-muted mb-3">
+                Вы ещё не добавили товары в корзину.
+            </p>
+            <router-link to="/cars" class="btn btn-primary">
+                Перейти в каталог
+            </router-link>
         </div>
 
         <!-- ITEMS -->
@@ -167,13 +185,33 @@ const submitOrder = async () => {
                 </div>
             </div>
 
-            <button
-                class="btn btn-success w-100 py-2"
-                :disabled="isLoading"
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+
+                    <label class="form-label">Комментарий к заказу</label>
+
+                    <textarea
+                        v-model="comment"
+                        class="form-control"
+                        rows="3"
+                        :disabled="isSubmitting"
+                    />
+
+                </div>
+            </div>
+
+            <BaseButton
+                variant="success"
+                :loading="isSubmitting"
                 @click="submitOrder"
             >
                 Отправить заказ
-            </button>
+
+                <template #loading>
+                    Отправляем заказ...
+                </template>
+            </BaseButton>
+
 
         </div>
     </div>

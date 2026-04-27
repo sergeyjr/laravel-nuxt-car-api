@@ -1,6 +1,5 @@
 import {defineStore} from 'pinia'
 import {api} from '@/api'
-import {useAlertStore} from '@/stores/alertStore'
 
 export const useContactStore = defineStore('contact', {
 
@@ -16,10 +15,21 @@ export const useContactStore = defineStore('contact', {
         errors: {},
 
         loading: false,
-        success: false,
 
         retryAfter: null,
-        timer: null
+        timer: null,
+
+        contexts: {
+            home: {
+                successMessage: '',
+                errorMessage: ''
+            },
+            contactPage: {
+                successMessage: '',
+                errorMessage: ''
+            }
+        }
+
     }),
 
     actions: {
@@ -41,7 +51,11 @@ export const useContactStore = defineStore('contact', {
                 body: ''
             }
             this.errors = {}
-            this.success = false
+        },
+
+        resetMessages(context) {
+            this.contexts[context].successMessage = ''
+            this.contexts[context].errorMessage = ''
         },
 
         startCountdown() {
@@ -57,13 +71,11 @@ export const useContactStore = defineStore('contact', {
             }, 1000)
         },
 
-        async submit() {
+        async submit(context = 'home') {
 
             this.loading = true
-            this.success = false
             this.resetErrors()
-
-            const alertStore = useAlertStore()
+            this.resetMessages(context)
 
             try {
 
@@ -72,9 +84,8 @@ export const useContactStore = defineStore('contact', {
 
                 this.resetForm()
 
-                this.success = true
-
-                alertStore.add('success', data.message || 'Сообщение отправлено успешно')
+                this.contexts[context].successMessage =
+                    data.message || 'Сообщение отправлено успешно'
 
             } catch (e) {
 
@@ -89,7 +100,9 @@ export const useContactStore = defineStore('contact', {
                     return
                 }
 
-                alertStore.add('error', 'Произошла ошибка при отправке формы')
+                this.contexts[context].errorMessage =
+                    'Произошла ошибка при отправке формы'
+
                 console.error('error:', e)
 
             } finally {
