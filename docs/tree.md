@@ -1,6 +1,6 @@
-```md
 # Laravel Project Structure (Clean Architecture)
 
+```text
 ├── app
 │   ├── API
 │   │   └── V1
@@ -30,12 +30,12 @@
 │   │       │   └── CarOptionModel.php
 │   │       │
 │   │       ├── Repositories
-│   │       │   ├── Interfaces
-│   │       │   │   ├── CarRepositoryInterface.php
-│   │       │   │   └── CarOptionRepositoryInterface.php
-│   │       │   │
+│   │       │   ├── CarOptionRepository.php
 │   │       │   ├── CarRepository.php
-│   │       │   └── CarOptionRepository.php
+│   │       │   │
+│   │       │   └── Interfaces
+│   │       │       ├── CarOptionRepositoryInterface.php
+│   │       │       └── CarRepositoryInterface.php
 │   │       │
 │   │       ├── Services
 │   │       │   └── CarService.php
@@ -43,15 +43,18 @@
 │   │       └── Support
 │   │           └── CarMapper.php
 │   │
+│   ├── Enums
+│   │   └── OrderStatus.php
+│   │
 │   ├── Http
 │   │   ├── Controllers
-│   │   │   ├── Controller.php
 │   │   │   ├── AuthController.php
 │   │   │   ├── CarController.php
 │   │   │   ├── CartController.php
-│   │   │   ├── OrderController.php
+│   │   │   ├── Controller.php
 │   │   │   ├── DashboardController.php
 │   │   │   ├── FileController.php
+│   │   │   ├── OrderController.php
 │   │   │   ├── ProfileController.php
 │   │   │   └── SiteController.php
 │   │   │
@@ -70,9 +73,6 @@
 │   │   ├── OrderItem.php
 │   │   ├── Page.php
 │   │   └── User.php
-│   │
-│   ├── Enums
-│   │   └── OrderStatus.php
 │   │
 │   └── Providers
 │       └── AppServiceProvider.php
@@ -97,9 +97,9 @@
 │   ├── database.sqlite
 │   │
 │   ├── factories
-│   │   ├── UserFactory.php
 │   │   ├── CartFactory.php
-│   │   └── CartItemFactory.php
+│   │   ├── CartItemFactory.php
+│   │   └── UserFactory.php
 │   │
 │   ├── migrations
 │   │   ├── 0001_01_01_000000_create_users_table.php
@@ -118,9 +118,9 @@
 │   │   └── 2026_04_25_113940_create_order_items_table.php
 │   │
 │   └── seeders
+│       ├── CarSeeder.php
 │       ├── DatabaseSeeder.php
-│       ├── UserSeeder.php
-│       └── CarSeeder.php
+│       └── UserSeeder.php
 
 ├── lang
 │   └── ru
@@ -143,35 +143,35 @@
 │   │   ├── bootstrap.js
 │   │   ├── main.js
 │   │   │
-│   │   ├── plugins
-│   │   │   └── axios.js
-│   │   │
 │   │   ├── components
 │   │   │   ├── Alerts.vue
 │   │   │   ├── BaseButton.vue
 │   │   │   ├── BaseInput.vue
-│   │   │   ├── Navbar.vue
-│   │   │   └── LogoutModal.vue
+│   │   │   ├── LogoutModal.vue
+│   │   │   └── Navbar.vue
 │   │   │
 │   │   ├── composables
 │   │   │   └── useAuthActions.js
 │   │   │
 │   │   ├── pages
-│   │   │   ├── Home.vue
-│   │   │   ├── Login.vue
-│   │   │   ├── Register.vue
-│   │   │   ├── Dashboard.vue
-│   │   │   ├── Profile.vue
-│   │   │   ├── CarsIndex.vue
 │   │   │   ├── CarCreate.vue
 │   │   │   ├── CarShow.vue
+│   │   │   ├── CarsIndex.vue
 │   │   │   ├── Cart.vue
 │   │   │   ├── Contact.vue
-│   │   │   ├── Page.vue
+│   │   │   ├── Dashboard.vue
+│   │   │   ├── Home.vue
+│   │   │   ├── Login.vue
 │   │   │   ├── MyOrders.vue
+│   │   │   ├── NotFound.vue
 │   │   │   ├── OrderDetails.vue
 │   │   │   ├── OrderSuccess.vue
-│   │   │   └── NotFound.vue
+│   │   │   ├── Page.vue
+│   │   │   ├── Profile.vue
+│   │   │   └── Register.vue
+│   │   │
+│   │   ├── plugins
+│   │   │   └── axios.js
 │   │   │
 │   │   ├── router
 │   │   │   └── index.js
@@ -211,8 +211,8 @@
 │       │   └── main.blade.php
 │       │
 │       ├── pages
-│       │   ├── home.blade.php
 │       │   ├── contact.blade.php
+│       │   ├── home.blade.php
 │       │   └── page.blade.php
 │       │
 │       └── partials

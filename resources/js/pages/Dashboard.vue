@@ -56,7 +56,7 @@ onMounted(async () => {
 
                             <router-link
                                 to="/dashboard/profile"
-                                class="btn btn-outline-secondary"
+                                class="btn btn-outline-secondary w-100 mt-3"
                             >
                                 Мой профиль
                             </router-link>
@@ -77,14 +77,14 @@ onMounted(async () => {
                             <router-link
                                 v-if="isApiUser"
                                 to="/dashboard/car/create"
-                                class="btn btn-primary"
+                                class="btn btn-primary w-100 mt-3"
                             >
                                 Добавить авто
                             </router-link>
 
                             <router-link
                                 to="/cars"
-                                class="btn btn-outline-primary mt-3"
+                                class="btn btn-outline-primary w-100 mt-3"
                             >
                                 Перейти в каталог
                             </router-link>
@@ -103,12 +103,18 @@ onMounted(async () => {
                                 <p class="mb-1 text-muted">Всего заказов: {{ ordersCount }}</p>
                             </div>
 
-                            <router-link
-                                to="/orders"
-                                class="btn btn-outline-primary mt-3"
-                            >
-                                Смотреть заказы
-                            </router-link>
+                            <div v-if="!recentOrders.length" class="btn btn-outline-secondary mt-3">
+                                У вас пока нет заказов
+                            </div>
+
+                            <div v-else>
+                                <router-link
+                                    to="/orders"
+                                    class="btn btn-outline-primary w-100 mt-3"
+                                >
+                                    Смотреть заказы
+                                </router-link>
+                            </div>
 
                         </div>
                     </div>
@@ -128,12 +134,18 @@ onMounted(async () => {
                                     }} &#8381;</span></p>
                             </div>
 
-                            <router-link
-                                to="/cart"
-                                class="btn btn-outline-success mt-3"
-                            >
-                                Перейти в корзину
-                            </router-link>
+                            <div v-if="cartTotal === 0" class="btn btn-outline-secondary w-100 mt-3">
+                                Корзина пустая
+                            </div>
+
+                            <div v-else>
+                                <router-link
+                                    to="/cart"
+                                    class="btn btn-outline-success w-100 mt-3"
+                                >
+                                    Перейти в корзину
+                                </router-link>
+                            </div>
 
                         </div>
 
@@ -143,37 +155,31 @@ onMounted(async () => {
             </div>
 
             <!-- RECENT ORDERS -->
-            <div class="mt-4">
+            <div v-if="recentOrders.length" class="mt-4">
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="mb-0">Последние заказы</h4>
                 </div>
 
-                <div v-if="!recentOrders.length" class="alert alert-light">
-                    У вас пока нет заказов
-                </div>
+                <div
+                    v-for="order in recentOrders"
+                    :key="order.id"
+                    class="col-12 col-md-6 col-lg-4"
+                >
+                    <div class="card h-100 shadow-sm border-0">
 
-                <div v-else class="row g-3">
+                        <div class="card-body d-flex flex-column justify-content-between">
 
-                    <div
-                        v-for="order in recentOrders"
-                        :key="order.id"
-                        class="col-12 col-md-6 col-lg-4"
-                    >
-                        <div class="card h-100 shadow-sm border-0">
+                            <div>
+                                <h6 class="mb-1 text-truncate">
+                                    Заказ #{{ order.id }}
+                                </h6>
 
-                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div class="text-muted small">
+                                    {{ new Date(order.created_at).toLocaleString('ru-RU') }}
+                                </div>
 
-                                <div>
-                                    <h6 class="mb-1 text-truncate">
-                                        Заказ #{{ order.id }}
-                                    </h6>
-
-                                    <div class="text-muted small">
-                                        {{ new Date(order.created_at).toLocaleString('ru-RU') }}
-                                    </div>
-
-                                    <div class="mt-2">
+                                <div class="mt-2">
                                         <span
                                             class="badge"
                                             :class="{
@@ -185,29 +191,27 @@ onMounted(async () => {
                                         >
                                             {{ order.status }}
                                         </span>
-                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 d-flex justify-content-between align-items-center">
+
+                                <div class="fw-bold text-success">
+                                    {{ new Intl.NumberFormat('ru-RU').format(order.total) }} ₽
                                 </div>
 
-                                <div class="mt-3 d-flex justify-content-between align-items-center">
-
-                                    <div class="fw-bold text-success">
-                                        {{ new Intl.NumberFormat('ru-RU').format(order.total) }} ₽
-                                    </div>
-
-                                    <router-link
-                                        :to="`/orders/${order.id}`"
-                                        class="btn btn-sm btn-outline-primary"
-                                    >
-                                        открыть
-                                    </router-link>
-
-                                </div>
+                                <router-link
+                                    :to="`/orders/${order.id}`"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    открыть
+                                </router-link>
 
                             </div>
 
                         </div>
-                    </div>
 
+                    </div>
                 </div>
 
             </div>
