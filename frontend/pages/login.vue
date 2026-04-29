@@ -1,10 +1,5 @@
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from '#app'
-import { useAuthStore } from '~/stores/auth'
-
-import BaseButton from '~/components/BaseButton.vue'
-import BaseInput from '~/components/BaseInput.vue'
 
 const router = useRouter()
 const store = useAuthStore()
@@ -12,21 +7,9 @@ const store = useAuthStore()
 const email = ref('')
 const password = ref('')
 
-// =========================
-// RESET ERRORS
-// =========================
-onMounted(() => {
-    store.resetMessages?.()
-    store.errors = {}
-})
-
-// =========================
-// SIMPLE VALIDATION
-// =========================
 const submit = async () => {
+    // reset previous errors
     store.errors = {}
-    store.error = null
-    store.success = null
 
     let hasError = false
 
@@ -48,6 +31,10 @@ const submit = async () => {
         await router.push('/dashboard')
     }
 }
+
+onMounted(() => {
+    store.errors = {}
+})
 </script>
 
 <template>
@@ -57,12 +44,10 @@ const submit = async () => {
 
                 <h1 class="mb-4">Авторизация</h1>
 
-                <!-- SUCCESS -->
                 <p v-if="store.success" class="text-success text-center">
                     {{ store.success }}
                 </p>
 
-                <!-- ERROR -->
                 <p v-if="store.error" class="text-danger text-center">
                     {{ store.error }}
                 </p>

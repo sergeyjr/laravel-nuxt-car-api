@@ -1,13 +1,5 @@
-<script setup lang="ts">
-import { useContactStore } from '~/stores/contact'
-import BaseButton from '~/components/BaseButton.vue'
-
+<script setup>
 const store = useContactStore()
-
-// чтобы не писать длинные цепочки в шаблоне
-const form = store.form
-const errors = store.errors
-const contexts = store.contexts
 </script>
 
 <template>
@@ -19,18 +11,18 @@ const contexts = store.contexts
 
                 <!-- SUCCESS -->
                 <div
-                    v-if="contexts.contactPage.successMessage"
+                    v-if="store.contexts.contactPage.successMessage"
                     class="alert alert-success"
                 >
-                    {{ contexts.contactPage.successMessage }}
+                    {{ store.contexts.contactPage.successMessage }}
                 </div>
 
                 <!-- ERROR -->
                 <div
-                    v-if="contexts.contactPage.errorMessage"
+                    v-if="store.contexts.contactPage.errorMessage"
                     class="alert alert-danger"
                 >
-                    {{ contexts.contactPage.errorMessage }}
+                    {{ store.contexts.contactPage.errorMessage }}
                 </div>
 
                 <!-- RATE LIMIT -->
@@ -38,7 +30,7 @@ const contexts = store.contexts
                     Подождите {{ store.retryAfter }} сек перед повторной отправкой
                 </div>
 
-                <form @submit.prevent="store.submit('contactPage')">
+                <form @submit.prevent="store.submit">
 
                     <!-- NAME -->
                     <div class="mb-3">
@@ -48,16 +40,16 @@ const contexts = store.contexts
 
                         <input
                             id="contact-name"
-                            v-model="form.name"
                             type="text"
                             class="form-control"
-                            :class="{ 'is-invalid': errors.name }"
+                            :class="{ 'is-invalid': store.errors.name }"
+                            v-model="store.form.name"
                             required
                             autocomplete="name"
-                        >
+                        />
 
-                        <small v-if="errors.name" class="text-danger">
-                            {{ errors.name }}
+                        <small v-if="store.errors.name" class="text-danger">
+                            {{ store.errors.name }}
                         </small>
                     </div>
 
@@ -69,16 +61,16 @@ const contexts = store.contexts
 
                         <input
                             id="contact-email"
-                            v-model="form.email"
                             type="email"
                             class="form-control"
-                            :class="{ 'is-invalid': errors.email }"
+                            :class="{ 'is-invalid': store.errors.email }"
+                            v-model="store.form.email"
                             required
                             autocomplete="email"
-                        >
+                        />
 
-                        <small v-if="errors.email" class="text-danger">
-                            {{ errors.email }}
+                        <small v-if="store.errors.email" class="text-danger">
+                            {{ store.errors.email }}
                         </small>
                     </div>
 
@@ -90,15 +82,15 @@ const contexts = store.contexts
 
                         <input
                             id="contact-subject"
-                            v-model="form.subject"
                             type="text"
                             class="form-control"
-                            :class="{ 'is-invalid': errors.subject }"
+                            :class="{ 'is-invalid': store.errors.subject }"
+                            v-model="store.form.subject"
                             required
-                        >
+                        />
 
-                        <small v-if="errors.subject" class="text-danger">
-                            {{ errors.subject }}
+                        <small v-if="store.errors.subject" class="text-danger">
+                            {{ store.errors.subject }}
                         </small>
                     </div>
 
@@ -110,15 +102,15 @@ const contexts = store.contexts
 
                         <textarea
                             id="contact-body"
-                            v-model="form.body"
                             class="form-control"
-                            :class="{ 'is-invalid': errors.body }"
+                            :class="{ 'is-invalid': store.errors.body }"
                             rows="5"
+                            v-model="store.form.body"
                             required
                         />
 
-                        <small v-if="errors.body" class="text-danger">
-                            {{ errors.body }}
+                        <small v-if="store.errors.body" class="text-danger">
+                            {{ store.errors.body }}
                         </small>
                     </div>
 
@@ -133,7 +125,6 @@ const contexts = store.contexts
                         <template #loading>
                             Отправляем...
                         </template>
-
                         Отправить сообщение
                     </BaseButton>
 

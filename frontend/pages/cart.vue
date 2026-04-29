@@ -1,9 +1,5 @@
-<script setup lang="ts">
-
-import { onMounted, computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCartStore } from '~/stores/cart'
-import BaseButton from '~/components/BaseButton.vue'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 
 const router = useRouter()
 const cart = useCartStore()
@@ -20,14 +16,7 @@ onMounted(async () => {
 const items = computed(() => cart.items)
 const total = computed(() => cart.total)
 
-const hasItems = computed(() =>
-    Object.keys(items.value || {}).length > 0
-)
-
-// =========================
-// QTY SAFE LOGIC
-// =========================
-function sanitizeQty(value: number | string) {
+function sanitizeQty(value) {
     let qty = Number(value)
 
     if (!Number.isInteger(qty)) {
@@ -41,20 +30,16 @@ function sanitizeQty(value: number | string) {
     return qty
 }
 
-function updateQty(id: string | number, qty: number) {
+function updateQty(id, qty) {
     cart.update(id, sanitizeQty(qty))
 }
 
-function updateInput(id: string | number, event: Event) {
-    const target = event.target as HTMLInputElement
-    const qty = sanitizeQty(target.value)
+function updateInput(id, event) {
+    const qty = sanitizeQty(event.target.value)
     cart.update(id, qty)
 }
 
-// =========================
-// ACTIONS
-// =========================
-function remove(id: string | number) {
+function remove(id) {
     if (confirm('Удалить этот товар из корзины?')) {
         cart.remove(id)
     }
@@ -66,28 +51,23 @@ function clear() {
     }
 }
 
-// =========================
-// CHECKOUT
-// =========================
 const submitOrder = async () => {
-    if (!confirm('Вы уверены, что хотите отправить заказ?')) return
-
     try {
-        isSubmitting.value = true
+        if (confirm('Вы уверены, что хотите отправить заказ?')) {
+            isSubmitting.value = true
 
-        const res = await cart.checkout({
-            comment: comment.value
-        })
+            const res = await cart.checkout({
+                comment: comment.value
+            })
 
-        router.push(`/order-success/${res.order.id}`)
-
+            router.push(`/order-success/${res.order.id}`)
+        }
     } catch (e) {
-        console.error('Checkout error:', e)
+        console.error(e)
     } finally {
         isSubmitting.value = false
     }
 }
-
 </script>
 
 <template>
@@ -98,7 +78,7 @@ const submitOrder = async () => {
             <h2 class="mb-0">Корзина</h2>
 
             <button
-                v-if="hasItems"
+                v-if="Object.keys(items).length"
                 class="btn btn-outline-danger"
                 @click="clear"
             >
@@ -112,7 +92,10 @@ const submitOrder = async () => {
         </div>
 
         <!-- EMPTY -->
-        <div v-else-if="!hasItems" class="alert alert-light text-center py-5">
+        <div
+            v-else-if="!Object.keys(items).length"
+            class="alert alert-light text-center py-5"
+        >
             <h5 class="mb-2">Корзина пуста</h5>
             <p class="text-muted mb-3">
                 Вы ещё не добавили товары в корзину.
@@ -134,13 +117,14 @@ const submitOrder = async () => {
                 <div class="card shadow-sm border-0">
                     <div class="card-body cart-row">
 
-                        <!-- ITEM -->
+                        <!-- ITEM INFO -->
                         <div class="d-flex align-items-center gap-3">
 
                             <NuxtLink :to="`/cars/show/${itemData.id}`">
                                 <img
                                     :src="itemData.photo_url || '/images/default_car.jpg'"
                                     style="width: 100px; height: 70px; object-fit: contain; border-radius: 6px;"
+                                    alt=""
                                 />
                             </NuxtLink>
 
@@ -172,6 +156,7 @@ const submitOrder = async () => {
                             <input
                                 type="number"
                                 min="1"
+                                step="1"
                                 class="form-control form-control-sm text-center"
                                 style="width: 80px;"
                                 :value="itemData.qty"
@@ -203,15 +188,16 @@ const submitOrder = async () => {
                     </div>
                 </div>
             </div>
+
         </div>
 
         <!-- TOTAL -->
-        <div v-if="hasItems" class="mt-4">
+        <div v-if="Object.keys(items).length" class="mt-4">
 
             <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body d-flex justify-content-between">
-                    <h4>Итого:</h4>
-                    <h4 class="text-success">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Итого:</h4>
+                    <h4 class="mb-0 text-success">
                         {{ new Intl.NumberFormat('ru-RU').format(total) }} ₽
                     </h4>
                 </div>
@@ -220,7 +206,7 @@ const submitOrder = async () => {
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
 
-                    <label class="form-label">Комментарий</label>
+                    <label class="form-label">Комментарий к заказу</label>
 
                     <textarea
                         v-model="comment"
