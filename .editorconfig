@@ -3,14 +3,40 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 4
 indent_style = space
+indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.md]
-trim_trailing_whitespace = false
+# JS / TS / Vue (Nuxt 4 + Vue 3)
+[*.{js,ts,vue,jsx,tsx}]
+indent_size = 2
 
+# JSON / config
+[*.{json,jsonc}]
+indent_size = 2
+
+# Laravel / PHP
+[*.php]
+indent_size = 4
+
+# Blade templates
+[*.blade.php]
+indent_size = 4
+
+# YAML (Laravel, CI, Docker)
 [*.{yml,yaml}]
 indent_size = 2
 
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# Env files
+[*.env]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Shell scripts
+[*.sh]
+indent_size = 2

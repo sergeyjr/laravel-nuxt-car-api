@@ -1,26 +1,37 @@
 <script setup lang="ts">
 
-import {computed, onMounted} from 'vue'
+import { computed, onMounted } from 'vue'
 
-import {useAuthStore} from '~/stores/auth'
-import {useCartStore} from '~/stores/cart'
-import {useAuthActions} from '~/composables/useAuthActions'
+import { useAuthStore } from '~/stores/auth'
+import { useCartStore } from '~/stores/cart'
+import { useAuthActions } from '~/composables/useAuthActions'
+
+/* ---------------- stores ---------------- */
 
 const auth = useAuthStore()
 const cart = useCartStore()
-const {handleLogout} = useAuthActions()
+
+/* ---------------- composables ---------------- */
+
+const { handleLogout } = useAuthActions()
+
+/* ---------------- config ---------------- */
 
 const config = useRuntimeConfig()
 const appName = config.public.appName || 'My App'
 
+/* ---------------- lifecycle ---------------- */
+
 onMounted(async () => {
-    if (auth.isAuth) {
-        await cart.fetch()
-    }
+  if (auth.isAuth) {
+    await cart.fetch()
+  }
 })
 
+/* ---------------- computed ---------------- */
+
 const cartCount = computed(() => {
-    return Object.values(cart.items || {}).filter(Boolean).length
+  return Object.values(cart.items || {}).filter(Boolean).length
 })
 
 </script>

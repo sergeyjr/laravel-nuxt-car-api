@@ -3,7 +3,6 @@ import { useAuthStore } from '~/stores/auth'
 export default defineNuxtRouteMiddleware(async (to) => {
     const auth = useAuthStore()
 
-    // важно для SSR
     if (!auth.initialized) {
         try {
             await auth.initAuth()

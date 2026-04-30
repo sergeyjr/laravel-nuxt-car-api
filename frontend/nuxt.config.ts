@@ -51,7 +51,6 @@ export default defineNuxtConfig({
             include: [
                 '@vue/devtools-core',
                 '@vue/devtools-kit',
-                //'axios',
                 'bootstrap',
                 'swiper/modules',
                 'swiper/vue',
