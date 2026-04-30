@@ -1,8 +1,22 @@
-import { defineStore } from 'pinia'
-import { carsApi } from '~/services/api/cars.api'
-import type { Car, CarsListResponse } from '~/services/api/cars.api'
+import {defineStore} from 'pinia'
+import {useNuxtApp} from '#app'
+
+interface Car {
+    id: number
+    [key: string]: any
+}
 
 interface CarsMeta {
+    current_page: number
+    last_page: number
+    from: number | null
+    to: number | null
+    total: number
+    per_page: number
+}
+
+interface CarsListResponse {
+    data: Car[]
     current_page: number
     last_page: number
     from: number | null
@@ -17,11 +31,8 @@ export const useCarStore = defineStore('cars', {
         meta: null as CarsMeta | null,
         loading: false,
 
-        cache: new Map<number, { items: Car[]; meta: CarsMeta }>(),
-
         car: null as Car | null,
         carLoading: false,
-        carCache: new Map<number, Car>(),
 
         latest: [] as Car[],
         latestLoaded: false,
@@ -29,42 +40,32 @@ export const useCarStore = defineStore('cars', {
     }),
 
     actions: {
-        // --- LIST ---
+
+        api() {
+            return useNuxtApp().$api as any
+        },
+
         async fetch(page = 1) {
-            if (!page || page < 1) return
-
-            if (this.cache.has(page)) {
-                const cached = this.cache.get(page)!
-                this.cars = cached.items
-                this.meta = cached.meta
-                return
-            }
-
             this.loading = true
 
             try {
-                const res: CarsListResponse = await carsApi.list(page)
+                const res: CarsListResponse = await this.api()('/cars', {
+                    query: { page }
+                })
 
-                const items = Array.isArray(res.data) ? res.data : []
+                this.cars = res.data || []
 
-                const meta: CarsMeta = {
-                    current_page: (res as any).current_page ?? 1,
-                    last_page: (res as any).last_page ?? 1,
-                    from: (res as any).from ?? null,
-                    to: (res as any).to ?? null,
-                    total: (res as any).total ?? 0,
-                    per_page: (res as any).per_page ?? items.length
+                this.meta = {
+                    current_page: res.current_page,
+                    last_page: res.last_page,
+                    from: res.from,
+                    to: res.to,
+                    total: res.total,
+                    per_page: res.per_page
                 }
 
-                this.cars = items
-                this.meta = meta
-
-                this.cache.set(page, {
-                    items,
-                    meta: { ...meta }
-                })
             } catch (e) {
-                console.error('Ошибка загрузки машин:', e)
+                console.error(e)
                 this.cars = []
                 this.meta = null
             } finally {
@@ -72,46 +73,35 @@ export const useCarStore = defineStore('cars', {
             }
         },
 
-        // --- SINGLE ---
         async fetchCar(id: number) {
             if (!id) return
-
-            if (this.carCache.has(id)) {
-                this.car = this.carCache.get(id)!
-                return
-            }
 
             this.carLoading = true
             this.car = null
 
             try {
-                const res = await carsApi.show(id)
-console.log('res', res)
-                const car = (res as any).data ?? res
+                this.car = await this.api()(`/cars/${id}`)
 
-                this.car = car
-                this.carCache.set(id, car)
             } catch (e) {
-                console.error('Ошибка загрузки машины:', e)
+                console.error(e)
                 this.car = null
             } finally {
                 this.carLoading = false
             }
         },
 
-        // --- LATEST ---
         async fetchLatest() {
-            if (this.latestLoaded) return
-
             this.latestLoading = true
 
             try {
-                const res = await carsApi.latest()
+                const res = await this.api()('/cars/latest')
 
-                this.latest = (res as any).data ?? res
-                this.latestLoaded = true
+                // console.log('res', res)
+
+                this.latest = Array.isArray(res) ? res : res.data || []
+
             } catch (e) {
-                console.error('Ошибка загрузки новинок:', e)
+                console.error(e)
                 this.latest = []
             } finally {
                 this.latestLoading = false

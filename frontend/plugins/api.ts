@@ -1,3 +1,6 @@
+import { useAuthStore } from '~/stores/auth'
+import { useAlertStore } from '~/stores/alert'
+
 export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig()
 
@@ -5,9 +8,7 @@ export default defineNuxtPlugin(() => {
     const IGNORE_ALERT_URLS = ['/api/me']
 
     const api = $fetch.create({
-        baseURL: import.meta.server
-            ? config.apiBaseServer
-            : config.public.apiBase,
+        baseURL: config.public.apiBase,
 
         credentials: 'include',
 
@@ -17,8 +18,6 @@ export default defineNuxtPlugin(() => {
         },
 
         onRequest({ options }) {
-            // НИКАКИХ useCookie / nuxt composables тут
-
             if (!import.meta.client) return
 
             const token = localStorage.getItem('web_session_token')
@@ -30,23 +29,25 @@ export default defineNuxtPlugin(() => {
         },
 
         onResponseError({ response, request }) {
+            if (!import.meta.client) return
+
             const alert = useAlertStore()
             const auth = useAuthStore()
 
             const status = response.status
-            const url = request.toString()
+            const url = String(request)
 
             const isIgnoredStatus = IGNORE_ALERT_STATUSES.includes(status)
             const isIgnoredUrl = IGNORE_ALERT_URLS.some(u => url.includes(u))
 
-            if (status === 401 && import.meta.client) {
+            if (status === 401) {
                 localStorage.removeItem('web_session_token')
                 auth.logoutLocal?.()
             }
 
             if (isIgnoredStatus || isIgnoredUrl) return
 
-            const data = response._data as any
+            const data: any = response._data
 
             if (data?.message) {
                 alert.add('error', data.message)
@@ -63,6 +64,8 @@ export default defineNuxtPlugin(() => {
     })
 
     return {
-        provide: { api }
+        provide: {
+            api
+        }
     }
 })

@@ -52,7 +52,10 @@ const carStore = useCarStore()
 //     }
 // })
 
-await useAsyncData('cars', () => carStore.fetchLatest())
+await useAsyncData('cars', async () => {
+    await carStore.fetchLatest()
+    return carStore.latest
+})
 
 // helpers
 const getImage = (car) => {

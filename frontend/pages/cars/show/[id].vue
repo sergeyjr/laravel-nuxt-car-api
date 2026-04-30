@@ -1,10 +1,10 @@
 <script setup>
 
-import {computed, watch} from 'vue'
-import {useRoute, createError, navigateTo} from '#app'
-import {useCarStore} from '~/stores/car'
-import {useAuthStore} from '~/stores/auth'
-import {useCartStore} from '~/stores/cart'
+import { computed, watch } from 'vue'
+import { useRoute, navigateTo } from '#app'
+import { useCarStore } from '~/stores/car'
+import { useAuthStore } from '~/stores/auth'
+import { useCartStore } from '~/stores/cart'
 
 const route = useRoute()
 
@@ -12,23 +12,24 @@ const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
 
-const carId = computed(() => route.params.id)
+const carId = computed(() => {
+    const id = route.params.id
+    return Array.isArray(id) ? null : Number(id)
+})
 
-await callOnce(async () => {
-    if (!carId.value) {
-        return navigateTo('/404')
-    }
-
+if (!carId.value) {
+    await navigateTo('/404')
+} else {
     await store.fetchCar(carId.value)
 
     if (!store.car) {
-        return navigateTo('/404')
+        await navigateTo('/404')
+    } else {
+        if (auth.isAuth && !Object.keys(cart.items || {}).length) {
+            await cart.fetch()
+        }
     }
-
-    if (auth.isAuth && !Object.keys(cart.items || {}).length) {
-        await cart.fetch()
-    }
-})
+}
 
 const car = computed(() => store.car)
 const loading = computed(() => store.carLoading)
@@ -60,8 +61,8 @@ const isInCart = (carId) => {
 watch(
     () => route.params.id,
     async (id) => {
-        if (!id) return
-        await store.fetchCar(id)
+        if (!id || Array.isArray(id)) return
+        await store.fetchCar(Number(id))
     }
 )
 

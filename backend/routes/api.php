@@ -18,8 +18,6 @@ Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
 
 Route::get('/cars/latest', [CarController::class, 'latest']);
 
-Route::get('/api/cars/latest', [CarController::class, 'latest']);
-
 Route::get('/page/{code}', [SiteController::class, 'page']);
 
 Route::post('/contact', [SiteController::class, 'sendContact'])

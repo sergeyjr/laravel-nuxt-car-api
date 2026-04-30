@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+import {orderApi} from '~/services/api/order.api'
 
 export const useOrderStore = defineStore('order', {
     state: () => ({
@@ -16,23 +17,24 @@ export const useOrderStore = defineStore('order', {
             return useNuxtApp().$api
         },
 
+        api() {
+            return orderApi(this.getApi())
+        },
+
         // --- SINGLE ORDER ---
         async fetchOrder(id: number | string) {
             if (!id) return
-
-            // cache
-            if (this.orderCache.has(id)) {
-                this.currentOrder = this.orderCache.get(id)
-                return
-            }
-
-            const api = this.getApi()
 
             this.loading = true
             this.error = null
 
             try {
-                const {data} = await api.get(`/api/orders/${id}`)
+                if (this.orderCache.has(id)) {
+                    this.currentOrder = this.orderCache.get(id)
+                    return
+                }
+
+                const data = await this.api().getOrder(id)
 
                 this.currentOrder = data
                 this.orderCache.set(id, data)
@@ -48,15 +50,11 @@ export const useOrderStore = defineStore('order', {
 
         // --- LIST ---
         async fetchOrders() {
-            const api = this.getApi()
-
             this.loading = true
             this.error = null
 
             try {
-                const {data} = await api.get('/api/orders')
-
-                this.orders = data
+                this.orders = await this.api().getOrders()
 
             } catch (e: any) {
                 this.error = e
