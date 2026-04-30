@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 
 export const useAlertStore = defineStore('alert', {
     state: () => ({
@@ -18,7 +18,7 @@ export const useAlertStore = defineStore('alert', {
                 this.remove(id)
             }, 60000)
 
-            this.alerts.push({ id, type, message, timeout })
+            this.alerts.push({id, type, message, timeout})
         },
 
         remove(id: number) {

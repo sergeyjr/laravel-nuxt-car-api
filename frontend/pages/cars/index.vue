@@ -1,29 +1,35 @@
 <script setup>
-import { onMounted } from 'vue'
 
-const router = useRouter()
+import {computed} from 'vue'
+import {useCarStore} from '~/stores/car'
+import {useAuthStore} from '~/stores/auth'
+import {useCartStore} from '~/stores/cart'
 
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
 
-const changePage = (page) => {
-    store.fetch(page)
+await callOnce(async () => {
+    await store.fetch(1)
+
+    if (auth.isAuth && !Object.keys(cart.items || {}).length) {
+        await cart.fetch()
+    }
+})
+
+const changePage = (p) => {
+    navigateTo(`/cars?page=${p}`)
 }
 
-const openCar = (id) => {
-    router.push(`/cars/show/${id}`)
-}
+const openCar = (id) => navigateTo(`/cars/show/${id}`)
 
 const getImage = (car) => {
     if (!car.photo_url) return '/images/default_car.jpg'
-    if (car.photo_url.startsWith('http')) return car.photo_url
     return car.photo_url
 }
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
-}
+const formatPrice = (price) =>
+    new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
 
 const addToCart = (car) => {
     cart.add({
@@ -37,17 +43,10 @@ const addToCart = (car) => {
 
 const isInCart = (carId) => {
     return Object.values(cart.items || {}).some(
-        item => item && item.id === carId
+        item => item?.id === carId
     )
 }
 
-onMounted(() => {
-    store.fetch(1)
-
-    if (auth.isAuth && Object.keys(cart.items || {}).length === 0) {
-        cart.fetch()
-    }
-})
 </script>
 
 <template>
@@ -55,9 +54,7 @@ onMounted(() => {
 
         <h1>Каталог</h1>
 
-        <div v-if="store.loading">
-            Загрузка...
-        </div>
+        <div v-if="store.loading">Загрузка...</div>
 
         <div v-else class="row">
             <div
@@ -67,16 +64,15 @@ onMounted(() => {
             >
                 <div
                     class="card"
-                    style="cursor:pointer"
                     @click="openCar(car.id)"
+                    style="cursor:pointer"
                 >
 
                     <img
                         :src="getImage(car)"
                         class="card-img-top"
-                        style="height:200px; object-fit:contain;"
-                        alt=""
-                    />
+                        style="height:200px;object-fit:contain;"
+                        alt="">
 
                     <div class="card-body">
                         <h5>{{ car.title }}</h5>
@@ -96,7 +92,7 @@ onMounted(() => {
                             v-if="isInCart(car.id)"
                             variant="light"
                             class="w-100"
-                            @click.stop="router.push('/cart')"
+                            @click.stop="navigateTo('/cart')"
                         >
                             Товар в корзине
                         </BaseButton>
@@ -104,7 +100,7 @@ onMounted(() => {
                         <BaseButton
                             v-else
                             variant="success"
-                            class="w-100 d-flex align-items-center justify-content-center gap-2 py-2 rounded-3 shadow-sm"
+                            class="w-100"
                             @click.stop="addToCart(car)"
                         >
                             В корзину
@@ -116,7 +112,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- PAGINATION -->
+        <!-- pagination -->
         <div v-if="store.meta" class="d-flex gap-2 mt-3">
 
             <BaseButton
@@ -139,9 +135,9 @@ onMounted(() => {
 
         <div v-if="store.meta" class="mt-2">
             Страница: {{ store.meta.current_page }} / {{ store.meta.last_page }}
-            <br />
+            <br>
             Показано {{ store.meta.from }}–{{ store.meta.to }}
-            из {{ store.meta.total }} автомобилей
+            из {{ store.meta.total }}
         </div>
 
     </div>

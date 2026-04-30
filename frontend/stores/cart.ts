@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 
 function cleanItems(obj: any) {
     return Object.fromEntries(
@@ -48,7 +48,7 @@ export const useCartStore = defineStore('cart', {
             }
 
             try {
-                const { data } = await api.get('/api/cart')
+                const {data} = await api.get('/api/cart')
                 const serverItems = cleanItems(data)
 
                 if (Object.keys(serverItems).length > 0) {
@@ -109,7 +109,7 @@ export const useCartStore = defineStore('cart', {
 
             try {
                 await api.get('/sanctum/csrf-cookie')
-                await api.post('/api/cart/update', { id, qty })
+                await api.post('/api/cart/update', {id, qty})
             } catch (e) {
                 this.items = backup
                 this.save()
@@ -125,7 +125,7 @@ export const useCartStore = defineStore('cart', {
 
             try {
                 await api.get('/sanctum/csrf-cookie')
-                await api.post('/api/cart/remove', { id })
+                await api.post('/api/cart/remove', {id})
             } catch (e) {
                 this.items = backup
                 this.save()
@@ -155,7 +155,7 @@ export const useCartStore = defineStore('cart', {
             try {
                 await api.get('/sanctum/csrf-cookie')
 
-                const { data } = await api.post('/api/orders/checkout', {
+                const {data} = await api.post('/api/orders/checkout', {
                     comment: payload.comment || null
                 })
 

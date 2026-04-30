@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 
 type ContactContext = 'home' | 'contactPage'
 
@@ -79,7 +79,7 @@ export const useContactStore = defineStore('contact', {
             try {
                 await api.get('/sanctum/csrf-cookie')
 
-                const { data } = await api.post('/api/contact', this.form)
+                const {data} = await api.post('/api/contact', this.form)
 
                 this.resetForm()
 

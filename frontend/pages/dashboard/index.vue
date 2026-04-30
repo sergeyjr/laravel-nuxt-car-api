@@ -1,8 +1,13 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+
+import {computed} from 'vue'
+import {useAuthStore} from '~/stores/auth'
+import {useDashboardStore} from '~/stores/dashboard'
 
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
+
+await callOnce(() => dashboard.fetchDashboard())
 
 const user = computed(() => auth.user)
 const isApiUser = computed(() => auth.user?.role === 'api')
@@ -19,13 +24,8 @@ const cartCount = computed(() =>
 
 const cartTotal = computed(() => dashboard.cartTotal || 0)
 
-onMounted(async () => {
-    if (!auth.initialized) {
-        await auth.initAuth()
-    }
+const formatPrice = (v) => new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
 
-    await dashboard.fetchDashboard()
-})
 </script>
 
 <template>
@@ -33,9 +33,7 @@ onMounted(async () => {
 
         <h1 class="mb-3">Панель управления</h1>
 
-        <div v-if="dashboard.loading">
-            Загрузка...
-        </div>
+        <div v-if="dashboard.loading">Загрузка...</div>
 
         <template v-else>
 
@@ -47,9 +45,8 @@ onMounted(async () => {
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <h5>Мой профиль</h5>
-
                             <p>Добро пожаловать, {{ user?.name || 'пользователь' }}</p>
-                            <p>{{ user?.email || 'пользователь' }}</p>
+                            <p>{{ user?.email || '—' }}</p>
 
                             <NuxtLink
                                 to="/dashboard/profile"
@@ -105,7 +102,10 @@ onMounted(async () => {
                                 </p>
                             </div>
 
-                            <div v-if="!recentOrders.length" class="btn btn-outline-secondary mt-3">
+                            <div
+                                v-if="!recentOrders.length"
+                                class="btn btn-outline-secondary mt-3"
+                            >
                                 У вас пока нет заказов
                             </div>
 
@@ -125,7 +125,6 @@ onMounted(async () => {
                 <!-- CART -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
-
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <div>
@@ -138,13 +137,14 @@ onMounted(async () => {
 
                                 <p class="mb-0">
                                     Стоимость:
-                                    <span class="fw-bold">
-                    {{ new Intl.NumberFormat('ru-RU').format(cartTotal) }} ₽
-                  </span>
+                                    <span class="fw-bold">{{ formatPrice(cartTotal) }}</span>
                                 </p>
                             </div>
 
-                            <div v-if="cartTotal === 0" class="btn btn-outline-secondary w-100 mt-3">
+                            <div
+                                v-if="cartTotal === 0"
+                                class="btn btn-outline-secondary w-100 mt-3"
+                            >
                                 Корзина пустая
                             </div>
 
@@ -158,7 +158,6 @@ onMounted(async () => {
                             </div>
 
                         </div>
-
                     </div>
                 </div>
 
@@ -167,69 +166,59 @@ onMounted(async () => {
             <!-- RECENT ORDERS -->
             <div v-if="recentOrders.length" class="mt-4">
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">Последние заказы</h4>
-                </div>
+                <h4 class="mb-3">Последние заказы</h4>
 
-                <div class="row g-3">
+                <div
+                    v-for="order in recentOrders"
+                    :key="order.id"
+                    class="col-12 col-md-6 col-lg-4 mb-3"
+                >
+                    <div class="card h-100 shadow-sm border-0">
 
-                    <div
-                        v-for="order in recentOrders"
-                        :key="order.id"
-                        class="col-12 col-md-6 col-lg-4"
-                    >
-                        <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body d-flex flex-column justify-content-between">
 
-                            <div class="card-body d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="mb-1 text-truncate">
+                                    Заказ #{{ order.id }}
+                                </h6>
 
-                                <div>
-
-                                    <h6 class="mb-1 text-truncate">
-                                        Заказ #{{ order.id }}
-                                    </h6>
-
-                                    <div class="text-muted small">
-                                        {{ new Date(order.created_at).toLocaleString('ru-RU') }}
-                                    </div>
-
-                                    <div class="mt-2">
-
-                    <span
-                        class="badge"
-                        :class="{
-                        'bg-warning': order.status === 'pending',
-                        'bg-success': order.status === 'paid',
-                        'bg-danger': order.status === 'cancelled',
-                        'bg-secondary': order.status === 'completed'
-                      }"
-                    >
-                      {{ order.status }}
-                    </span>
-
-                                    </div>
-
+                                <div class="text-muted small">
+                                    {{ new Date(order.created_at).toLocaleString('ru-RU') }}
                                 </div>
 
-                                <div class="mt-3 d-flex justify-content-between align-items-center">
-
-                                    <div class="fw-bold text-success">
-                                        {{ new Intl.NumberFormat('ru-RU').format(order.total) }} ₽
-                                    </div>
-
-                                    <NuxtLink
-                                        :to="`/orders/${order.id}`"
-                                        class="btn btn-sm btn-outline-primary"
-                                    >
-                                        открыть
-                                    </NuxtLink>
-
+                                <div class="mt-2">
+                  <span
+                      class="badge"
+                      :class="{
+                      'bg-warning': order.status === 'pending',
+                      'bg-success': order.status === 'paid',
+                      'bg-danger': order.status === 'cancelled',
+                      'bg-secondary': order.status === 'completed'
+                    }"
+                  >
+                    {{ order.status }}
+                  </span>
                                 </div>
+                            </div>
+
+                            <div class="mt-3 d-flex justify-content-between">
+
+                                <div class="fw-bold text-success">
+                                    {{ formatPrice(order.total) }}
+                                </div>
+
+                                <NuxtLink
+                                    :to="`/orders/${order.id}`"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    открыть
+                                </NuxtLink>
 
                             </div>
 
                         </div>
-                    </div>
 
+                    </div>
                 </div>
 
             </div>

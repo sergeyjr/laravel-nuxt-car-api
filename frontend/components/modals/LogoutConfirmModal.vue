@@ -1,7 +1,8 @@
 <script setup>
-import { computed } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
-import BaseButton from '@/components/BaseButton.vue'
+
+import {computed} from 'vue'
+import {useAuthStore} from '~/stores/auth'
+import BaseButton from '~/components/BaseButton.vue'
 
 const props = defineProps({
     show: {
@@ -24,6 +25,7 @@ const confirmLogout = async () => {
     await authStore.logout()
     close()
 }
+
 </script>
 
 <template>
@@ -69,43 +71,52 @@ const confirmLogout = async () => {
 </template>
 
 <style scoped>
+
 .modal-mask {
     position: fixed;
-    inset: 0;
     z-index: 9998;
-    background: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.modal-container {
-    background: #fff;
-    border-radius: 6px;
-    width: 400px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.modal-wrapper {
+    display: flex;
 }
 
-.modal-header,
-.modal-body,
-.modal-footer {
-    padding: 1rem;
+.modal-container {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 400px;
 }
 
 .modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 1rem;
 }
 
 .modal-footer {
+    padding: 1rem;
+    border-top: 1px solid #eee;
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    border-top: 1px solid #eee;
 }
 
 .close-modal {
     cursor: pointer;
 }
+
 </style>

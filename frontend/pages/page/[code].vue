@@ -1,10 +1,16 @@
 <script setup>
-import { computed, watch, onMounted } from 'vue'
+
+import {computed, watch} from 'vue'
+import {useRoute, navigateTo, createError} from '#app'
+import {usePageStore} from '~/stores/page'
 
 const route = useRoute()
-const router = useRouter()
 
 const store = usePageStore()
+
+const code = computed(() => route.params.code)
+
+await callOnce(() => store.fetch(code.value))
 
 const page = computed(() => store.current)
 const loading = computed(() => store.loading)
@@ -13,32 +19,6 @@ const formattedContent = computed(() => {
     return page.value?.content?.replace(/\n/g, '<br>') || ''
 })
 
-const fetchData = async (code) => {
-    if (!code) return
-
-    store.clearCurrent()
-
-    try {
-        await store.fetch(code)
-    } catch (e) {
-        const status = e?.response?.status || e?.status
-
-        if (status === 404) {
-            await router.push('/not-found')
-        } else {
-            store.clearCurrent()
-        }
-    }
-}
-
-onMounted(() => {
-    fetchData(route.params.code)
-})
-
-watch(
-    () => route.params.code,
-    (newCode) => fetchData(newCode)
-)
 </script>
 
 <template>
@@ -50,12 +30,16 @@ watch(
                     Загрузка...
                 </div>
 
-                <div v-else>
+                <div v-else-if="page">
                     <h1 class="mb-3">
-                        {{ page?.title || '' }}
+                        {{ page.title }}
                     </h1>
 
-                    <div v-if="page" v-html="formattedContent" />
+                    <div v-html="formattedContent"></div>
+                </div>
+
+                <div v-else>
+                    <h3>Страница не найдена</h3>
                 </div>
 
             </div>

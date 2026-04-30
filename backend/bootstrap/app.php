@@ -57,14 +57,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'data' => null,
-                    'message' => 'Доступ запрещен.',
+                    'message' => $e->getMessage() ?: 'Доступ запрещен.',
                 ], 403);
             }
 
             if ($e->getStatusCode() === 404 && $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Не найдено.',
+                    'data' => null,
+                    'message' => $e->getMessage() ?: 'Не найдено.',
                 ], 404);
             }
 

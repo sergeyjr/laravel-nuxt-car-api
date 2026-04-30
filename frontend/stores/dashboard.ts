@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import type { DashboardResponse } from '~/services/api/dashboard.api'
 
 export const useDashboardStore = defineStore('dashboard', {
     state: () => ({
@@ -28,22 +29,19 @@ export const useDashboardStore = defineStore('dashboard', {
             this.error = null
 
             try {
-                const { data } = await api.get('/api/dashboard')
+                const data = await api<DashboardResponse>('/dashboard')
 
-                this.carsCount = data?.carsCount ?? 0
+                this.carsCount = data.carsCount ?? 0
+                this.ordersCount = data.ordersCount ?? 0
+                this.orders = data.orders ?? []
 
-                this.ordersCount = data?.ordersCount ?? 0
-                this.orders = data?.orders ?? []
-
-                this.cart = data?.cart ?? {}
-                this.cartTotal = data?.cartTotal ?? 0
+                this.cart = data.cart ?? {}
+                this.cartTotal = data.cartTotal ?? 0
 
                 this.loaded = true
-
             } catch (e: any) {
                 this.error = e
                 console.error('Dashboard error:', e)
-
             } finally {
                 this.loading = false
             }

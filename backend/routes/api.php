@@ -2,6 +2,7 @@
 
 use App\API\V1\Controllers\ApiAuthController;
 use App\API\V1\Controllers\ApiCarController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
@@ -50,6 +51,16 @@ Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::post('/checkout', [OrderController::class, 'checkout']);
     Route::get('/{id}', [OrderController::class, 'show']);
+});
+
+// LOGIN, REGISTER
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 // API V1

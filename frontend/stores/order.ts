@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 
 export const useOrderStore = defineStore('order', {
     state: () => ({
@@ -32,7 +32,7 @@ export const useOrderStore = defineStore('order', {
             this.error = null
 
             try {
-                const { data } = await api.get(`/api/orders/${id}`)
+                const {data} = await api.get(`/api/orders/${id}`)
 
                 this.currentOrder = data
                 this.orderCache.set(id, data)
@@ -54,7 +54,7 @@ export const useOrderStore = defineStore('order', {
             this.error = null
 
             try {
-                const { data } = await api.get('/api/orders')
+                const {data} = await api.get('/api/orders')
 
                 this.orders = data
 

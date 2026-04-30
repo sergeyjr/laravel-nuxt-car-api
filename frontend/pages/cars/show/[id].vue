@@ -1,29 +1,45 @@
 <script setup>
-import { computed, watch } from 'vue'
+
+import {computed, watch} from 'vue'
+import {useRoute, createError, navigateTo} from '#app'
+import {useCarStore} from '~/stores/car'
+import {useAuthStore} from '~/stores/auth'
+import {useCartStore} from '~/stores/cart'
 
 const route = useRoute()
-const router = useRouter()
 
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
 
+const carId = computed(() => route.params.id)
+
+await callOnce(async () => {
+    if (!carId.value) {
+        return navigateTo('/404')
+    }
+
+    await store.fetchCar(carId.value)
+
+    if (!store.car) {
+        return navigateTo('/404')
+    }
+
+    if (auth.isAuth && !Object.keys(cart.items || {}).length) {
+        await cart.fetch()
+    }
+})
+
 const car = computed(() => store.car)
 const loading = computed(() => store.carLoading)
 
 const carImage = computed(() => {
-    if (!car.value?.photo_url) {
-        return '/images/default_car.jpg'
-    }
-    if (car.value.photo_url.startsWith('http')) {
-        return car.value.photo_url
-    }
+    if (!car.value?.photo_url) return '/images/default_car.jpg'
     return car.value.photo_url
 })
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
-}
+const formatPrice = (price) =>
+    new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
 
 const addToCart = (car) => {
     cart.add({
@@ -37,52 +53,24 @@ const addToCart = (car) => {
 
 const isInCart = (carId) => {
     return Object.values(cart.items || {}).some(
-        item => item && item.id === carId
+        item => item?.id === carId
     )
 }
 
-const loadCar = async (id) => {
-    if (!id) return
-
-    store.clearCurrent?.()
-
-    try {
-        await store.fetchCar(id)
-
-        if (!store.car) {
-            await router.push('/not-found')
-        }
-    } catch (e) {
-        const status = e?.response?.status || e?.status
-
-        if (status === 404) {
-            await router.push('/not-found')
-        } else {
-            store.clearCurrent?.()
-        }
-    }
-}
-
-onMounted(() => {
-    loadCar(route.params.id)
-
-    if (auth.isAuth && Object.keys(cart.items || {}).length === 0) {
-        cart.fetch()
-    }
-})
-
 watch(
     () => route.params.id,
-    (newId) => loadCar(newId)
+    async (id) => {
+        if (!id) return
+        await store.fetchCar(id)
+    }
 )
+
 </script>
 
 <template>
     <div class="container mt-4">
 
-        <div v-if="loading">
-            Загрузка...
-        </div>
+        <div v-if="loading">Загрузка...</div>
 
         <div v-else-if="!car">
             Автомобиль не найден
@@ -96,21 +84,17 @@ watch(
                     <h1 class="mb-4">{{ car.title }}</h1>
                 </div>
 
-                <div class="col-12 col-md-5">
+                <div class="col-md-5">
                     <img
                         :src="carImage"
                         class="img-fluid rounded"
-                        style="max-height: 400px; object-fit: contain;"
-                        alt=""
-                    />
+                        style="max-height:400px;object-fit:contain;"
+                        alt="">
                 </div>
 
-                <div class="col-12 col-md-7">
+                <div class="col-md-7">
 
-                    <p>
-                        <strong>Описание:</strong>
-                        {{ car.description }}
-                    </p>
+                    <p><strong>Описание:</strong> {{ car.description }}</p>
 
                     <div v-if="car.option">
                         <p><strong>Бренд:</strong> {{ car.option.brand }}</p>
@@ -133,7 +117,7 @@ watch(
                             v-if="isInCart(car.id)"
                             variant="light"
                             class="w-100"
-                            @click.stop="router.push('/cart')"
+                            @click.stop="navigateTo('/cart')"
                         >
                             Товар в корзине
                         </BaseButton>
@@ -141,7 +125,7 @@ watch(
                         <BaseButton
                             v-else
                             variant="success"
-                            class="w-100 d-flex align-items-center justify-content-center gap-2 py-2 rounded-3 shadow-sm"
+                            class="w-100"
                             @click.stop="addToCart(car)"
                         >
                             В корзину
@@ -153,7 +137,7 @@ watch(
 
             </div>
 
-            <hr />
+            <hr>
 
             <NuxtLink to="/cars" class="btn btn-outline-secondary">
                 В каталог

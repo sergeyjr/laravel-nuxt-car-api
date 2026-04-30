@@ -10,7 +10,7 @@ class CarPatchRequest
 
     public ?string $title = null;
     public ?string $description = null;
-    public $price = null;
+    public float|int|null $price = null;
     public ?string $photo_url = null;
     public ?string $contacts = null;
 
@@ -47,7 +47,7 @@ class CarPatchRequest
             'options' => ['sometimes', 'array'],
         ];
 
-        if (!empty($this->options)) {
+        if ($this->options !== null) {
             $rules = array_merge($rules, [
                 'options.brand' => ['sometimes', 'string'],
                 'options.model' => ['sometimes', 'string'],

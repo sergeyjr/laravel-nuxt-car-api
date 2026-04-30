@@ -31,13 +31,21 @@ const statusClasses: Record<OrderStatus, string> = {
     refunded: 'refunded'
 }
 
+const isOrderStatus = (status: string): status is OrderStatus => {
+    return status in ORDER_STATUS
+}
+
 export const useOrderStatus = () => {
-    const getLabel = (status: string) => {
-        return statusLabels[status as OrderStatus] || status
+    const getLabel = (status: string): string => {
+        return isOrderStatus(status)
+            ? statusLabels[status]
+            : status
     }
 
-    const getClass = (status: string) => {
-        return statusClasses[status as OrderStatus] || ''
+    const getClass = (status: string): string => {
+        return isOrderStatus(status)
+            ? statusClasses[status]
+            : ''
     }
 
     return {

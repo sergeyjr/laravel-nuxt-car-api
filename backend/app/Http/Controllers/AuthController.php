@@ -52,23 +52,11 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
 
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $user = User::where('email', $request->email)->first();
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(
-                ['message' => 'Имя пользователя и пароль не совпадают.'],
-                422
-            );
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Неверные данные'], 422);
         }
-
-        $user = auth()->user();
-
-        $request->session()->regenerate();
-
-        $user->tokens()->where('name', 'web_session_token')->delete();
 
         $token = $user->createToken('web_session_token')->plainTextToken;
 

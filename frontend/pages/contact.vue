@@ -1,5 +1,10 @@
 <script setup>
+
+import {useContactStore} from '~/stores/contact'
+import BaseButton from '~/components/BaseButton.vue'
+
 const store = useContactStore()
+
 </script>
 
 <template>
@@ -9,122 +14,85 @@ const store = useContactStore()
 
                 <h1 class="mb-4">Контактная форма</h1>
 
-                <!-- SUCCESS -->
-                <div
-                    v-if="store.contexts.contactPage.successMessage"
-                    class="alert alert-success"
-                >
+                <div v-if="store.contexts.contactPage.successMessage" class="alert alert-success">
                     {{ store.contexts.contactPage.successMessage }}
                 </div>
 
-                <!-- ERROR -->
-                <div
-                    v-if="store.contexts.contactPage.errorMessage"
-                    class="alert alert-danger"
-                >
+                <div v-if="store.contexts.contactPage.errorMessage" class="alert alert-danger">
                     {{ store.contexts.contactPage.errorMessage }}
                 </div>
 
-                <!-- RATE LIMIT -->
                 <div v-if="store.retryAfter" class="alert alert-warning mt-4">
                     Подождите {{ store.retryAfter }} сек перед повторной отправкой
                 </div>
 
                 <form @submit.prevent="store.submit">
 
-                    <!-- NAME -->
                     <div class="mb-3">
-                        <label class="form-label" for="contact-name">
-                            Имя <span class="text-danger">*</span>
-                        </label>
-
+                        <label class="form-label">Имя *</label>
                         <input
-                            id="contact-name"
                             type="text"
                             class="form-control"
                             :class="{ 'is-invalid': store.errors.name }"
                             v-model="store.form.name"
                             required
                             autocomplete="name"
-                        />
-
+                        >
                         <small v-if="store.errors.name" class="text-danger">
                             {{ store.errors.name }}
                         </small>
                     </div>
 
-                    <!-- EMAIL -->
                     <div class="mb-3">
-                        <label class="form-label" for="contact-email">
-                            Email <span class="text-danger">*</span>
-                        </label>
-
+                        <label class="form-label">Email *</label>
                         <input
-                            id="contact-email"
                             type="email"
                             class="form-control"
                             :class="{ 'is-invalid': store.errors.email }"
                             v-model="store.form.email"
                             required
                             autocomplete="email"
-                        />
-
+                        >
                         <small v-if="store.errors.email" class="text-danger">
                             {{ store.errors.email }}
                         </small>
                     </div>
 
-                    <!-- SUBJECT -->
                     <div class="mb-3">
-                        <label class="form-label" for="contact-subject">
-                            Тема сообщения <span class="text-danger">*</span>
-                        </label>
-
+                        <label class="form-label">Тема *</label>
                         <input
-                            id="contact-subject"
                             type="text"
                             class="form-control"
                             :class="{ 'is-invalid': store.errors.subject }"
                             v-model="store.form.subject"
                             required
-                        />
-
+                        >
                         <small v-if="store.errors.subject" class="text-danger">
                             {{ store.errors.subject }}
                         </small>
                     </div>
 
-                    <!-- BODY -->
                     <div class="mb-3">
-                        <label class="form-label" for="contact-body">
-                            Текст сообщения <span class="text-danger">*</span>
-                        </label>
-
+                        <label class="form-label">Сообщение *</label>
                         <textarea
-                            id="contact-body"
                             class="form-control"
-                            :class="{ 'is-invalid': store.errors.body }"
                             rows="5"
+                            :class="{ 'is-invalid': store.errors.body }"
                             v-model="store.form.body"
                             required
-                        />
-
+                        ></textarea>
                         <small v-if="store.errors.body" class="text-danger">
                             {{ store.errors.body }}
                         </small>
                     </div>
 
-                    <!-- SUBMIT -->
                     <BaseButton
-                        variant="primary"
                         type="submit"
                         class="w-100"
                         :loading="store.loading"
                         :disabled="store.retryAfter > 0"
                     >
-                        <template #loading>
-                            Отправляем...
-                        </template>
+                        <template #loading>Отправляем...</template>
                         Отправить сообщение
                     </BaseButton>
 

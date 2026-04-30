@@ -53,6 +53,7 @@ const alertClass = (type: string) => {
 </template>
 
 <style scoped>
+
 .alert {
     position: relative;
     border-radius: 8px;
@@ -101,4 +102,5 @@ const alertClass = (type: string) => {
 .alert-close svg {
     pointer-events: none;
 }
+
 </style>

@@ -1,14 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue'
 
-const router = useRouter()
+import {ref, onMounted} from 'vue'
+// import { useRouter } from '#app'
+import {useAuthStore} from '~/stores/auth'
+
+import BaseButton from '~/components/BaseButton.vue'
+import BaseInput from '~/components/BaseInput.vue'
+
+// const router = useRouter()
 const store = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 
 const submit = async () => {
-    // reset previous errors
     store.errors = {}
 
     let hasError = false
@@ -28,13 +33,13 @@ const submit = async () => {
     const ok = await store.login(email.value, password.value)
 
     if (ok) {
-        await router.push('/dashboard')
+        // await router.push('/dashboard')
+        return navigateTo('/dashboard')
     }
 }
 
-onMounted(() => {
-    store.errors = {}
-})
+store.clearErrors()
+
 </script>
 
 <template>
@@ -71,7 +76,6 @@ onMounted(() => {
                     />
 
                     <BaseButton
-                        variant="primary"
                         type="submit"
                         class="w-100 mt-3"
                         :loading="store.loading"

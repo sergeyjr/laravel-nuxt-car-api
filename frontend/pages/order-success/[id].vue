@@ -1,33 +1,38 @@
 <script setup>
-import { computed, onMounted } from 'vue'
-import { orderStatusLabel, orderStatusClass } from '@/shared/orderStatus'
+
+import {computed} from 'vue'
+import {useRoute, navigateTo, createError} from '#app'
+import {useOrderStore} from '~/stores/order'
+import {useOrderStatus} from '~/composables/useOrderStatus'
 
 const route = useRoute()
-const router = useRouter()
 const store = useOrderStore()
+const {getLabel, getClass} = useOrderStatus()
 
 const orderId = computed(() => route.params.id)
-const order = computed(() => store.currentOrder)
 
-const formatPrice = (price) =>
-    new Intl.NumberFormat('ru-RU').format(price)
-
-onMounted(async () => {
+await callOnce(async () => {
     if (!orderId.value) {
-        router.push('/')
-        return
+        return navigateTo('/')
     }
 
-    await store.fetchOrder(orderId.value)
+    try {
+        await store.fetchOrder(orderId.value)
+    } catch (e) {
+        throw createError({statusCode: 404})
+    }
 })
+
+const order = computed(() => store.currentOrder)
+
+const formatPrice = (price) => new Intl.NumberFormat('ru-RU').format(price)
+
 </script>
 
 <template>
     <div class="container py-5">
 
-        <!-- MAIN CARD -->
-        <div class="card shadow-sm mx-auto" style="max-width: 720px;">
-
+        <div class="card shadow-sm mx-auto" style="max-width:720px;">
             <div class="card-body p-4">
 
                 <!-- HEADER -->
@@ -35,7 +40,7 @@ onMounted(async () => {
 
                     <div
                         class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success fw-bold mb-3"
-                        style="width: 64px; height: 64px; font-size: 28px;"
+                        style="width:64px;height:64px;font-size:28px;"
                     >
                         ✔
                     </div>
@@ -45,7 +50,7 @@ onMounted(async () => {
                     </h3>
 
                     <p class="text-muted mb-0">
-                        Мы отправили подтверждение и начали обработку заказа
+                        Мы начали обработку заказа
                     </p>
 
                 </div>
@@ -58,11 +63,11 @@ onMounted(async () => {
                 <!-- CONTENT -->
                 <div v-else>
 
-                    <!-- ORDER INFO -->
-                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-3">
+                    <!-- INFO -->
+                    <div class="d-flex justify-content-between p-3 bg-light rounded mb-3">
 
                         <div>
-                            <div class="text-muted small">Номер заказа</div>
+                            <div class="text-muted small">Номер</div>
                             <div class="fw-bold">#{{ order.id }}</div>
                         </div>
 
@@ -77,14 +82,10 @@ onMounted(async () => {
 
                     <!-- STATUS -->
                     <div class="text-center mb-4">
-
-            <span
-                class="badge fs-6 px-3 py-2"
-                :class="orderStatusClass(order.status)"
-            >
-              {{ orderStatusLabel(order.status) }}
-            </span>
-
+                            <span
+                                class="badge fs-6 px-3 py-2"
+                                :class="getClass(order.status)"
+                            >{{ getLabel(order.status) }}</span>
                     </div>
 
                     <!-- ITEMS -->
@@ -93,7 +94,7 @@ onMounted(async () => {
                         <div
                             v-for="item in order.items"
                             :key="item.id"
-                            class="d-flex justify-content-between align-items-center p-2 bg-light rounded"
+                            class="d-flex justify-content-between p-2 bg-light rounded"
                         >
 
                             <div>
@@ -116,15 +117,8 @@ onMounted(async () => {
 
                     <!-- COMMENT -->
                     <div v-if="order.comment" class="mt-4 p-3 bg-light rounded">
-
-                        <div class="text-muted small mb-1">
-                            Комментарий
-                        </div>
-
-                        <div>
-                            {{ order.comment }}
-                        </div>
-
+                        <div class="text-muted small mb-1">Комментарий</div>
+                        <div>{{ order.comment }}</div>
                     </div>
 
                     <!-- ACTIONS -->
@@ -143,7 +137,6 @@ onMounted(async () => {
                 </div>
 
             </div>
-
         </div>
 
     </div>

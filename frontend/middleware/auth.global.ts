@@ -1,15 +1,18 @@
 import { useAuthStore } from '~/stores/auth'
 
-export default defineNuxtRouteMiddleware((to) => {
-
+export default defineNuxtRouteMiddleware(async (to) => {
     const auth = useAuthStore()
 
-    if (!auth) return
-
-    const isAuth = auth.isAuth
-
-    if (!isAuth && to.path.startsWith('/dashboard')) {
-        return navigateTo('/login')
+    // важно для SSR
+    if (!auth.initialized) {
+        try {
+            await auth.initAuth()
+        } catch (e) {
+            // игнор — просто считаем неавторизованным
+        }
     }
 
+    if (!auth.isAuth && to.path.startsWith('/dashboard')) {
+        return navigateTo('/login')
+    }
 })

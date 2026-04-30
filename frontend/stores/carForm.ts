@@ -1,21 +1,34 @@
-import { defineStore } from 'pinia'
-import { useAlertStore } from './alert'
-import { useAuthStore } from './auth'
+import {defineStore} from 'pinia'
+import {useAlertStore} from './alert'
+import {useAuthStore} from './auth'
+
+type CarForm = {
+    title: string
+    description: string
+    price: string | number
+    photo_url: string
+    contacts: string
+    brand: string
+    model: string
+    year: string | number
+    body: string
+    mileage: string | number
+}
 
 export const useCarFormStore = defineStore('carForm', {
     state: () => ({
         form: {
             title: '',
             description: '',
-            price: null as number | null,
+            price: '',
             photo_url: '',
             contacts: '',
             brand: '',
             model: '',
-            year: null as number | null,
+            year: '',
             body: '',
-            mileage: null as number | null
-        },
+            mileage: ''
+        } as CarForm,
 
         errors: {} as Record<string, string>,
         submitting: false,
@@ -23,7 +36,7 @@ export const useCarFormStore = defineStore('carForm', {
     }),
 
     actions: {
-        // --- utils ---
+
         showAlert(type: string, message: string) {
             useAlertStore().add(type, message)
         },
@@ -36,14 +49,14 @@ export const useCarFormStore = defineStore('carForm', {
             this.form = {
                 title: '',
                 description: '',
-                price: null,
+                price: '',
                 photo_url: '',
                 contacts: '',
                 brand: '',
                 model: '',
-                year: null,
+                year: '',
                 body: '',
-                mileage: null
+                mileage: ''
             }
             this.errors = {}
         },
@@ -56,7 +69,6 @@ export const useCarFormStore = defineStore('carForm', {
             this.errors = {}
         },
 
-        // --- validation ---
         validateOptions() {
             const f = this.form
 
@@ -76,7 +88,6 @@ export const useCarFormStore = defineStore('carForm', {
             return missing
         },
 
-        // --- submit ---
         async submit() {
             const api = this.getApi()
             const auth = useAuthStore()
@@ -88,7 +99,7 @@ export const useCarFormStore = defineStore('carForm', {
             if (missing.length) {
                 missing.forEach(f => this.setError(f, 'Это поле обязательно'))
                 this.showAlert('danger', 'Заполните все опции автомобиля')
-                return
+                return null
             }
 
             this.submitting = true
@@ -98,19 +109,25 @@ export const useCarFormStore = defineStore('carForm', {
 
                 if (!isAuth) {
                     this.showAlert('danger', 'Требуется авторизация')
-                    return
+                    return null
                 }
 
-                const data: any = await api.post('/api/v1/car/create', {
+                const payload = {
                     ...this.form,
+                    price: Number(this.form.price),
+                    year: Number(this.form.year),
+                    mileage: Number(this.form.mileage),
+
                     options: {
                         brand: this.form.brand,
                         model: this.form.model,
-                        year: this.form.year,
+                        year: Number(this.form.year),
                         body: this.form.body,
-                        mileage: this.form.mileage
+                        mileage: Number(this.form.mileage)
                     }
-                })
+                }
+
+                const data: any = await api.post('/api/v1/car/create', payload)
 
                 this.showAlert(
                     'success',
@@ -119,7 +136,7 @@ export const useCarFormStore = defineStore('carForm', {
 
                 this.reset()
 
-                return data
+                return data.data
 
             } catch (e: any) {
                 const status = e?.status
@@ -128,7 +145,7 @@ export const useCarFormStore = defineStore('carForm', {
                 if (status === 401) {
                     auth.clearToken?.()
                     this.showAlert('danger', 'Сессия истекла')
-                    return
+                    return null
                 }
 
                 if (status === 422) {
@@ -144,12 +161,13 @@ export const useCarFormStore = defineStore('carForm', {
                     this.showAlert('error', data?.message || 'Ошибка сервера')
                 }
 
+                return null
+
             } finally {
                 this.submitting = false
             }
         },
 
-        // --- generate ---
         async generate() {
             const api = this.getApi()
             const auth = useAuthStore()
@@ -165,7 +183,6 @@ export const useCarFormStore = defineStore('carForm', {
                 }
 
                 const data: any = await api('/api/v1/car/generate-mock')
-
                 const car = data.data
 
                 Object.assign(this.form, {

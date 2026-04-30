@@ -1,5 +1,6 @@
-import { defineStore } from 'pinia'
-import { useAlertStore } from './alert'
+import {defineStore} from 'pinia'
+import {useAlertStore} from './alert'
+import {authApi} from '~/services/api/auth.api'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -9,7 +10,7 @@ export const useAuthStore = defineStore('auth', {
         error: null as string | null,
         errors: {} as Record<string, string[]>,
         success: null as string | null,
-        token: useCookie<string | null>('api_token'),
+        token: useCookie<string | null>('web_session_token'),
         loggingOut: false
     }),
 
@@ -25,19 +26,25 @@ export const useAuthStore = defineStore('auth', {
         },
 
         hydrateToken() {
-            if (!import.meta.client) return
-            this.token = localStorage.getItem('api_token')
+            if (this.token) return
+
+            if (import.meta.client) {
+                const local = localStorage.getItem('web_session_token')
+                if (local) {
+                    this.token = local
+                }
+            }
         },
 
         setToken(token: string | null) {
             this.token = token
 
-            if (!import.meta.client) return
-
-            if (token) {
-                localStorage.setItem('api_token', token)
-            } else {
-                localStorage.removeItem('api_token')
+            if (import.meta.client) {
+                if (token) {
+                    localStorage.setItem('web_session_token', token)
+                } else {
+                    localStorage.removeItem('web_session_token')
+                }
             }
         },
 
@@ -46,38 +53,59 @@ export const useAuthStore = defineStore('auth', {
 
             this.token = null
             if (import.meta.client) {
-                localStorage.removeItem('api_token')
+                localStorage.removeItem('web_session_token')
             }
+        },
+
+        clearErrors() {
+            this.errors = {}
+        },
+
+        logoutLocal() {
+            this.user = null
+            this.clearToken()
+            this.initialized = true
         },
 
         async fetchUser() {
             try {
-                const data: any = await $fetch('/me', {
-                    credentials: 'include'
-                })
+                const data: any = await authApi.me()
 
                 this.user = data.user
                 return true
+
             } catch (e: any) {
                 console.log('ME ERROR', e?.status)
+
                 this.user = null
+
+                if (e?.status === 401) {
+                    this.clearToken()
+                }
+
                 return false
             }
         },
 
         async initAuth() {
-            if (this.initialized) {
-                return this.isAuth
+            if (this.initialized) return this.isAuth
+
+            const token = this.token
+
+            if (!token) {
+                this.user = null
+                this.initialized = true
+                return false
             }
 
-            this.hydrateToken()
-
             try {
-                return await this.fetchUser()
+                await this.fetchUser()
+                return this.isAuth
+
             } catch (e) {
-                console.error(e)
                 this.user = null
                 return false
+
             } finally {
                 this.initialized = true
             }
@@ -90,20 +118,14 @@ export const useAuthStore = defineStore('auth', {
             const alertStore = useAlertStore()
 
             try {
-                await $fetch('/sanctum/csrf-cookie', {
-                    credentials: 'include'
-                })
+                await authApi.register(payload)
 
-                const data: any = await $fetch('/register', {
-                    method: 'POST',
-                    body: payload,
-                    credentials: 'include'
-                })
+                this.user = null
 
-                this.user = data.user
-                alertStore.add('success', data.message)
+                alertStore.add('success', 'Успешная регистрация')
 
                 return true
+
             } catch (e: any) {
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
@@ -111,6 +133,7 @@ export const useAuthStore = defineStore('auth', {
                     this.error = e.data?.message || 'Ошибка регистрации'
                 }
                 return false
+
             } finally {
                 this.loading = false
             }
@@ -121,20 +144,14 @@ export const useAuthStore = defineStore('auth', {
             this.resetMessages()
 
             try {
-                await $fetch('/sanctum/csrf-cookie', {
-                    credentials: 'include'
-                })
-
-                const data: any = await $fetch('/login', {
-                    method: 'POST',
-                    body: { email, password },
-                    credentials: 'include'
-                })
+                const data: any = await authApi.login(email, password)
 
                 this.user = data.user
                 this.setToken(data.token)
+                this.initialized = true
 
                 return true
+
             } catch (e: any) {
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
@@ -142,6 +159,7 @@ export const useAuthStore = defineStore('auth', {
                     this.error = e.data?.message || 'Ошибка авторизации'
                 }
                 return false
+
             } finally {
                 this.loading = false
             }
@@ -151,19 +169,13 @@ export const useAuthStore = defineStore('auth', {
             this.loggingOut = true
 
             try {
-                await $fetch('/sanctum/csrf-cookie', {
-                    credentials: 'include'
-                })
+                await authApi.logout()
 
-                await $fetch('/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                })
             } catch (e) {
                 console.error(e)
+
             } finally {
-                this.user = null
-                this.clearToken()
+                this.logoutLocal()
                 this.loggingOut = false
             }
         }

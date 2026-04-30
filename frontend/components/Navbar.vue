@@ -1,14 +1,14 @@
 <script setup lang="ts">
 
-import { computed, onMounted } from 'vue'
+import {computed, onMounted} from 'vue'
 
-import { useAuthStore } from '~/stores/auth'
-import { useCartStore } from '~/stores/cart'
-import { useAuthActions } from '~/composables/useAuthActions'
+import {useAuthStore} from '~/stores/auth'
+import {useCartStore} from '~/stores/cart'
+import {useAuthActions} from '~/composables/useAuthActions'
 
 const auth = useAuthStore()
 const cart = useCartStore()
-const { handleLogout } = useAuthActions()
+const {handleLogout} = useAuthActions()
 
 const config = useRuntimeConfig()
 const appName = config.public.appName || 'My App'
@@ -75,9 +75,9 @@ const cartCount = computed(() => {
                             v-if="cartCount > 0"
                             class="badge bg-danger ms-1"
                             style="font-size: 11px;"
-                        >
-              {{ cartCount }}
-            </span>
+                        >{{ cartCount }}
+                        </span>
+
                     </NuxtLink>
                 </template>
 
@@ -107,6 +107,7 @@ const cartCount = computed(() => {
 </template>
 
 <style scoped>
+
 .navbar {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
@@ -119,4 +120,5 @@ const cartCount = computed(() => {
     opacity: 0.8;
     text-decoration: underline;
 }
+
 </style>

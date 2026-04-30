@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { useAuthStore } from './auth'
-import { useAlertStore } from './alert'
+import {defineStore} from 'pinia'
+import {useAuthStore} from './auth'
+import {useAlertStore} from './alert'
 
 export const useProfileStore = defineStore('profile', {
     state: () => ({
@@ -94,7 +94,7 @@ export const useProfileStore = defineStore('profile', {
 
                 await api.get('/sanctum/csrf-cookie')
 
-                const { data } = await api.post('/api/profile/update', fd)
+                const {data} = await api.post('/api/profile/update', fd)
 
                 if (data?.user) {
                     auth.user = data.user
@@ -134,7 +134,7 @@ export const useProfileStore = defineStore('profile', {
             try {
                 await api.get('/sanctum/csrf-cookie')
 
-                const { data } = await api.post(
+                const {data} = await api.post(
                     '/api/profile/password',
                     this.passwordForm
                 )

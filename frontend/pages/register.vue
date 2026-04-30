@@ -1,5 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+
+import {ref} from 'vue'
+import {useAuthStore} from '~/stores/auth'
+
+import BaseButton from '~/components/BaseButton.vue'
+import BaseInput from '~/components/BaseInput.vue'
 
 const store = useAuthStore()
 
@@ -9,7 +14,7 @@ const password = ref('')
 const password_confirmation = ref('')
 
 const validate = () => {
-    store.errors = {}
+    store.clearErrors()
 
     let hasError = false
 
@@ -29,7 +34,7 @@ const validate = () => {
     }
 
     if (password.value && password.value.length < 6) {
-        store.errors.password = 'Пароль должен быть минимум 6 символов'
+        store.errors.password = 'Минимум 6 символов'
         hasError = true
     }
 
@@ -59,9 +64,6 @@ const submit = async () => {
     }
 }
 
-onMounted(() => {
-    store.errors = {}
-})
 </script>
 
 <template>
@@ -83,9 +85,7 @@ onMounted(() => {
 
                     <BaseInput
                         v-model="name"
-                        type="text"
                         label="Имя"
-                        required
                         :error="store.errors.name"
                     />
 
@@ -93,7 +93,6 @@ onMounted(() => {
                         v-model="email"
                         type="email"
                         label="Email"
-                        required
                         :error="store.errors.email"
                     />
 
@@ -101,7 +100,6 @@ onMounted(() => {
                         v-model="password"
                         type="password"
                         label="Пароль"
-                        required
                         :error="store.errors.password"
                     />
 
@@ -109,12 +107,10 @@ onMounted(() => {
                         v-model="password_confirmation"
                         type="password"
                         label="Повтор пароля"
-                        required
                         :error="store.errors.password_confirmation"
                     />
 
                     <BaseButton
-                        variant="primary"
                         type="submit"
                         class="w-100 mt-3"
                         :loading="store.loading"

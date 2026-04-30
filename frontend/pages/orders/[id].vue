@@ -1,15 +1,30 @@
 <script setup>
-import { computed, onMounted } from 'vue'
-import { orderStatusLabel } from '@/shared/orderStatus'
+
+import {computed} from 'vue'
+import {useRoute, createError} from '#app'
+import {useOrderStore} from '~/stores/order'
+import {useOrderStatus} from '~/composables/useOrderStatus'
 
 const route = useRoute()
 const store = useOrderStore()
+const {getLabel} = useOrderStatus()
+
+const orderId = computed(() => route.params.id)
+
+await callOnce(async () => {
+    if (!orderId.value) {
+        throw createError({statusCode: 404})
+    }
+
+    try {
+        await store.fetchOrder(orderId.value)
+    } catch (e) {
+        throw createError({statusCode: 404})
+    }
+})
 
 const order = computed(() => store.currentOrder)
 
-onMounted(async () => {
-    await store.fetchOrder(route.params.id)
-})
 </script>
 
 <template>
@@ -24,8 +39,7 @@ onMounted(async () => {
             <h2>Заказ #{{ order.id }}</h2>
 
             <p class="text-muted">
-                Статус:
-                <strong>{{ orderStatusLabel(order.status) }}</strong>
+                Статус: <strong>{{ getLabel(order.status) }}</strong>
             </p>
 
             <hr>
@@ -45,9 +59,8 @@ onMounted(async () => {
                             <NuxtLink :to="`/cars/show/${item.car_id}`">
                                 <img
                                     :src="item.photo_url || '/images/default_car.jpg'"
-                                    alt="car"
-                                    style="width: 90px; height: 60px; object-fit: contain; border-radius: 6px;"
-                                />
+                                    style="width:90px;height:60px;object-fit:contain;border-radius:6px;"
+                                    alt=""/>
                             </NuxtLink>
 
                             <div>

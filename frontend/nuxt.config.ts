@@ -7,12 +7,9 @@ export default defineNuxtConfig({
 
     debug: false,
 
-    nitro: {
-        logLevel: 'error'
+    devtools: {
+        enabled: false
     },
-
-    // Vue DevTools
-    devtools: {enabled: false},
 
     ssr: true,
 
@@ -25,8 +22,9 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
         public: {
-            apiBase: '/api'
-        }
+            apiBase: 'http://laravel/api'
+        },
+        apiBaseServer: 'http://web/api'
     },
 
     devServer: {
@@ -42,7 +40,7 @@ export default defineNuxtConfig({
             include: [
                 '@vue/devtools-core',
                 '@vue/devtools-kit',
-                'axios',
+                //'axios',
                 'bootstrap',
                 'swiper/modules',
                 'swiper/vue',
