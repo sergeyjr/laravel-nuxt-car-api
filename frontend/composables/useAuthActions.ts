@@ -1,4 +1,4 @@
-import { useAuthStore } from '~/stores/auth'
+import {useAuthStore} from '~/stores/auth'
 
 export const useAuthActions = () => {
     const auth = useAuthStore()
@@ -25,5 +25,5 @@ export const useAuthActions = () => {
         }
     }
 
-    return { handleLogout }
+    return {handleLogout}
 }

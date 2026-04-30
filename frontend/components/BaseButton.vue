@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
     variant: {
@@ -29,7 +29,7 @@ const isDisabled = computed(() => props.loading || props.disabled)
 const classes = computed(() => [
     'btn',
     `btn-${props.variant}`,
-    { disabled: isDisabled.value }
+    {disabled: isDisabled.value}
 ])
 
 const handleClick = (e: MouseEvent) => {
@@ -53,7 +53,7 @@ const handleClick = (e: MouseEvent) => {
 
         <!-- DEFAULT -->
         <span v-else>
-            <slot />
+            <slot/>
         </span>
     </button>
 </template>

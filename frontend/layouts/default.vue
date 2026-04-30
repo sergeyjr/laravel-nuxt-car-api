@@ -5,8 +5,8 @@ import Alerts from '~/components/Alerts.vue'
 
 <template>
     <div>
-        <Navbar />
-        <Alerts />
-        <slot />
+        <Navbar/>
+        <Alerts/>
+        <slot/>
     </div>
 </template>

@@ -1,4 +1,4 @@
-import { useNuxtApp } from '#app'
+import {useNuxtApp} from '#app'
 
 export interface DashboardResponse {
     carsCount: number
@@ -10,7 +10,7 @@ export interface DashboardResponse {
 
 export const dashboardApi = {
     fetch(): Promise<DashboardResponse> {
-        const { $api } = useNuxtApp()
+        const {$api} = useNuxtApp()
         return $api<DashboardResponse>('/dashboard')
     }
 }

@@ -1,5 +1,5 @@
-import { useAuthStore } from '~/stores/auth'
-import { useAlertStore } from '~/stores/alert'
+import {useAuthStore} from '~/stores/auth'
+import {useAlertStore} from '~/stores/alert'
 
 export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig()
@@ -17,7 +17,7 @@ export default defineNuxtPlugin(() => {
             Accept: 'application/json'
         },
 
-        onRequest({ options }) {
+        onRequest({options}) {
             if (!import.meta.client) return
 
             const token = localStorage.getItem('web_session_token')
@@ -28,7 +28,7 @@ export default defineNuxtPlugin(() => {
             options.headers = headers
         },
 
-        onResponseError({ response, request }) {
+        onResponseError({response, request}) {
             if (!import.meta.client) return
 
             const alert = useAlertStore()

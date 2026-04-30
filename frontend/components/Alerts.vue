@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
-import { storeToRefs } from 'pinia'
-import { useAlertStore } from '~/stores/alert'
+import {storeToRefs} from 'pinia'
+import {useAlertStore} from '~/stores/alert'
 
 const store = useAlertStore()
-const { alerts } = storeToRefs(store)
+const {alerts} = storeToRefs(store)
 
 const alertClass = (type: string) => {
     return {

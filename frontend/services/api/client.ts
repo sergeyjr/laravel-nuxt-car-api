@@ -1,4 +1,4 @@
 export function useApiClient() {
-    const { $api } = useNuxtApp()
+    const {$api} = useNuxtApp()
     return $api
 }
