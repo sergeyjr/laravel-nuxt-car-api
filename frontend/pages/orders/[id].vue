@@ -1,29 +1,43 @@
-<script setup>
+<script setup lang="ts">
 
-import {computed} from 'vue'
-import {useRoute, createError} from '#app'
-import {useOrderStore} from '~/stores/order'
-import {useOrderStatus} from '~/composables/useOrderStatus'
+import { computed, watch } from 'vue'
+import { useRoute, createError } from '#app'
+import { useOrderStore } from '~/stores/order'
+import { useOrderStatus } from '~/composables/useOrderStatus'
 
 const route = useRoute()
 const store = useOrderStore()
-const {getLabel} = useOrderStatus()
+const { getLabel } = useOrderStatus()
 
 const orderId = computed(() => route.params.id)
 
-await callOnce(async () => {
-    if (!orderId.value) {
-        throw createError({statusCode: 404})
-    }
+async function load(id: string | number) {
+    if (!id) throw createError({ statusCode: 404 })
 
     try {
-        await store.fetchOrder(orderId.value)
+        await store.fetchOrder(id)
     } catch (e) {
-        throw createError({statusCode: 404})
+        throw createError({ statusCode: 404 })
     }
-})
+}
+
+watch(
+    orderId,
+    async (id) => {
+        await load(id)
+    },
+    { immediate: true }
+)
 
 const order = computed(() => store.currentOrder)
+
+const goBack = () => {
+    if (import.meta.client && window.history.length > 1) {
+        window.history.back()
+    } else {
+        navigateTo('/dashboard')
+    }
+}
 
 </script>
 
@@ -88,6 +102,12 @@ const order = computed(() => store.currentOrder)
             <h4 class="text-success mt-3">
                 Итого: {{ order.total }} ₽
             </h4>
+
+            <hr>
+
+            <button class="btn btn-outline-secondary" @click="goBack">
+                Назад
+            </button>
 
         </div>
 

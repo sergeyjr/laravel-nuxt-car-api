@@ -8,7 +8,10 @@ export default defineNuxtPlugin(() => {
     const IGNORE_ALERT_URLS = ['/api/me']
 
     const api = $fetch.create({
-        baseURL: config.public.apiBase,
+
+        // baseURL: config.public.apiBase,
+        baseURL: '/',
+
         credentials: 'include',
 
         headers: {

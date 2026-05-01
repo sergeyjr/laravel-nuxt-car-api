@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia'
 import {cartApi} from '~/services/api/cart.api'
+import { toRaw } from 'vue'
 
 function cleanItems(obj: any) {
     return Object.fromEntries(
@@ -22,6 +23,7 @@ export const useCartStore = defineStore('cart', {
     },
 
     actions: {
+
         hydrate() {
             if (!import.meta.client) return
 
@@ -58,7 +60,7 @@ export const useCartStore = defineStore('cart', {
 
         async add(newItem: any) {
             const id = newItem.id
-            const backup = structuredClone(this.items)
+            const backup = structuredClone(toRaw(this.items))
 
             if (this.items[id]) {
                 this.items[id].qty += newItem.qty ?? 1
@@ -88,7 +90,7 @@ export const useCartStore = defineStore('cart', {
         async update(id: number, qty: number) {
             if (!id || qty < 1) return
 
-            const backup = structuredClone(this.items)
+            const backup = structuredClone(toRaw(this.items))
 
             if (this.items[id]) {
                 this.items[id].qty = qty
@@ -105,7 +107,7 @@ export const useCartStore = defineStore('cart', {
         },
 
         async remove(id: number) {
-            const backup = structuredClone(this.items)
+            const backup = structuredClone(toRaw(this.items))
 
             delete this.items[id]
             this.save()
@@ -119,7 +121,7 @@ export const useCartStore = defineStore('cart', {
         },
 
         async clear() {
-            const backup = structuredClone(this.items)
+            const backup = structuredClone(toRaw(this.items))
 
             this.items = {}
             this.save()
@@ -133,7 +135,7 @@ export const useCartStore = defineStore('cart', {
         },
 
         async checkout(payload: any = {}) {
-            const backup = structuredClone(this.items)
+            const backup = structuredClone(toRaw(this.items))
 
             try {
                 const data = await cartApi.checkout({

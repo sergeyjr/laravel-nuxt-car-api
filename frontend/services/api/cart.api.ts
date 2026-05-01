@@ -6,12 +6,12 @@ function api() {
 
 export const cartApi = {
     getCart() {
-        return api()('/cart')
+        return api()('/api/cart')
     },
 
     addItem(payload: { id: number; qty: number }) {
         return api()('/sanctum/csrf-cookie').then(() =>
-            api()('/cart/add', {
+            api()('/api/cart/add', {
                 method: 'POST',
                 body: payload
             })
@@ -20,7 +20,7 @@ export const cartApi = {
 
     updateItem(payload: { id: number; qty: number }) {
         return api()('/sanctum/csrf-cookie').then(() =>
-            api()('/cart/update', {
+            api()('/api/cart/update', {
                 method: 'POST',
                 body: payload
             })
@@ -29,7 +29,7 @@ export const cartApi = {
 
     removeItem(id: number) {
         return api()('/sanctum/csrf-cookie').then(() =>
-            api()('/cart/remove', {
+            api()('/api/cart/remove', {
                 method: 'POST',
                 body: {id}
             })
@@ -38,7 +38,7 @@ export const cartApi = {
 
     clear() {
         return api()('/sanctum/csrf-cookie').then(() =>
-            api()('/cart/clear', {
+            api()('/api/cart/clear', {
                 method: 'POST'
             })
         )
@@ -46,7 +46,7 @@ export const cartApi = {
 
     checkout(payload: { comment?: string }) {
         return api()('/sanctum/csrf-cookie').then(() =>
-            api()('/orders/checkout', {
+            api()('/api/orders/checkout', {
                 method: 'POST',
                 body: payload
             })

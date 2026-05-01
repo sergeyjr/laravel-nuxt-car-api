@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+import {carApi} from '~/services/api/car.api'
 import {useAlertStore} from './alert'
 import {useAuthStore} from './auth'
 
@@ -41,10 +42,6 @@ export const useCarFormStore = defineStore('carForm', {
             useAlertStore().add(type, message)
         },
 
-        getApi() {
-            return useNuxtApp().$api
-        },
-
         reset() {
             this.form = {
                 title: '',
@@ -58,6 +55,7 @@ export const useCarFormStore = defineStore('carForm', {
                 body: '',
                 mileage: ''
             }
+
             this.errors = {}
         },
 
@@ -72,24 +70,21 @@ export const useCarFormStore = defineStore('carForm', {
         validateOptions() {
             const f = this.form
 
-            const hasAny =
-                f.brand || f.model || f.year || f.body || f.mileage
+            const required = ['brand', 'model', 'year', 'body', 'mileage'] as const
+            const missing: string[] = []
+
+            const hasAny = f.brand || f.model || f.year || f.body || f.mileage
 
             if (!hasAny) return []
 
-            const missing: string[] = []
-
-            if (!f.brand) missing.push('brand')
-            if (!f.model) missing.push('model')
-            if (!f.year) missing.push('year')
-            if (!f.body) missing.push('body')
-            if (!f.mileage) missing.push('mileage')
+            required.forEach((k) => {
+                if (!f[k]) missing.push(k)
+            })
 
             return missing
         },
 
         async submit() {
-            const api = this.getApi()
             const auth = useAuthStore()
 
             this.clearErrors()
@@ -117,7 +112,6 @@ export const useCarFormStore = defineStore('carForm', {
                     price: Number(this.form.price),
                     year: Number(this.form.year),
                     mileage: Number(this.form.mileage),
-
                     options: {
                         brand: this.form.brand,
                         model: this.form.model,
@@ -127,18 +121,19 @@ export const useCarFormStore = defineStore('carForm', {
                     }
                 }
 
-                const data: any = await api.post('/api/v1/car/create', payload)
+                const res = await carApi.create(payload)
 
                 this.showAlert(
                     'success',
-                    data.message || `Создано! ID: ${data.data.id}`
+                    res.message || `Создано! ID: ${res.data.id}`
                 )
 
                 this.reset()
 
-                return data.data
+                return res.data
 
             } catch (e: any) {
+
                 const status = e?.status
                 const data = e?.data
 
@@ -169,21 +164,11 @@ export const useCarFormStore = defineStore('carForm', {
         },
 
         async generate() {
-            const api = this.getApi()
-            const auth = useAuthStore()
-
             this.generating = true
 
             try {
-                const isAuth = await auth.initAuth()
-
-                if (!isAuth) {
-                    this.showAlert('danger', 'Требуется авторизация')
-                    return
-                }
-
-                const data: any = await api('/api/v1/car/generate-mock')
-                const car = data.data
+                const res = await carApi.generateMock()
+                const car = res.data
 
                 Object.assign(this.form, {
                     title: car.title,
@@ -198,9 +183,10 @@ export const useCarFormStore = defineStore('carForm', {
                     mileage: car.options?.mileage
                 })
 
-            } catch (e: any) {
-                console.log('GEN ERROR:', e?.data)
+            } catch (e) {
+                console.error(e)
                 this.showAlert('error', 'Ошибка генерации данных')
+
             } finally {
                 this.generating = false
             }

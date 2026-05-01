@@ -1,35 +1,33 @@
 import {useNuxtApp} from '#app'
 
+function api() {
+    return useNuxtApp().$api
+}
+
 export const profileApi = {
-    async update(fd: FormData): Promise<any> {
-        const {$api} = useNuxtApp()
-
-        await $api('/sanctum/csrf-cookie')
-
-        return $api('/api/profile/update', {
-            method: 'POST',
-            body: fd
-        })
+    update(fd: FormData) {
+        return api()('/sanctum/csrf-cookie').then(() =>
+            api()('/api/profile/update', {
+                method: 'POST',
+                body: fd
+            })
+        )
     },
 
-    async changePassword(payload: any): Promise<any> {
-        const {$api} = useNuxtApp()
-
-        await $api('/sanctum/csrf-cookie')
-
-        return $api('/api/profile/password', {
-            method: 'POST',
-            body: payload
-        })
+    changePassword(payload: any) {
+        return api()('/sanctum/csrf-cookie').then(() =>
+            api()('/api/profile/password', {
+                method: 'POST',
+                body: payload
+            })
+        )
     },
 
-    async delete(): Promise<any> {
-        const {$api} = useNuxtApp()
-
-        await $api('/sanctum/csrf-cookie')
-
-        return $api('/api/profile', {
-            method: 'DELETE'
-        })
+    delete() {
+        return api()('/sanctum/csrf-cookie').then(() =>
+            api()('/api/profile', {
+                method: 'DELETE'
+            })
+        )
     }
 }

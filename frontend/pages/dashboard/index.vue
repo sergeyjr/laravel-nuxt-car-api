@@ -1,5 +1,4 @@
 <script setup>
-
 import {computed, onMounted} from 'vue'
 import {useAuthStore} from '~/stores/auth'
 import {useDashboardStore} from '~/stores/dashboard'
@@ -38,7 +37,6 @@ const formatDate = (date) => {
         timeZone: 'Europe/Amsterdam'
     }).format(new Date(date))
 }
-
 </script>
 
 <template>
@@ -52,7 +50,6 @@ const formatDate = (date) => {
 
             <div class="row">
 
-                <!-- PROFILE -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
@@ -72,7 +69,6 @@ const formatDate = (date) => {
                     </div>
                 </div>
 
-                <!-- CARS -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
@@ -103,56 +99,21 @@ const formatDate = (date) => {
                     </div>
                 </div>
 
-                <!-- ORDERS -->
                 <div class="col-12 col-md-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <div>
-                                <h5>Мои заказы</h5>
-                                <p class="mb-1 text-muted">
-                                    Всего заказов: {{ ordersCount }}
-                                </p>
-                            </div>
+                            <h5>Корзина</h5>
 
-                            <div
-                                v-if="!recentOrders.length"
-                                class="btn btn-outline-secondary mt-3"
-                            >
-                                У вас пока нет заказов
-                            </div>
+                            <p class="mb-1 text-muted">
+                                Товаров:
+                                <span class="fw-bold">{{ cartCount }}</span>
+                            </p>
 
-                            <div v-else>
-                                <NuxtLink
-                                    to="/orders"
-                                    class="btn btn-outline-primary w-100 mt-3"
-                                >
-                                    Смотреть заказы
-                                </NuxtLink>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CART -->
-                <div class="col-12 col-md-4 mb-3">
-                    <div class="card h-100">
-                        <div class="card-body d-flex flex-column justify-content-between">
-
-                            <div>
-                                <h5>Корзина</h5>
-
-                                <p class="mb-1 text-muted">
-                                    Товаров:
-                                    <span class="fw-bold">{{ cartCount }}</span>
-                                </p>
-
-                                <p class="mb-0">
-                                    Стоимость:
-                                    <span class="fw-bold">{{ formatPrice(cartTotal) }}</span>
-                                </p>
-                            </div>
+                            <p class="mb-0">
+                                Стоимость:
+                                <span class="fw-bold">{{ formatPrice(cartTotal) }}</span>
+                            </p>
 
                             <div
                                 v-if="cartTotal === 0"
@@ -161,14 +122,13 @@ const formatDate = (date) => {
                                 Корзина пустая
                             </div>
 
-                            <div v-else>
-                                <NuxtLink
-                                    to="/cart"
-                                    class="btn btn-outline-success w-100 mt-3"
-                                >
-                                    Перейти в корзину
-                                </NuxtLink>
-                            </div>
+                            <NuxtLink
+                                v-else
+                                to="/cart"
+                                class="btn btn-outline-success w-100 mt-3"
+                            >
+                                Перейти в корзину
+                            </NuxtLink>
 
                         </div>
                     </div>
@@ -176,62 +136,88 @@ const formatDate = (date) => {
 
             </div>
 
-            <!-- RECENT ORDERS -->
-            <div v-if="recentOrders.length" class="mt-4">
+            <div class="mt-4">
 
-                <h4 class="mb-3">Последние заказы</h4>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h4>Заказы</h4>
+                    </div>
+                </div>
 
-                <div
-                    v-for="order in recentOrders"
-                    :key="order.id"
-                    class="col-12 col-md-6 col-lg-4 mb-3"
-                >
-                    <div class="card h-100 shadow-sm border-0">
+                <div v-if="!recentOrders.length" class="alert alert-light">
+                    У вас пока нет заказов
+                </div>
 
-                        <div class="card-body d-flex flex-column justify-content-between">
+                <div v-else class="row g-3">
 
-                            <div>
-                                <h6 class="mb-1 text-truncate">
-                                    Заказ #{{ order.id }}
-                                </h6>
+                    <div class="col-12 col-md-12">
+                            <span class="text-muted">
+                                Всего заказов: {{ ordersCount }}
+                            </span>
+                    </div>
 
-                                <div class="text-muted small">
-                                    Создан: {{ formatDate(order?.created_at) }}
+                    <div class="col-12 col-md-12 mt-2">
+                        <NuxtLink
+                            to="/orders"
+                            class="btn btn-outline-primary btn-sm"
+                        >
+                            Посмотреть все
+                        </NuxtLink>
+                    </div>
+
+                    <div
+                        v-for="order in recentOrders"
+                        :key="order.id"
+                        class="col-12 col-md-6 col-lg-4"
+                    >
+                        <div class="card h-100 shadow-sm border-0">
+
+                            <div class="card-body d-flex flex-column justify-content-between">
+
+                                <div>
+                                    <h6 class="mb-1 text-truncate">
+                                        Заказ #{{ order.id }}
+                                    </h6>
+
+                                    <div class="text-muted small">
+                                        Создан: {{ formatDate(order?.created_at) }}
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <span
+                                            class="badge"
+                                            :class="{
+                                                'bg-warning': order.status === 'pending',
+                                                'bg-success': order.status === 'paid',
+                                                'bg-danger': order.status === 'cancelled',
+                                                'bg-secondary': order.status === 'completed'
+                                            }"
+                                        >
+                                            {{ order.status }}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <div class="mt-2">
-                  <span
-                      class="badge"
-                      :class="{
-                      'bg-warning': order.status === 'pending',
-                      'bg-success': order.status === 'paid',
-                      'bg-danger': order.status === 'cancelled',
-                      'bg-secondary': order.status === 'completed'
-                    }"
-                  >
-                    {{ order.status }}
-                  </span>
+                                <div class="mt-3 d-flex justify-content-between align-items-center">
+
+                                    <div class="fw-bold text-success">
+                                        {{ formatPrice(order.total) }}
+                                    </div>
+
+                                    <NuxtLink
+                                        :to="`/orders/${order.id}`"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        Открыть
+                                    </NuxtLink>
+
                                 </div>
-                            </div>
-
-                            <div class="mt-3 d-flex justify-content-between">
-
-                                <div class="fw-bold text-success">
-                                    {{ formatPrice(order.total) }}
-                                </div>
-
-                                <NuxtLink
-                                    :to="`/orders/${order.id}`"
-                                    class="btn btn-sm btn-outline-primary"
-                                >
-                                    Открыть
-                                </NuxtLink>
 
                             </div>
 
                         </div>
-
                     </div>
+
                 </div>
 
             </div>

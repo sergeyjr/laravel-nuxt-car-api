@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+import {contactApi} from '~/services/api/contact.api'
 
 type ContactContext = 'home' | 'contactPage'
 
@@ -33,9 +34,6 @@ export const useContactStore = defineStore('contact', {
     }),
 
     actions: {
-        getApi() {
-            return useNuxtApp().$api
-        },
 
         resetErrors() {
             this.errors = {}
@@ -70,16 +68,12 @@ export const useContactStore = defineStore('contact', {
         },
 
         async submit(context: ContactContext = 'home') {
-            const api = this.getApi()
-
             this.loading = true
             this.resetErrors()
             this.resetMessages(context)
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-
-                const {data} = await api.post('/api/contact', this.form)
+                const data: any = await contactApi.submit(this.form)
 
                 this.resetForm()
 
@@ -87,6 +81,7 @@ export const useContactStore = defineStore('contact', {
                     data?.message || 'Сообщение отправлено'
 
             } catch (e: any) {
+
                 const status = e?.response?.status
 
                 if (status === 422) {

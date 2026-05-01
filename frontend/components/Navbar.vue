@@ -1,37 +1,42 @@
 <script setup lang="ts">
 
-import { computed, onMounted } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 
-import { useAuthStore } from '~/stores/auth'
-import { useCartStore } from '~/stores/cart'
-import { useAuthActions } from '~/composables/useAuthActions'
-
-/* ---------------- stores ---------------- */
+import {useAuthStore} from '~/stores/auth'
+import {useCartStore} from '~/stores/cart'
+import {useAuthActions} from '~/composables/useAuthActions'
 
 const auth = useAuthStore()
 const cart = useCartStore()
 
-/* ---------------- composables ---------------- */
-
-const { handleLogout } = useAuthActions()
-
-/* ---------------- config ---------------- */
+const {handleLogout} = useAuthActions()
 
 const config = useRuntimeConfig()
 const appName = config.public.appName || 'My App'
 
-/* ---------------- lifecycle ---------------- */
+const mounted = ref(false)
 
 onMounted(async () => {
-  if (auth.isAuth) {
-    await cart.fetch()
-  }
+    mounted.value = true
+
+    if (auth.isAuth) {
+        await cart.fetch()
+    }
 })
 
-/* ---------------- computed ---------------- */
+watch(
+    () => auth.isAuth,
+    async (isAuth) => {
+        if (mounted.value && isAuth) {
+            await cart.fetch()
+        }
+    }
+)
 
 const cartCount = computed(() => {
-  return Object.values(cart.items || {}).filter(Boolean).length
+    return Object.values(cart.items || {}).reduce((sum, item: any) => {
+        return item ? sum + Number(item.qty || 0) : sum
+    }, 0)
 })
 
 </script>
@@ -39,13 +44,11 @@ const cartCount = computed(() => {
 <template>
     <nav v-if="auth.initialized" class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-
             <NuxtLink class="navbar-brand text-white text-decoration-none" to="/">
                 {{ appName }}
             </NuxtLink>
 
             <div class="nav-divider d-flex align-items-center">
-
                 <NuxtLink class="nav-link d-inline text-white" to="/cars">
                     Каталог
                 </NuxtLink>
@@ -83,12 +86,12 @@ const cartCount = computed(() => {
                         Корзина
 
                         <span
-                            v-if="cartCount > 0"
+                            v-if="mounted && cart.initialized && cartCount > 0"
                             class="badge bg-danger ms-1"
                             style="font-size: 11px;"
-                        >{{ cartCount }}
+                        >
+                            {{ cartCount }}
                         </span>
-
                     </NuxtLink>
                 </template>
 
@@ -110,9 +113,7 @@ const cartCount = computed(() => {
                 >
                     Вход
                 </NuxtLink>
-
             </div>
-
         </div>
     </nav>
 </template>

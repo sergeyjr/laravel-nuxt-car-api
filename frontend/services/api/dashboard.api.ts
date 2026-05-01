@@ -14,6 +14,6 @@ function api() {
 
 export const dashboardApi = {
     getDashboard(): Promise<DashboardResponse> {
-        return api()('/dashboard')
+        return api()('/api/dashboard')
     }
 }

@@ -12,6 +12,17 @@ use App\Http\Controllers\SiteController;
 use App\Http\Middleware\FixJsonMiddleware;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * routes/api.php
+ *
+ * Используется для:
+ *
+ * SPA (Nuxt, Vue, React)
+ * JSON API
+ * stateless запросы
+ * обычно prefix /api
+ */
+
 Route::get('/cars', [CarController::class, 'list']);
 
 Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');

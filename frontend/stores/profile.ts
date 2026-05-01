@@ -27,10 +27,8 @@ export const useProfileStore = defineStore('profile', {
     }),
 
     actions: {
-        getApi() {
-            return useNuxtApp().$api
-        },
 
+        // --- LOAD ---
         load(user: any) {
             if (!user) return
 
@@ -40,6 +38,7 @@ export const useProfileStore = defineStore('profile', {
             this.form.remove_avatar = false
         },
 
+        // --- FILE ---
         onFile(e: Event) {
             const target = e.target as HTMLInputElement
             const file = target.files?.[0] || null
@@ -51,6 +50,7 @@ export const useProfileStore = defineStore('profile', {
             }
         },
 
+        // --- MODAL ---
         openAvatar() {
             this.showAvatarModal = true
         },
@@ -59,10 +59,12 @@ export const useProfileStore = defineStore('profile', {
             this.showAvatarModal = false
         },
 
+        // --- ERRORS ---
         resetErrors() {
             this.errors = {}
         },
 
+        // --- UPDATE PROFILE ---
         async updateProfile() {
             const alert = useAlertStore()
             const auth = useAuthStore()
@@ -97,6 +99,7 @@ export const useProfileStore = defineStore('profile', {
                 alert.add('success', data?.message || 'Профиль обновлён')
 
             } catch (e: any) {
+
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
                     return
@@ -109,6 +112,7 @@ export const useProfileStore = defineStore('profile', {
             }
         },
 
+        // --- CHANGE PASSWORD ---
         async changePassword() {
             const alert = useAlertStore()
 
@@ -129,6 +133,7 @@ export const useProfileStore = defineStore('profile', {
                 alert.add('success', data?.message || 'Пароль обновлён')
 
             } catch (e: any) {
+
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
                     return
@@ -141,6 +146,7 @@ export const useProfileStore = defineStore('profile', {
             }
         },
 
+        // --- DELETE ACCOUNT ---
         async deleteAccount() {
             const alert = useAlertStore()
             const auth = useAuthStore()
@@ -160,6 +166,7 @@ export const useProfileStore = defineStore('profile', {
                 await router.push('/')
 
             } catch (e: any) {
+
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
                     return

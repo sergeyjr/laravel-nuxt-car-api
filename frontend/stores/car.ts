@@ -1,68 +1,30 @@
-import {defineStore} from 'pinia'
-import {useNuxtApp} from '#app'
-
-interface Car {
-    id: number
-    [key: string]: any
-}
-
-interface CarsMeta {
-    current_page: number
-    last_page: number
-    from: number | null
-    to: number | null
-    total: number
-    per_page: number
-}
-
-interface CarsListResponse {
-    data: Car[]
-    current_page: number
-    last_page: number
-    from: number | null
-    to: number | null
-    total: number
-    per_page: number
-}
+import { defineStore } from 'pinia'
+import { carApi, type Car, type CarsResponse } from '~/services/api/car.api'
 
 export const useCarStore = defineStore('cars', {
     state: () => ({
         cars: [] as Car[],
-        meta: null as CarsMeta | null,
+        meta: null as CarsResponse | null,
+
         loading: false,
 
         car: null as Car | null,
         carLoading: false,
 
         latest: [] as Car[],
-        latestLoaded: false,
         latestLoading: false
     }),
 
     actions: {
 
-        api() {
-            return useNuxtApp().$api as any
-        },
-
         async fetch(page = 1) {
             this.loading = true
 
             try {
-                const res: CarsListResponse = await this.api()('/cars', {
-                    query: { page }
-                })
+                const res = await carApi.fetchCars(page)
 
                 this.cars = res.data || []
-
-                this.meta = {
-                    current_page: res.current_page,
-                    last_page: res.last_page,
-                    from: res.from,
-                    to: res.to,
-                    total: res.total,
-                    per_page: res.per_page
-                }
+                this.meta = res
 
             } catch (e) {
                 console.error(e)
@@ -77,10 +39,9 @@ export const useCarStore = defineStore('cars', {
             if (!id) return
 
             this.carLoading = true
-            this.car = null
 
             try {
-                this.car = await this.api()(`/cars/${id}`)
+                this.car = await carApi.fetchCar(id)
 
             } catch (e) {
                 console.error(e)
@@ -94,11 +55,7 @@ export const useCarStore = defineStore('cars', {
             this.latestLoading = true
 
             try {
-                const res = await this.api()('/cars/latest')
-
-                // console.log('res', res)
-
-                this.latest = Array.isArray(res) ? res : res.data || []
+                this.latest = await carApi.fetchLatest()
 
             } catch (e) {
                 console.error(e)

@@ -19,25 +19,25 @@ function api() {
 
 export const authApi = {
     me(): Promise<{ user: User }> {
-        return api()('/me')
+        return api()('/api/me')
     },
 
     login(email: string, password: string): Promise<AuthResponse> {
-        return api()('/login', {
+        return api()('/api/login', {
             method: 'POST',
             body: {email, password}
         })
     },
 
     register(payload: any): Promise<AuthResponse> {
-        return api()('/register', {
+        return api()('/api/register', {
             method: 'POST',
             body: payload
         })
     },
 
     logout(): Promise<{ message: string }> {
-        return api()('/logout', {
+        return api()('/api/logout', {
             method: 'POST'
         })
     }

@@ -1,40 +1,32 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
+import {pageApi, type PageResponse} from '~/services/api/page.api'
 
 export const usePageStore = defineStore('pages', {
     state: () => ({
-        pages: {} as Record<string, any>,
-        current: null as any,
-        loading: false
+        pages: {} as Record<string, PageResponse>,
+        current: null as PageResponse | null,
+        loading: false,
+        error: null as any
     }),
 
     actions: {
-        getApi() {
-            return useNuxtApp().$api
-        },
 
         async fetch(code: string) {
             if (!code) return
 
-            const api = this.getApi()
-
-            if (!api) {
-                console.error('API не настроен')
-                return
-            }
-
             this.loading = true
+            this.error = null
 
             try {
-
-                const data = await api(`/page/${code}`)
+                const data = await pageApi.fetchPage(code)
 
                 this.pages[code] = data
                 this.current = data
 
             } catch (e: any) {
-
                 this.current = null
-                throw e
+                this.error = e
+                console.error('Page fetch error:', e)
 
             } finally {
                 this.loading = false

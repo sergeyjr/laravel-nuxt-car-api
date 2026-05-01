@@ -1,5 +1,5 @@
-import {defineStore} from 'pinia'
-import {orderApi} from '~/services/api/order.api'
+import { defineStore } from 'pinia'
+import { orderApi } from '~/services/api/order.api'
 
 export const useOrderStore = defineStore('order', {
     state: () => ({
@@ -11,28 +11,33 @@ export const useOrderStore = defineStore('order', {
 
         initialized: false,
 
-        orderCache: new Map<number | string, any>()
+        orderCache: new Map<string, any>()
     }),
 
     actions: {
 
-        // --- SINGLE ORDER ---
         async fetchOrder(id: number | string) {
             if (!id) return
+
+            const key = String(id)
 
             this.loading = true
             this.error = null
 
+            // важно: сбрасываем старое значение
+            this.currentOrder = null
+
             try {
-                if (this.orderCache.has(id)) {
-                    this.currentOrder = this.orderCache.get(id)
+                if (this.orderCache.has(key)) {
+                    this.currentOrder = this.orderCache.get(key)
                     return
                 }
 
                 const data = await orderApi.getOrder(id)
 
                 this.currentOrder = data
-                this.orderCache.set(id, data)
+
+                this.orderCache.set(key, data)
 
             } catch (e) {
                 this.error = e
@@ -43,7 +48,6 @@ export const useOrderStore = defineStore('order', {
             }
         },
 
-        // --- LIST ---
         async fetchOrders() {
             this.loading = true
             this.error = null
@@ -51,7 +55,7 @@ export const useOrderStore = defineStore('order', {
             try {
                 const data = await orderApi.getOrders()
 
-                this.orders = (data ?? []) as any[]
+                this.orders = Array.isArray(data) ? data : (data ?? [])
 
             } catch (e) {
                 this.error = e

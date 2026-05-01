@@ -36,16 +36,21 @@ const isOrderStatus = (status: string): status is OrderStatus => {
 }
 
 export const useOrderStatus = () => {
+
     const getLabel = (status: string): string => {
+        if (!status) return '—'
+
         return isOrderStatus(status)
             ? statusLabels[status]
             : status
     }
 
     const getClass = (status: string): string => {
+        if (!status) return 'bg-secondary'
+
         return isOrderStatus(status)
             ? statusClasses[status]
-            : ''
+            : 'bg-secondary'
     }
 
     return {

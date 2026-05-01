@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import {computed} from 'vue'
 
 const props = defineProps({
@@ -36,6 +37,7 @@ const handleClick = (e: MouseEvent) => {
     if (isDisabled.value) return
     emit('click', e)
 }
+
 </script>
 
 <template>

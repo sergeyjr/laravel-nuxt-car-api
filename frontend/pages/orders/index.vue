@@ -1,26 +1,23 @@
-<script setup>
-
-import {computed, onMounted} from 'vue'
-import {useOrderStore} from '~/stores/order'
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+import { useOrderStore } from '~/stores/order'
+import { useOrderStatus } from '~/composables/useOrderStatus'
 
 const store = useOrderStore()
+const { getLabel } = useOrderStatus()
 
 onMounted(async () => {
     await store.fetchOrders()
 })
 
 const orders = computed(() => store.orders || [])
-
 const loading = computed(() => store.loading)
-
 const initialized = computed(() => store.initialized)
 
-const formatPrice = (price) =>
-    new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
+const formatPrice = (price: number | string) =>
+    new Intl.NumberFormat('ru-RU').format(Number(price)) + ' ₽'
 
-const goToOrder = (id) => navigateTo(`/orders/${id}`)
-
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     if (!date) return ''
 
     return new Intl.DateTimeFormat('ru-RU', {
@@ -30,6 +27,26 @@ const formatDate = (date) => {
     }).format(new Date(date))
 }
 
+const statusBadgeClass = (status: string) => {
+    switch (status) {
+        case 'pending_payment':
+            return 'bg-warning text-dark'
+        case 'processing':
+            return 'bg-info text-dark'
+        case 'packed':
+        case 'shipped':
+            return 'bg-primary'
+        case 'completed':
+            return 'bg-success'
+        case 'cancelled':
+            return 'bg-danger'
+        case 'refunded':
+            return 'bg-secondary'
+        default:
+            return 'bg-secondary'
+    }
+}
+
 const goBack = () => {
     if (import.meta.client && window.history.length > 1) {
         window.history.back()
@@ -37,7 +54,6 @@ const goBack = () => {
         navigateTo('/dashboard')
     }
 }
-
 </script>
 
 <template>
@@ -55,57 +71,56 @@ const goBack = () => {
             Загружается...
         </div>
 
-        <div v-else-if="initialized && !orders.length">
-            <div class="alert alert-light">
-                У вас пока нет заказов
-            </div>
-
-            <NuxtLink to="/dashboard" class="btn btn-outline-secondary">
-                В панель
-            </NuxtLink>
+        <div v-else-if="initialized && !orders.length" class="alert alert-light">
+            У вас пока нет заказов
         </div>
 
-        <div v-else class="row g-3">
-            <div
-                v-for="order in orders"
-                :key="order.id"
-                class="col-12 col-md-6 col-lg-4"
-            >
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <div>
-                            <h5>Заказ #{{ order.id }}</h5>
+        <div v-else class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Товаров</th>
+                    <th class="text-end">Сумма</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+                </thead>
 
-                            <div class="text-muted small">
-                                Создан: {{ formatDate(order.created_at) }}
-                            </div>
+                <tbody>
+                <tr v-for="order in orders" :key="order.id">
+                    <td class="fw-bold">#{{ order.id }}</td>
 
-                            <div class="mt-2">
-                                <span class="badge">{{ order.status }}</span>
-                            </div>
-                        </div>
+                    <td>
+                        {{ formatDate(order.created_at) }}
+                    </td>
 
-                        <div class="mt-3 d-flex justify-content-between">
-                            <div>
-                                <div class="fw-bold text-success">
-                                    {{ formatPrice(order.total) }}
-                                </div>
+                    <td>
+                            <span class="badge" :class="statusBadgeClass(order.status)">
+                                {{ getLabel(order.status) }}
+                            </span>
+                    </td>
 
-                                <small class="text-muted">
-                                    {{ order.items?.length || 0 }} товаров
-                                </small>
-                            </div>
+                    <td>
+                        {{ order.items?.length || 0 }}
+                    </td>
 
-                            <button
-                                class="btn btn-outline-primary btn-sm"
-                                @click="goToOrder(order.id)"
-                            >
-                                Подробнее
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <td class="text-end fw-bold text-success">
+                        {{ formatPrice(order.total) }}
+                    </td>
+
+                    <td class="text-end">
+                        <NuxtLink
+                            :to="`/orders/${order.id}`"
+                            class="btn btn-sm btn-outline-primary"
+                        >
+                            Открыть
+                        </NuxtLink>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
 
     </div>
