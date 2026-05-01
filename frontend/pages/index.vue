@@ -46,12 +46,6 @@ const swiperOptions = {
 // cars
 const carStore = useCarStore()
 
-// onMounted(() => {
-//     if (!carStore.latest.length) {
-//         carStore.fetchLatest()
-//     }
-// })
-
 await useAsyncData('cars', async () => {
     await carStore.fetchLatest()
     return carStore.latest
@@ -181,7 +175,9 @@ const contactStore = useContactStore()
                             </div>
                         </SwiperSlide>
                     </Swiper>
+
                 </ClientOnly>
+
             </div>
 
             <!-- CONTACT -->
@@ -236,6 +232,7 @@ const contactStore = useContactStore()
                         Отправить
                     </BaseButton>
                 </form>
+
             </div>
         </div>
     </div>

@@ -9,17 +9,12 @@ export const useOrderStore = defineStore('order', {
         loading: false,
         error: null as any,
 
+        initialized: false,
+
         orderCache: new Map<number | string, any>()
     }),
 
     actions: {
-        getApi() {
-            return useNuxtApp().$api
-        },
-
-        api() {
-            return orderApi(this.getApi())
-        },
 
         // --- SINGLE ORDER ---
         async fetchOrder(id: number | string) {
@@ -34,12 +29,12 @@ export const useOrderStore = defineStore('order', {
                     return
                 }
 
-                const data = await this.api().getOrder(id)
+                const data = await orderApi.getOrder(id)
 
                 this.currentOrder = data
                 this.orderCache.set(id, data)
 
-            } catch (e: any) {
+            } catch (e) {
                 this.error = e
                 console.error('Order fetch error:', e)
 
@@ -54,15 +49,19 @@ export const useOrderStore = defineStore('order', {
             this.error = null
 
             try {
-                this.orders = await this.api().getOrders()
+                const data = await orderApi.getOrders()
 
-            } catch (e: any) {
+                this.orders = (data ?? []) as any[]
+
+            } catch (e) {
                 this.error = e
                 console.error('Orders fetch error:', e)
 
             } finally {
                 this.loading = false
+                this.initialized = true
             }
         }
+
     }
 })

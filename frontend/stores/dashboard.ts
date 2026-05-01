@@ -12,7 +12,9 @@ export const useDashboardStore = defineStore('dashboard', {
 
         loading: false,
         loaded: false,
-        error: null as any
+        error: null as any,
+
+        _promise: null as Promise<void> | null
     }),
 
     actions: {
@@ -21,6 +23,7 @@ export const useDashboardStore = defineStore('dashboard', {
         },
 
         async fetchDashboard(force = false) {
+            if (this._promise && !force) return this._promise
             if (this.loaded && !force) return
 
             const api = this.getApi()
@@ -28,23 +31,28 @@ export const useDashboardStore = defineStore('dashboard', {
             this.loading = true
             this.error = null
 
-            try {
-                const data = await api<DashboardResponse>('/dashboard')
+            this._promise = (async () => {
+                try {
+                    const data = await api<DashboardResponse>('/dashboard')
 
-                this.carsCount = data.carsCount ?? 0
-                this.ordersCount = data.ordersCount ?? 0
-                this.orders = data.orders ?? []
+                    this.carsCount = data.carsCount ?? 0
+                    this.ordersCount = data.ordersCount ?? 0
+                    this.orders = data.orders ?? []
 
-                this.cart = data.cart ?? {}
-                this.cartTotal = data.cartTotal ?? 0
+                    this.cart = data.cart ?? {}
+                    this.cartTotal = data.cartTotal ?? 0
 
-                this.loaded = true
-            } catch (e: any) {
-                this.error = e
-                console.error('Dashboard error:', e)
-            } finally {
-                this.loading = false
-            }
+                    this.loaded = true
+                } catch (e: any) {
+                    this.error = e
+                    console.error('Dashboard error:', e)
+                } finally {
+                    this.loading = false
+                    this._promise = null
+                }
+            })()
+
+            return this._promise
         }
     }
 })

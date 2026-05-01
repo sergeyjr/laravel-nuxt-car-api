@@ -1,13 +1,11 @@
 <script setup>
 
 import {ref, onMounted} from 'vue'
-// import { useRouter } from '#app'
 import {useAuthStore} from '~/stores/auth'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
-// const router = useRouter()
 const store = useAuthStore()
 
 const email = ref('')
@@ -33,12 +31,13 @@ const submit = async () => {
     const ok = await store.login(email.value, password.value)
 
     if (ok) {
-        // await router.push('/dashboard')
         return navigateTo('/dashboard')
     }
 }
 
-store.clearErrors()
+onMounted(() => {
+    store.clearErrors()
+})
 
 </script>
 

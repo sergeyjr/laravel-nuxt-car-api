@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {useAuthStore} from './auth'
 import {useAlertStore} from './alert'
+import {profileApi} from '~/services/api/profile.api'
 
 export const useProfileStore = defineStore('profile', {
     state: () => ({
@@ -29,10 +30,6 @@ export const useProfileStore = defineStore('profile', {
         getApi() {
             return useNuxtApp().$api
         },
-
-        /* -------------------------
-           INIT
-        ------------------------- */
 
         load(user: any) {
             if (!user) return
@@ -66,12 +63,7 @@ export const useProfileStore = defineStore('profile', {
             this.errors = {}
         },
 
-        /* -------------------------
-           UPDATE PROFILE
-        ------------------------- */
-
         async updateProfile() {
-            const api = this.getApi()
             const alert = useAlertStore()
             const auth = useAuthStore()
 
@@ -92,9 +84,7 @@ export const useProfileStore = defineStore('profile', {
                     fd.append('remove_avatar', '1')
                 }
 
-                await api.get('/sanctum/csrf-cookie')
-
-                const {data} = await api.post('/api/profile/update', fd)
+                const data: any = await profileApi.update(fd)
 
                 if (data?.user) {
                     auth.user = data.user
@@ -107,37 +97,26 @@ export const useProfileStore = defineStore('profile', {
                 alert.add('success', data?.message || 'Профиль обновлён')
 
             } catch (e: any) {
-                if (e.response?.status === 422) {
-                    this.errors = e.response.data?.errors || {}
+                if (e?.status === 422) {
+                    this.errors = e.data?.errors || {}
                     return
                 }
 
                 alert.add('error', 'Ошибка обновления профиля')
-                console.error('Profile update error:', e)
 
             } finally {
                 this.loading = false
             }
         },
 
-        /* -------------------------
-           CHANGE PASSWORD
-        ------------------------- */
-
         async changePassword() {
-            const api = this.getApi()
             const alert = useAlertStore()
 
             this.loading = true
             this.resetErrors()
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-
-                const {data} = await api.post(
-                    '/api/profile/password',
-                    this.passwordForm
-                )
+                const data: any = await profileApi.changePassword(this.passwordForm)
 
                 this.passwordForm = {
                     current_password: '',
@@ -150,25 +129,19 @@ export const useProfileStore = defineStore('profile', {
                 alert.add('success', data?.message || 'Пароль обновлён')
 
             } catch (e: any) {
-                if (e.response?.status === 422) {
-                    this.errors = e.response.data?.errors || {}
+                if (e?.status === 422) {
+                    this.errors = e.data?.errors || {}
                     return
                 }
 
                 alert.add('error', 'Ошибка смены пароля')
-                console.error('Password error:', e)
 
             } finally {
                 this.loading = false
             }
         },
 
-        /* -------------------------
-           DELETE ACCOUNT
-        ------------------------- */
-
         async deleteAccount() {
-            const api = this.getApi()
             const alert = useAlertStore()
             const auth = useAuthStore()
             const router = useRouter()
@@ -179,8 +152,7 @@ export const useProfileStore = defineStore('profile', {
             this.resetErrors()
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-                await api.delete('/api/profile')
+                await profileApi.delete()
 
                 auth.user = null
                 this.success = true
@@ -188,13 +160,12 @@ export const useProfileStore = defineStore('profile', {
                 await router.push('/')
 
             } catch (e: any) {
-                if (e.response?.status === 422) {
-                    this.errors = e.response.data?.errors || {}
+                if (e?.status === 422) {
+                    this.errors = e.data?.errors || {}
                     return
                 }
 
                 alert.add('error', 'Ошибка удаления аккаунта')
-                console.error('Delete account error:', e)
 
             } finally {
                 this.loading = false

@@ -8,9 +8,8 @@ export const useAuthStore = defineStore('auth', {
         initialized: false,
         loading: false,
         error: null as string | null,
-        errors: {} as Record<string, string[]>,
+        errors: {} as Record<string, string>,
         success: null as string | null,
-        token: useCookie<string | null>('web_session_token'),
         loggingOut: false
     }),
 
@@ -25,36 +24,16 @@ export const useAuthStore = defineStore('auth', {
             this.success = null
         },
 
-        hydrateToken() {
-            if (this.token) return
-
-            if (import.meta.client) {
-                const local = localStorage.getItem('web_session_token')
-                if (local) {
-                    this.token = local
-                }
-            }
+        getToken() {
+            return useCookie<string | null>('web_session_token')
         },
 
         setToken(token: string | null) {
-            this.token = token
-
-            if (import.meta.client) {
-                if (token) {
-                    localStorage.setItem('web_session_token', token)
-                } else {
-                    localStorage.removeItem('web_session_token')
-                }
-            }
+            useCookie('web_session_token').value = token
         },
 
         clearToken() {
-            if (!this.token) return
-
-            this.token = null
-            if (import.meta.client) {
-                localStorage.removeItem('web_session_token')
-            }
+            useCookie('web_session_token').value = null
         },
 
         clearErrors() {
@@ -68,15 +47,14 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async fetchUser() {
+            this.loading = true
+
             try {
                 const data: any = await authApi.me()
-
                 this.user = data.user
                 return true
 
             } catch (e: any) {
-                console.log('ME ERROR', e?.status)
-
                 this.user = null
 
                 if (e?.status === 401) {
@@ -84,13 +62,16 @@ export const useAuthStore = defineStore('auth', {
                 }
 
                 return false
+
+            } finally {
+                this.loading = false
             }
         },
 
         async initAuth() {
             if (this.initialized) return this.isAuth
 
-            const token = this.token
+            const token = this.getToken().value
 
             if (!token) {
                 this.user = null
@@ -102,7 +83,7 @@ export const useAuthStore = defineStore('auth', {
                 await this.fetchUser()
                 return this.isAuth
 
-            } catch (e) {
+            } catch {
                 this.user = null
                 return false
 
@@ -121,7 +102,6 @@ export const useAuthStore = defineStore('auth', {
                 await authApi.register(payload)
 
                 this.user = null
-
                 alertStore.add('success', 'Успешная регистрация')
 
                 return true
@@ -146,8 +126,13 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const data: any = await authApi.login(email, password)
 
-                this.user = data.user
+                if (!data?.token) {
+                    this.error = 'Нет токена'
+                    return false
+                }
+
                 this.setToken(data.token)
+                this.user = data.user
                 this.initialized = true
 
                 return true
@@ -171,9 +156,7 @@ export const useAuthStore = defineStore('auth', {
             try {
                 await authApi.logout()
 
-            } catch (e) {
-                console.error(e)
-
+            } catch {
             } finally {
                 this.logoutLocal()
                 this.loggingOut = false

@@ -214,6 +214,7 @@ const submitOrder = async () => {
 
             <BaseButton
                 variant="success"
+                class="w-100"
                 :loading="isSubmitting"
                 @click="submitOrder"
             >

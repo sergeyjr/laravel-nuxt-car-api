@@ -9,7 +9,6 @@ export default defineNuxtPlugin(() => {
 
     const api = $fetch.create({
         baseURL: config.public.apiBase,
-
         credentials: 'include',
 
         headers: {
@@ -18,13 +17,12 @@ export default defineNuxtPlugin(() => {
         },
 
         onRequest({options}) {
-            if (!import.meta.client) return
-
-            const token = localStorage.getItem('web_session_token')
+            const token = useCookie<string | null>('web_session_token').value
             if (!token) return
 
             const headers = new Headers(options.headers as HeadersInit | undefined)
             headers.set('Authorization', `Bearer ${token}`)
+
             options.headers = headers
         },
 
@@ -41,8 +39,8 @@ export default defineNuxtPlugin(() => {
             const isIgnoredUrl = IGNORE_ALERT_URLS.some(u => url.includes(u))
 
             if (status === 401) {
-                localStorage.removeItem('web_session_token')
-                auth.logoutLocal?.()
+                auth.logoutLocal()
+                return
             }
 
             if (isIgnoredStatus || isIgnoredUrl) return

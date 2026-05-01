@@ -13,31 +13,31 @@ export interface AuthResponse {
     message?: string
 }
 
+function api() {
+    return useNuxtApp().$api
+}
+
 export const authApi = {
-    async me(): Promise<{ user: User }> {
-        const {$api} = useNuxtApp()
-        return await $api<{ user: User }>('/me')
+    me(): Promise<{ user: User }> {
+        return api()('/me')
     },
 
-    async login(email: string, password: string): Promise<AuthResponse> {
-        const {$api} = useNuxtApp()
-        return await $api<AuthResponse>('/login', {
+    login(email: string, password: string): Promise<AuthResponse> {
+        return api()('/login', {
             method: 'POST',
             body: {email, password}
         })
     },
 
-    async register(payload: any): Promise<AuthResponse> {
-        const {$api} = useNuxtApp()
-        return await $api<AuthResponse>('/register', {
+    register(payload: any): Promise<AuthResponse> {
+        return api()('/register', {
             method: 'POST',
             body: payload
         })
     },
 
-    async logout(): Promise<{ message: string }> {
-        const {$api} = useNuxtApp()
-        return await $api<{ message: string }>('/logout', {
+    logout(): Promise<{ message: string }> {
+        return api()('/logout', {
             method: 'POST'
         })
     }

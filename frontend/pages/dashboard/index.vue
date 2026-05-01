@@ -1,13 +1,15 @@
 <script setup>
 
-import {computed} from 'vue'
+import {computed, onMounted} from 'vue'
 import {useAuthStore} from '~/stores/auth'
 import {useDashboardStore} from '~/stores/dashboard'
 
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
 
-await callOnce(() => dashboard.fetchDashboard())
+onMounted(() => {
+    dashboard.fetchDashboard()
+})
 
 const user = computed(() => auth.user)
 const isApiUser = computed(() => auth.user?.role === 'api')
@@ -24,7 +26,18 @@ const cartCount = computed(() =>
 
 const cartTotal = computed(() => dashboard.cartTotal || 0)
 
-const formatPrice = (v) => new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
+const formatPrice = (v) =>
+    new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
+
+const formatDate = (date) => {
+    if (!date) return ''
+
+    return new Intl.DateTimeFormat('ru-RU', {
+        dateStyle: 'short',
+        timeStyle: 'medium',
+        timeZone: 'Europe/Amsterdam'
+    }).format(new Date(date))
+}
 
 </script>
 
@@ -183,7 +196,7 @@ const formatPrice = (v) => new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
                                 </h6>
 
                                 <div class="text-muted small">
-                                    {{ new Date(order.created_at).toLocaleString('ru-RU') }}
+                                    Создан: {{ formatDate(order?.created_at) }}
                                 </div>
 
                                 <div class="mt-2">
@@ -211,7 +224,7 @@ const formatPrice = (v) => new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
                                     :to="`/orders/${order.id}`"
                                     class="btn btn-sm btn-outline-primary"
                                 >
-                                    открыть
+                                    Открыть
                                 </NuxtLink>
 
                             </div>

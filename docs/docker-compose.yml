@@ -1,0 +1,110 @@
+services:
+
+  web:
+    container_name: nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/sites-enabled:/etc/nginx/conf.d
+      - e:/www/laravel:/var/www/laravel
+    depends_on:
+      - php
+      - node
+    networks:
+      app-network:
+        aliases:
+          - laravel
+
+  php:
+    container_name: php
+    image: php:8.4-fpm
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    environment:
+      - XDEBUG_MODE=debug,develop
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9001
+      - PHP_IDE_CONFIG=serverName=Docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - e:/www/laravel:/var/www/laravel
+      - e:/www/tmp:/tmp:cached
+      - e:/www/yii2:/var/www/yii2
+    networks:
+      - app-network
+
+  node:
+    container_name: node-nuxt-laravel
+    image: node:25-slim
+    environment:
+      - NODE_OPTIONS=--dns-result-order=ipv4first
+    working_dir: /app
+    volumes:
+      - e:/www/laravel/frontend:/app
+      - nuxt_node_modules:/app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    networks:
+      - app-network
+
+  mysql:
+    container_name: mysql
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  pg_data:
+  rabbitmq_data:
+  redis_data:
+  nuxt_node_modules:

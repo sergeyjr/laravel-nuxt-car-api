@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+import {cartApi} from '~/services/api/cart.api'
 
 function cleanItems(obj: any) {
     return Object.fromEntries(
@@ -21,10 +22,6 @@ export const useCartStore = defineStore('cart', {
     },
 
     actions: {
-        getApi() {
-            return useNuxtApp().$api
-        },
-
         hydrate() {
             if (!import.meta.client) return
 
@@ -38,24 +35,20 @@ export const useCartStore = defineStore('cart', {
         },
 
         async fetch(force = false) {
-            const api = this.getApi()
-
             if (this.initialized && !force) return
-
             if (!force && Object.keys(this.items).length > 0) {
                 this.initialized = true
                 return
             }
 
             try {
-                const {data} = await api.get('/api/cart')
+                const data = await cartApi.getCart()
                 const serverItems = cleanItems(data)
 
                 if (Object.keys(serverItems).length > 0) {
                     this.items = serverItems
                     this.save()
                 }
-
             } catch (e) {
                 console.error('Ошибка загрузки корзины:', e)
             } finally {
@@ -64,8 +57,6 @@ export const useCartStore = defineStore('cart', {
         },
 
         async add(newItem: any) {
-            const api = this.getApi()
-
             const id = newItem.id
             const backup = structuredClone(this.items)
 
@@ -84,8 +75,7 @@ export const useCartStore = defineStore('cart', {
             this.save()
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-                await api.post('/api/cart/add', {
+                await cartApi.addItem({
                     id,
                     qty: newItem.qty ?? 1
                 })
@@ -98,7 +88,6 @@ export const useCartStore = defineStore('cart', {
         async update(id: number, qty: number) {
             if (!id || qty < 1) return
 
-            const api = this.getApi()
             const backup = structuredClone(this.items)
 
             if (this.items[id]) {
@@ -108,8 +97,7 @@ export const useCartStore = defineStore('cart', {
             this.save()
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-                await api.post('/api/cart/update', {id, qty})
+                await cartApi.updateItem({id, qty})
             } catch (e) {
                 this.items = backup
                 this.save()
@@ -117,15 +105,13 @@ export const useCartStore = defineStore('cart', {
         },
 
         async remove(id: number) {
-            const api = this.getApi()
             const backup = structuredClone(this.items)
 
             delete this.items[id]
             this.save()
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-                await api.post('/api/cart/remove', {id})
+                await cartApi.removeItem(id)
             } catch (e) {
                 this.items = backup
                 this.save()
@@ -133,15 +119,13 @@ export const useCartStore = defineStore('cart', {
         },
 
         async clear() {
-            const api = this.getApi()
             const backup = structuredClone(this.items)
 
             this.items = {}
             this.save()
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-                await api.post('/api/cart/clear')
+                await cartApi.clear()
             } catch (e) {
                 this.items = backup
                 this.save()
@@ -149,13 +133,10 @@ export const useCartStore = defineStore('cart', {
         },
 
         async checkout(payload: any = {}) {
-            const api = this.getApi()
             const backup = structuredClone(this.items)
 
             try {
-                await api.get('/sanctum/csrf-cookie')
-
-                const {data} = await api.post('/api/orders/checkout', {
+                const data = await cartApi.checkout({
                     comment: payload.comment || null
                 })
 
@@ -163,7 +144,6 @@ export const useCartStore = defineStore('cart', {
                 this.save()
 
                 return data
-
             } catch (e) {
                 this.items = backup
                 this.save()

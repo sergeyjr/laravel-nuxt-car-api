@@ -15,7 +15,6 @@ await callOnce(() => {
 
 const user = computed(() => auth.user)
 
-// avatar
 const avatarUrl = computed(() => {
     if (user.value?.avatar) {
         return `/storage/${user.value.avatar}?t=${Date.now()}`
@@ -23,17 +22,23 @@ const avatarUrl = computed(() => {
     return '/images/default-avatar.png'
 })
 
-// helpers
 const formatDate = (date) => {
     if (!date) return ''
-    return new Date(date).toLocaleDateString('ru-RU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })
+
+    return new Intl.DateTimeFormat('ru-RU', {
+        dateStyle: 'short',
+        timeStyle: 'medium',
+        timeZone: 'Europe/Amsterdam'
+    }).format(new Date(date))
 }
 
-const goBack = () => navigateTo('/dashboard')
+const goBack = () => {
+    if (import.meta.client && window.history.length > 1) {
+        window.history.back()
+    } else {
+        navigateTo('/dashboard')
+    }
+}
 
 </script>
 
@@ -222,3 +227,41 @@ const goBack = () => navigateTo('/dashboard')
         </div>
     </div>
 </template>
+
+<style scoped>
+
+.card img.avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card img.avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.avatar-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.avatar-full {
+    max-width: 80vw;
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+</style>

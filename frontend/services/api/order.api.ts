@@ -1,13 +1,23 @@
-export const orderApi = (api: any) => {
-    return {
-        async getOrder(id: number | string) {
-            const {data} = await api(`/orders/${id}`)
-            return data
-        },
+import { useNuxtApp } from '#app'
 
-        async getOrders() {
-            const {data} = await api('/api/orders')
-            return data
-        }
+export interface Order {
+    id: number
+    created_at: string
+    status: string
+    total: number
+    items?: any[]
+}
+
+function api() {
+    return useNuxtApp().$api
+}
+
+export const orderApi = {
+    getOrder(id: number | string): Promise<Order> {
+        return api()(`/orders/${id}`)
+    },
+
+    getOrders(): Promise<Order[]> {
+        return api()('/orders')
     }
 }
