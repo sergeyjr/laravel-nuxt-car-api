@@ -22,20 +22,22 @@ export interface CarsResponse {
 export const carApi = {
 
     async fetchCar(id: number): Promise<Car> {
-        return api()(`/cars/${id}`)
+        return api()(`/api/cars/${id}`)
     },
 
     async fetchCars(page = 1): Promise<CarsResponse> {
-        return api()('/cars', {
+        return api()('/api/cars', {
             query: {page}
         })
     },
 
     async fetchLatest(): Promise<Car[]> {
-        const res = (await api()('/cars/latest')) as Car[] | { data?: Car[] }
+        const res = (await api()('/api/cars/latest')) as Car[] | { data?: Car[] }
 
         return Array.isArray(res) ? res : res.data || []
     },
+
+    // web_session_token
 
     async create(payload: any): Promise<{ data: Car; message?: string }> {
         return api()('/api/v1/car/create', {

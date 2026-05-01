@@ -10,7 +10,15 @@ const store = usePageStore()
 
 const code = computed(() => route.params.code)
 
-await callOnce(() => store.fetch(code.value))
+// реагируем на смену route
+watch(
+    code,
+    async (newCode) => {
+        if (!newCode) return
+        await store.fetch(newCode)
+    },
+    { immediate: true }
+)
 
 const page = computed(() => store.current)
 const loading = computed(() => store.loading)

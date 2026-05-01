@@ -52,6 +52,22 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
 
+//        $credentials = $request->validate([
+//            'email' => ['required', 'email'],
+//            'password' => ['required'],
+//        ]);
+//
+//        if (!Auth::attempt($credentials)) {
+//            return response()->json(
+//                ['message' => 'Имя пользователя и пароль не совпадают.'],
+//                422
+//            );
+//        }
+//
+//        $user = auth()->user();
+//
+//        $request->session()->regenerate();
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -71,17 +87,24 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
 
-        $user = auth()->user();
+//        $user = auth()->user();
+//
+//        $user?->tokens()->where('name', 'web_session_token')->delete();
+//
+//        Auth::guard('web')->logout();
+//
+//        $request->session()->invalidate();
+//        $request->session()->regenerateToken();
 
-        $user?->tokens()->where('name', 'web_session_token')->delete();
+        $user = $request->user();
 
-        Auth::guard('web')->logout();
+        if ($user) {
+            $request->user()->currentAccessToken()->delete();
+        }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json(['message' => 'Выход из системы.']);
-
+        return response()->json([
+            'message' => 'Выход из системы.'
+        ]);
     }
 
 }

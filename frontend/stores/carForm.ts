@@ -100,9 +100,9 @@ export const useCarFormStore = defineStore('carForm', {
             this.submitting = true
 
             try {
-                const isAuth = await auth.initAuth()
+                const auth = useAuthStore()
 
-                if (!isAuth) {
+                if (!auth.isAuth) {
                     this.showAlert('danger', 'Требуется авторизация')
                     return null
                 }

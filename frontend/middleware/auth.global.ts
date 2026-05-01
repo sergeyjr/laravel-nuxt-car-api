@@ -1,11 +1,13 @@
-import { useAuthStore } from '~/stores/auth'
+import {useAuthStore} from '~/stores/auth'
 
 export default defineNuxtRouteMiddleware(async (to) => {
     const auth = useAuthStore()
 
-    await auth.initAuth()
+    if (!auth.initialized) {
+        await auth.initAuth()
+    }
 
-    if (!auth.isAuth && to.path !== '/login') {
+    if (!auth.isAuth && to.path.startsWith('/dashboard')) {
         return navigateTo('/login')
     }
 

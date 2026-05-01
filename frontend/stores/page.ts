@@ -4,10 +4,17 @@ import {pageApi, type PageResponse} from '~/services/api/page.api'
 export const usePageStore = defineStore('pages', {
     state: () => ({
         pages: {} as Record<string, PageResponse>,
-        current: null as PageResponse | null,
         loading: false,
-        error: null as any
+        error: null as any,
+        activeCode: null as string | null
     }),
+
+    getters: {
+        current: (state) => {
+            if (!state.activeCode) return null
+            return state.pages[state.activeCode] || null
+        }
+    },
 
     actions: {
 
@@ -16,17 +23,21 @@ export const usePageStore = defineStore('pages', {
 
             this.loading = true
             this.error = null
+            this.activeCode = code
 
             try {
                 const data = await pageApi.fetchPage(code)
 
+                // кешируем по коду
                 this.pages[code] = data
-                this.current = data
+
+                return data
 
             } catch (e: any) {
-                this.current = null
                 this.error = e
-                console.error('Page fetch error:', e)
+                console.error('[page store] fetch error:', e)
+
+                return null
 
             } finally {
                 this.loading = false
@@ -34,7 +45,12 @@ export const usePageStore = defineStore('pages', {
         },
 
         clearCurrent() {
-            this.current = null
+            this.activeCode = null
+        },
+
+        clearCache() {
+            this.pages = {}
+            this.activeCode = null
         }
     }
 })

@@ -29,7 +29,8 @@ export default defineNuxtConfig({
     // Конфигурация окружений (важно для SSR + client)
     runtimeConfig: {
         public: {
-            apiBase: 'http://laravel/api'
+            apiBase: 'http://laravel/api',
+            debugApi: true
         },
     },
 
