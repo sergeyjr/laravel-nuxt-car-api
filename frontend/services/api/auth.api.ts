@@ -18,8 +18,9 @@ function api() {
 }
 
 export const authApi = {
+
     me(): Promise<{ user: User }> {
-        return api()('/me')
+        return api()('/api/me')
     },
 
     login(email: string, password: string): Promise<AuthResponse> {
@@ -41,4 +42,5 @@ export const authApi = {
             method: 'POST'
         })
     }
+
 }

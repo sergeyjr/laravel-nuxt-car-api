@@ -5,6 +5,7 @@ function api() {
 }
 
 export const profileApi = {
+
     update(fd: FormData) {
         return api()('/sanctum/csrf-cookie').then(() =>
             api()('/api/profile/update', {
@@ -30,4 +31,5 @@ export const profileApi = {
             })
         )
     }
+
 }

@@ -5,6 +5,7 @@ function api() {
 }
 
 export const contactApi = {
+
     submit(payload: any) {
         return api()('/sanctum/csrf-cookie').then(() =>
             api()('/api/contact', {
@@ -13,4 +14,5 @@ export const contactApi = {
             })
         )
     }
+
 }

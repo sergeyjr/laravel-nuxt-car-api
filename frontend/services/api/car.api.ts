@@ -32,7 +32,7 @@ export const carApi = {
     },
 
     async fetchLatest(): Promise<Car[]> {
-        const res = (await api()('/api/cars/latest')) as Car[] | { data?: Car[] }
+        const res = (await api()('http://laravel/api/cars/latest')) as Car[] | { data?: Car[] }
 
         return Array.isArray(res) ? res : res.data || []
     },

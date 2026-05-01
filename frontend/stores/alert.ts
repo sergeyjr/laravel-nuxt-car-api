@@ -16,7 +16,7 @@ export const useAlertStore = defineStore('alert', {
 
             const timeout = setTimeout(() => {
                 this.remove(id)
-            }, 10000)
+            }, 30000)
 
             this.alerts.push({id, type, message, timeout})
         },

@@ -86,6 +86,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withMiddleware(function (Middleware $middleware) {
 
+        $middleware->statefulApi();
+
         $middleware->alias([
             'api.role' => EnsureApiRole::class,
             'guest' => RedirectIfAuthenticated::class,

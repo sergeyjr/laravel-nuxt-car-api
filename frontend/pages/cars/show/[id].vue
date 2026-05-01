@@ -62,8 +62,10 @@ watch(
     () => route.params.id,
     async (id) => {
         if (!id || Array.isArray(id)) return
+
         await store.fetchCar(Number(id))
-    }
+    },
+    { immediate: true }
 )
 
 </script>

@@ -3,14 +3,20 @@ import {useAlertStore} from '~/stores/alert'
 import {debugLog} from '~/utils/debug'
 
 export default defineNuxtPlugin(() => {
+
+    const config = useRuntimeConfig()
+
     const IGNORE_ALERT_STATUSES = [401, 403]
     const IGNORE_ALERT_URLS = ['/api/me']
 
     debugLog('[api plugin] init')
 
     const api = $fetch.create({
-        baseURL: '/',
+
+        baseURL: config.public.apiBase,
+
         credentials: 'include',
+
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             Accept: 'application/json'
@@ -98,6 +104,7 @@ export default defineNuxtPlugin(() => {
                 })
             }
         }
+
     })
 
     debugLog('[api plugin] ready')
@@ -107,4 +114,5 @@ export default defineNuxtPlugin(() => {
             api
         }
     }
+
 })

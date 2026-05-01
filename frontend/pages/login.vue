@@ -31,7 +31,7 @@ const submit = async () => {
     const ok = await store.login(email.value, password.value)
 
     if (ok) {
-        return navigateTo('/dashboard')
+        return navigateTo('/')
     }
 }
 

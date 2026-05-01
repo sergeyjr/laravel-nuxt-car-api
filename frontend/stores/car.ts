@@ -39,6 +39,7 @@ export const useCarStore = defineStore('cars', {
             if (!id) return
 
             this.carLoading = true
+            this.car = null
 
             try {
                 this.car = await carApi.fetchCar(id)
@@ -64,5 +65,6 @@ export const useCarStore = defineStore('cars', {
                 this.latestLoading = false
             }
         }
+
     }
 })

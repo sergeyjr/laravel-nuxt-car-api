@@ -5,8 +5,13 @@ function api() {
 }
 
 export const cartApi = {
+
     getCart() {
-        return api()('/api/cart')
+        return api()('/sanctum/csrf-cookie').then(() =>
+            api()('/api/cart', {
+                method: 'POST'
+            })
+        )
     },
 
     addItem(payload: { id: number; qty: number }) {
@@ -52,4 +57,5 @@ export const cartApi = {
             })
         )
     }
+
 }

@@ -157,7 +157,14 @@ export const useAuthStore = defineStore('auth', {
                 debugLog('[auth] register error:', e)
 
                 if (e?.status === 422) {
-                    this.errors = e.data?.errors || {}
+                    const raw = e.data?.errors || {}
+
+                    this.errors = Object.fromEntries(
+                        Object.entries(raw).map(([key, value]: any) => [
+                            key,
+                            Array.isArray(value) ? value[0] : value
+                        ])
+                    )
                 } else {
                     this.error = e.data?.message || 'Ошибка регистрации'
                 }
