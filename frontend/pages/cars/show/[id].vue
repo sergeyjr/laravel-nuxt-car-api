@@ -5,6 +5,9 @@ import {useRoute, navigateTo} from '#app'
 import {useCarStore} from '~/stores/car'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
+import AuthModal from '~/components/modals/AuthModal.vue'
+
+const showAuth = ref(false)
 
 const route = useRoute()
 
@@ -110,7 +113,11 @@ watch(
                         </p>
 
                         <p v-else class="text-muted">
-                            Авторизуйтесь, чтобы увидеть цену
+                            <button class="btn btn-light" @click="showAuth = true">
+                                Авторизуйтесь, чтобы увидеть цену
+                            </button>
+
+                            <AuthModal v-model="showAuth" />
                         </p>
                     </div>
 

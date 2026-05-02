@@ -1,6 +1,6 @@
 <script setup>
 
-import {computed, onMounted} from 'vue'
+import {computed} from 'vue'
 import {useRouter} from '#app'
 
 import {useAuthStore} from '~/stores/auth'

@@ -1,7 +1,8 @@
-import { useAuthStore } from '~/stores/auth'
 import { useApiClient } from '~/composables/useApiClient'
+import { useAuthStore } from '~/stores/auth'
 
 export default defineNuxtRouteMiddleware(async (to) => {
+
     const auth = useAuthStore()
 
     if (import.meta.server) {
@@ -34,4 +35,5 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (auth.isAuth && to.path === '/login') {
         return navigateTo('/dashboard')
     }
+
 })

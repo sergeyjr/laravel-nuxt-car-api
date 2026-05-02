@@ -14,7 +14,7 @@ function api() {
 export const pageApi = {
 
     fetchPage(code: string): Promise<PageResponse> {
-        return api()(`/api/page/${code}`)
+        return api()(`/page/${code}`)
     }
 
 }

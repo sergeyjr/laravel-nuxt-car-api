@@ -1,7 +1,8 @@
 <script setup>
 
-import {useContactStore} from '~/stores/contact'
+import { useContactStore } from '~/stores/contact'
 import BaseButton from '~/components/BaseButton.vue'
+import BaseInput from '~/components/BaseInput.vue'
 
 const store = useContactStore()
 
@@ -28,63 +29,37 @@ const store = useContactStore()
 
                 <form @submit.prevent="store.submit">
 
-                    <div class="mb-3">
-                        <label class="form-label">Имя *</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            :class="{ 'is-invalid': store.errors.name }"
-                            v-model="store.form.name"
-                            required
-                            autocomplete="name"
-                        >
-                        <small v-if="store.errors.name" class="text-danger">
-                            {{ store.errors.name }}
-                        </small>
-                    </div>
+                    <BaseInput
+                        v-model="store.form.name"
+                        label="Имя"
+                        required
+                        :error="store.errors.name"
+                        autocomplete="name"
+                    />
 
-                    <div class="mb-3">
-                        <label class="form-label">Email *</label>
-                        <input
-                            type="email"
-                            class="form-control"
-                            :class="{ 'is-invalid': store.errors.email }"
-                            v-model="store.form.email"
-                            required
-                            autocomplete="email"
-                        >
-                        <small v-if="store.errors.email" class="text-danger">
-                            {{ store.errors.email }}
-                        </small>
-                    </div>
+                    <BaseInput
+                        v-model="store.form.email"
+                        type="email"
+                        label="Email"
+                        required
+                        :error="store.errors.email"
+                        autocomplete="email"
+                    />
 
-                    <div class="mb-3">
-                        <label class="form-label">Тема *</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            :class="{ 'is-invalid': store.errors.subject }"
-                            v-model="store.form.subject"
-                            required
-                        >
-                        <small v-if="store.errors.subject" class="text-danger">
-                            {{ store.errors.subject }}
-                        </small>
-                    </div>
+                    <BaseInput
+                        v-model="store.form.subject"
+                        label="Тема"
+                        required
+                        :error="store.errors.subject"
+                    />
 
-                    <div class="mb-3">
-                        <label class="form-label">Сообщение *</label>
-                        <textarea
-                            class="form-control"
-                            rows="5"
-                            :class="{ 'is-invalid': store.errors.body }"
-                            v-model="store.form.body"
-                            required
-                        ></textarea>
-                        <small v-if="store.errors.body" class="text-danger">
-                            {{ store.errors.body }}
-                        </small>
-                    </div>
+                    <BaseInput
+                        v-model="store.form.body"
+                        type="textarea"
+                        label="Сообщение"
+                        required
+                        :error="store.errors.body"
+                    />
 
                     <BaseButton
                         type="submit"

@@ -24,7 +24,8 @@ class SiteController extends Controller
     {
 
         if ($code === 'about') {
-            $readmePath = base_path('README.md');
+            $projectRoot = dirname(base_path());
+            $readmePath = $projectRoot . '/README.md';
 
             if (!file_exists($readmePath)) {
                 abort(404, 'README.md not found');

@@ -83,7 +83,9 @@ Route::prefix('auth')->group(function () {
 Route::prefix('v1')->group(function () {
 
     // Авторизация пользователя
-    Route::post('auth/login', [ApiAuthController::class, 'login']);
+    Route::prefix('auth')->group(function () {
+        Route::post('login', [ApiAuthController::class, 'login']);
+    });
 
     // Доступ только для API пользователей
     Route::middleware(['auth:sanctum', 'api.role'])->group(function () {

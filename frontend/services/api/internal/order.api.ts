@@ -1,4 +1,4 @@
-import { useNuxtApp } from '#app'
+import {useNuxtApp} from '#app'
 
 export interface Order {
     id: number
@@ -15,11 +15,11 @@ function api() {
 export const orderApi = {
 
     getOrder(id: number | string): Promise<Order> {
-        return api()(`/api/orders/${id}`)
+        return api()(`/orders/${id}`)
     },
 
     getOrders(): Promise<Order[]> {
-        return api()('/api/orders')
+        return api()('/orders')
     }
 
 }
