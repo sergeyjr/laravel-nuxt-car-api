@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {pageApi, type PageResponse} from '~/services/api/page.api'
+import {pageApi, type PageResponse} from '~/services/api/internal/page.api'
 
 export const usePageStore = defineStore('pages', {
     state: () => ({

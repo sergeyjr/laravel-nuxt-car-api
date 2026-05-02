@@ -36,7 +36,9 @@ Route::post('/contact', [SiteController::class, 'sendContact'])
 
 // DASHBOARD, PROFILE
 
-Route::middleware('auth:sanctum')->get('/dashboard', [DashboardController::class, 'api']);
+Route::middleware('auth:sanctum')->prefix('dashboard')->group(function () {
+    Route::delete('/', [DashboardController::class, 'api']);
+});
 
 Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
     Route::delete('/', [ProfileController::class, 'destroy']);
@@ -64,12 +66,16 @@ Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
 
 // LOGIN, REGISTER
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::prefix('auth')->group(function () {
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
+
 });
 
 // API V1

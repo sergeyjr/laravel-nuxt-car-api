@@ -81,7 +81,7 @@ class ApiCarController extends Controller
     public function update(int $id, Request $request): JsonResponse
     {
         if (!$id) {
-            return $this->error(self::ID_IS_REQUIRED, 400);
+            return $this->error(self::ID_IS_REQUIRED);
         }
 
         $dto = CarUpdateRequest::fromRequest($request);
@@ -111,7 +111,7 @@ class ApiCarController extends Controller
     public function patch(int $id, Request $request): JsonResponse
     {
         if (!$id) {
-            return $this->error(self::ID_IS_REQUIRED, 400);
+            return $this->error(self::ID_IS_REQUIRED);
         }
 
         $dto = CarPatchRequest::fromRequest($request);
@@ -141,7 +141,7 @@ class ApiCarController extends Controller
     public function destroy(int $id): JsonResponse
     {
         if (!$id) {
-            return $this->error(self::ID_IS_REQUIRED, 400);
+            return $this->error(self::ID_IS_REQUIRED);
         }
 
         $result = $this->service->deleteCar($id);

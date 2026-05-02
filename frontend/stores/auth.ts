@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import {useAlertStore} from './alert'
-import {authApi} from '~/services/api/auth.api'
+import {authApi} from '~/services/api/internal/auth.api'
 import {debugLog} from '~/utils/debug'
 
 const TOKEN_KEY = 'web_session_token'
@@ -81,7 +81,7 @@ export const useAuthStore = defineStore('auth', {
                 const data: any = await authApi.me()
                 debugLog('[auth] fetchUser success:', data)
 
-                this.user = data.user
+                this.user = data
                 return true
 
             } catch (e: any) {
@@ -186,14 +186,19 @@ export const useAuthStore = defineStore('auth', {
                 const data: any = await authApi.login(email, password)
                 debugLog('[auth] login response:', data)
 
-                if (!data?.token) {
-                    this.error = 'Нет токена'
-                    return false
+                /**
+                 * ВАЖНО:
+                 * Sanctum НЕ возвращает token
+                 * user получаем через /me
+                 */
+
+                // fallback (если вдруг backend вернет user)
+                if (data?.user) {
+                    this.user = data.user
+                } else {
+                    await this.fetchUser()
                 }
 
-                this.setToken(data.token)
-
-                this.user = data.user
                 this.initialized = true
 
                 debugLog('[auth] login success user:', this.user)
@@ -235,4 +240,5 @@ export const useAuthStore = defineStore('auth', {
             }
         }
     }
+
 })

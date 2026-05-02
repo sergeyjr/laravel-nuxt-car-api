@@ -17,11 +17,21 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
+    ->withMiddleware(function (Middleware $middleware) {
+
+        $middleware->alias([
+            'api.role' => EnsureApiRole::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'auth' => Authenticate::class,
+        ]);
+
+    })
     ->withExceptions(function ($exceptions) {
 
         // Auth errors
         $exceptions->render(function (AuthenticationException $e, $request) {
             $hasToken = $request->bearerToken();
+
             return response()->json([
                 'success' => false,
                 'data' => null,
@@ -43,20 +53,19 @@ return Application::configure(basePath: dirname(__DIR__))
         // Throttle errors
         $exceptions->render(function (ThrottleRequestsException $e, $request) {
             $retryAfter = $e->getHeaders()['Retry-After'] ?? null;
+
             return response()->json([
                 'success' => false,
-                //'message' => 'Слишком много попыток. Попробуйте позже.',
                 'retry_after' => $retryAfter,
             ], 429);
         });
 
-        // Forbidden
+        // HTTP errors
         $exceptions->render(function (HttpException $e, $request) {
 
             if ($e->getStatusCode() === 403) {
                 return response()->json([
                     'success' => false,
-                    'data' => null,
                     'message' => $e->getMessage() ?: 'Доступ запрещен.',
                 ], 403);
             }
@@ -64,7 +73,6 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($e->getStatusCode() === 404 && $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
-                    'data' => null,
                     'message' => $e->getMessage() ?: 'Не найдено.',
                 ], 404);
             }
@@ -82,17 +90,6 @@ return Application::configure(basePath: dirname(__DIR__))
 //            }
 //            return null;
 //        });
-
-    })
-    ->withMiddleware(function (Middleware $middleware) {
-
-        $middleware->statefulApi();
-
-        $middleware->alias([
-            'api.role' => EnsureApiRole::class,
-            'guest' => RedirectIfAuthenticated::class,
-            'auth' => Authenticate::class,
-        ]);
 
     })
     ->create();

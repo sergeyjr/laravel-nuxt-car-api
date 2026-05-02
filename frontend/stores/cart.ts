@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {cartApi} from '~/services/api/cart.api'
+import {cartApi} from '~/services/api/internal/cart.api'
 import { toRaw } from 'vue'
 
 function cleanItems(obj: any) {

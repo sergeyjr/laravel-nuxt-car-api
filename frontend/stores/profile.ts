@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
 import {useAuthStore} from './auth'
 import {useAlertStore} from './alert'
-import {profileApi} from '~/services/api/profile.api'
+import {profileApi} from '~/services/api/internal/profile.api'
 
 export const useProfileStore = defineStore('profile', {
     state: () => ({

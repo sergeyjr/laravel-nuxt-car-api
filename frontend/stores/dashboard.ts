@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {dashboardApi, type DashboardResponse} from '~/services/api/dashboard.api'
+import {dashboardApi, type DashboardResponse} from '~/services/api/internal/dashboard.api'
 
 export const useDashboardStore = defineStore('dashboard', {
     state: () => ({

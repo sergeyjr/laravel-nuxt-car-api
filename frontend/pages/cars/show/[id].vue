@@ -1,10 +1,10 @@
 <script setup>
 
-import { computed, watch } from 'vue'
-import { useRoute, navigateTo } from '#app'
-import { useCarStore } from '~/stores/car'
-import { useAuthStore } from '~/stores/auth'
-import { useCartStore } from '~/stores/cart'
+import {computed, watch} from 'vue'
+import {useRoute, navigateTo} from '#app'
+import {useCarStore} from '~/stores/car'
+import {useAuthStore} from '~/stores/auth'
+import {useCartStore} from '~/stores/cart'
 
 const route = useRoute()
 
@@ -65,7 +65,7 @@ watch(
 
         await store.fetchCar(Number(id))
     },
-    { immediate: true }
+    {immediate: true}
 )
 
 </script>

@@ -13,7 +13,6 @@ class ApiAuthController extends Controller
 
     public function login(Request $request): JsonResponse
     {
-
         $data = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
@@ -23,22 +22,41 @@ class ApiAuthController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
-            return $this->error('Неверные учетные данные', 401);
+            return $this->error('Неверные учетные данные.', 401);
         }
 
         if (!$user->isAdmin() && !$user->isApiUser()) {
-            return $this->error('Запрещено: нет доступа к API', 403);
+            return $this->error('Запрещено: нет доступа к API.', 403);
         }
 
+        // удаляем старые токены (по желанию)
         $user->tokens()->where('name', 'api_token')->delete();
 
         $token = $user->createToken('api_token')->plainTextToken;
 
         return $this->success([
+            'user' => $user,
             'token' => $token,
-            'message' => 'Успешный вход.',
         ]);
+    }
 
+    public function me(Request $request): JsonResponse
+    {
+        return $this->success($request->user());
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        if ($request->user()?->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
+
+        return $this->success(['message' => 'Logged out successfully']);
+    }
+
+    public function tokens(Request $request)
+    {
+        return response()->json($request->user()->tokens);
     }
 
 }

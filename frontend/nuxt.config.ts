@@ -6,15 +6,15 @@ export default defineNuxtConfig({
     // Совместимость с конкретной версией Nuxt
     compatibilityDate: '2025-07-15',
 
-    // Отключает dev debug-режим
+    // Dev debug-режим
     debug: false,
 
-    // Nuxt DevTools (выключены)
+    // Nuxt DevTools
     devtools: {
         enabled: false
     },
 
-    // SSR включён (серверный рендеринг)
+    // SSR (серверный рендеринг)
     ssr: true,
 
     // Глобальные стили проекта
@@ -23,13 +23,14 @@ export default defineNuxtConfig({
         '@/assets/css/app.css'
     ],
 
-    // Подключён Pinia (state management)
+    // Pinia (state management)
     modules: ['@pinia/nuxt'],
 
-    // Конфигурация окружений (важно для SSR + client)
+    // Конфигурация окружений (SSR + client)
     runtimeConfig: {
         public: {
-            apiBase: 'http://laravel',
+            apiBase: 'http://laravel/api',
+            backendBase: 'http://laravel',
             debugApi: true
         },
     },

@@ -7,76 +7,67 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
 
-    public function me(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        return response()->json([
-            'user' => $user
-        ]);
-    }
-
     public function register(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'min:6', 'confirmed'],
         ]);
 
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
             'role' => 'user',
         ]);
 
-        return response()->json([
-            'user' => $user,
-            'message' => 'Регистрация успешно завершена! Теперь вы можете войти.',
-        ]);
+        return $this->success($user);
     }
+
 
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => 'Имя пользователя и пароль не совпадают.',
-            ], 422);
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
         }
+
+        Auth::guard('web')->login($user);
 
         $request->session()->regenerate();
 
-        $user = auth()->user();
-        $token = $user->createToken('web_session_token')->plainTextToken;
-
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'message' => 'Успешный вход.',
-        ]);
+        return $this->success($user);
     }
+
+
+    public function me(Request $request): JsonResponse
+    {
+        return $this->success($request->user());
+    }
+
 
     public function logout(Request $request): JsonResponse
     {
-        $user = $request->user();
+        Auth::logout();
 
-        if ($user) {
-            $user->currentAccessToken()?->delete();
-        }
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Выход из системы.'
-        ]);
+        return $this->success(['message' => 'Logged out']);
     }
 
 }

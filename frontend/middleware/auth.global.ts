@@ -1,10 +1,30 @@
-import {useAuthStore} from '~/stores/auth'
+import { useAuthStore } from '~/stores/auth'
+import { useApiClient } from '~/composables/useApiClient'
 
 export default defineNuxtRouteMiddleware(async (to) => {
     const auth = useAuthStore()
 
+    if (import.meta.server) {
+        if (!auth.initialized) {
+            auth.initialized = true
+        }
+        if (!auth.isAuth && to.path.startsWith('/dashboard')) {
+            return navigateTo('/login')
+        }
+        return
+    }
+
     if (!auth.initialized) {
-        await auth.initAuth()
+        const api = useApiClient()
+
+        try {
+            const res: any = await api('/me')
+            auth.user = res?.user ?? res
+        } catch {
+            auth.user = null
+        } finally {
+            auth.initialized = true
+        }
     }
 
     if (!auth.isAuth && to.path.startsWith('/dashboard')) {

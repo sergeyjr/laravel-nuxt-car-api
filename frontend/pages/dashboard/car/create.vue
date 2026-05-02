@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
-import {useCarFormStore} from '~/stores/carForm'
+import {useCarStore} from '~/stores/car'
 import BaseInput from '~/components/BaseInput.vue'
 import BaseButton from '~/components/BaseButton.vue'
 
-const store = useCarFormStore()
+const store = useCarStore()
 const router = useRouter()
 
 store.reset()

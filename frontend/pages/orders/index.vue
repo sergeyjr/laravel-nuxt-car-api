@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useOrderStore } from '~/stores/order'
-import { useOrderStatus } from '~/composables/useOrderStatus'
+
+import {computed, onMounted} from 'vue'
+import {useOrderStore} from '~/stores/order'
+import {useOrderStatus} from '~/composables/useOrderStatus'
 
 const store = useOrderStore()
-const { getLabel } = useOrderStatus()
+const {getLabel} = useOrderStatus()
 
 onMounted(async () => {
     await store.fetchOrders()
@@ -54,6 +55,7 @@ const goBack = () => {
         navigateTo('/dashboard')
     }
 }
+
 </script>
 
 <template>

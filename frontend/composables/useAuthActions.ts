@@ -1,6 +1,8 @@
 import {useAuthStore} from '~/stores/auth'
+import {useRouter, useRoute} from 'vue-router'
 
-export const useAuthActions = () => {
+export function useAuthActions() {
+
     const auth = useAuthStore()
     const router = useRouter()
     const route = useRoute()
@@ -12,7 +14,7 @@ export const useAuthActions = () => {
         try {
             await auth.logout()
         } catch (e) {
-            console.warn('Logout request failed:', e)
+            console.warn('Запрос на выход из системы не удался:', e)
         }
 
         const path = route.path
@@ -26,4 +28,5 @@ export const useAuthActions = () => {
     }
 
     return {handleLogout}
+
 }

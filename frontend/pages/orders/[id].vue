@@ -1,23 +1,23 @@
 <script setup lang="ts">
 
-import { computed, watch } from 'vue'
-import { useRoute, createError } from '#app'
-import { useOrderStore } from '~/stores/order'
-import { useOrderStatus } from '~/composables/useOrderStatus'
+import {computed, watch} from 'vue'
+import {useRoute, createError} from '#app'
+import {useOrderStore} from '~/stores/order'
+import {useOrderStatus} from '~/composables/useOrderStatus'
 
 const route = useRoute()
 const store = useOrderStore()
-const { getLabel } = useOrderStatus()
+const {getLabel} = useOrderStatus()
 
 const orderId = computed(() => route.params.id)
 
 async function load(id: string | number) {
-    if (!id) throw createError({ statusCode: 404 })
+    if (!id) throw createError({statusCode: 404})
 
     try {
         await store.fetchOrder(id)
     } catch (e) {
-        throw createError({ statusCode: 404 })
+        throw createError({statusCode: 404})
     }
 }
 
@@ -26,7 +26,7 @@ watch(
     async (id) => {
         await load(id)
     },
-    { immediate: true }
+    {immediate: true}
 )
 
 const order = computed(() => store.currentOrder)

@@ -30,7 +30,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost', 'http://localhost:5173', 'http://localhost:3000'],
+    'allowed_origins' => ['http://localhost', 'http://localhost:3000', 'http://laravel'],
 
     'allowed_origins_patterns' => [],
 

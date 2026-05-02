@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 /*
  * routes/web.php
@@ -14,8 +13,6 @@ use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
  * CSRF обязателен
  * SSR/HTML ответы
  */
-
-Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
 Route::get('/files/{path}', [FileController::class, 'show'])
     ->where('path', '.*');
