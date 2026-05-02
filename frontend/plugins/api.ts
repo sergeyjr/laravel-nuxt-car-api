@@ -1,9 +1,10 @@
-import type { FetchResponse, FetchRequest } from 'ofetch'
-import { debugLog } from '~/utils/debug'
-import { useAlertStore } from '~/stores/alert'
-import { useAuthStore } from '~/stores/auth'
+import type {FetchResponse, FetchRequest} from 'ofetch'
+import {debugLog} from '~/utils/debug'
+import {useAlertStore} from '~/stores/alert'
+import {useAuthStore} from '~/stores/auth'
 
 export default defineNuxtPlugin(() => {
+
     const config = useRuntimeConfig()
 
     const IGNORE_ALERT_STATUSES = [401, 403]
@@ -13,12 +14,19 @@ export default defineNuxtPlugin(() => {
 
     debugLog('[api plugin] init')
 
+    /*
+    |--------------------------------------------------------------------------
+    | CSRF (SPA only)
+    |--------------------------------------------------------------------------
+    */
+
     async function ensureCsrfCookie() {
         if (csrfCookieObtained) return
         if (import.meta.server) return
 
         try {
             await $fetch('/sanctum/csrf-cookie', {
+                baseURL: config.public.backendBase,
                 credentials: 'include',
                 headers: {
                     Accept: 'application/json',
@@ -32,6 +40,12 @@ export default defineNuxtPlugin(() => {
             console.error('CSRF cookie failed:', e)
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Response normalizer
+    |--------------------------------------------------------------------------
+    */
 
     function normalizeResponse(response: FetchResponse<any>, request: FetchRequest) {
         const data = response?._data
@@ -50,6 +64,12 @@ export default defineNuxtPlugin(() => {
             throw error
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Error handler
+    |--------------------------------------------------------------------------
+    */
 
     function handleErrors(response: FetchResponse<any>, request: FetchRequest) {
         if (!import.meta.client) return
@@ -88,6 +108,27 @@ export default defineNuxtPlugin(() => {
         }
     }
 
+    function getCookie(name: string) {
+        if (!import.meta.client) return null
+        const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
+        return match ? decodeURIComponent(match[1]) : null
+    }
+
+    function withXsrfHeader(options: any) {
+        const token = getCookie('XSRF-TOKEN')
+        if (!token) return
+
+        const headers = new Headers(options.headers as HeadersInit)
+        headers.set('X-XSRF-TOKEN', token)
+        options.headers = headers
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SPA API (/api)
+    |--------------------------------------------------------------------------
+    */
+
     const api = $fetch.create({
 
         baseURL: config.public.apiBase, // http://laravel/api
@@ -100,9 +141,8 @@ export default defineNuxtPlugin(() => {
             'Content-Type': 'application/json'
         },
 
-        async onRequest({ options }) {
+        async onRequest({options}) {
             const method = (options.method || 'GET').toUpperCase()
-
             const skipCsrf = (options as any).skipCsrf
 
             if (
@@ -114,14 +154,20 @@ export default defineNuxtPlugin(() => {
             }
         },
 
-        onResponse({ response, request }) {
+        onResponse({response, request}) {
             normalizeResponse(response, request)
         },
 
-        onResponseError({ response, request }) {
+        onResponseError({response, request}) {
             handleErrors(response, request)
         }
     })
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXTERNAL API V1 (/api/v1)
+    |--------------------------------------------------------------------------
+    */
 
     const sessionTokenCookie = useCookie<string | null>('web_session_token', {
         default: () => null,
@@ -139,7 +185,7 @@ export default defineNuxtPlugin(() => {
             'Content-Type': 'application/json'
         },
 
-        onRequest({ options }) {
+        onRequest({options}) {
             const auth = useAuthStore()
             const token = auth.getToken?.() || sessionTokenCookie.value
 
@@ -150,11 +196,47 @@ export default defineNuxtPlugin(() => {
             options.headers = headers
         },
 
-        onResponse({ response, request }) {
+        onResponse({response, request}) {
             normalizeResponse(response, request)
         },
 
-        onResponseError({ response, request }) {
+        onResponseError({response, request}) {
+            handleErrors(response, request)
+        }
+    })
+
+    /*
+    |--------------------------------------------------------------------------
+    | AUTH CLIENT (NO /api prefix, direct backend)
+    |--------------------------------------------------------------------------
+    */
+
+    const authApiClient = $fetch.create({
+
+        baseURL: config.public.backendBase, // http://laravel
+
+        credentials: 'include',
+
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+
+        async onRequest({options}) {
+            const method = (options.method || 'GET').toUpperCase()
+
+            if (import.meta.client && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+                await ensureCsrfCookie()
+                withXsrfHeader(options)
+            }
+        },
+
+        onResponse({response, request}) {
+            normalizeResponse(response, request)
+        },
+
+        onResponseError({response, request}) {
             handleErrors(response, request)
         }
     })
@@ -162,7 +244,9 @@ export default defineNuxtPlugin(() => {
     return {
         provide: {
             api,
-            apiV1
+            apiV1,
+            authApiClient,
+            ensureCsrfCookie
         }
     }
 

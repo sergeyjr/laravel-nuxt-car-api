@@ -8,14 +8,14 @@ export interface DashboardResponse {
     cartTotal: number
 }
 
-function api() {
-    return useNuxtApp().$api
+function authApiClient() {
+    return useNuxtApp().$authApiClient
 }
 
 export const dashboardApi = {
 
     getDashboard(): Promise<DashboardResponse> {
-        return api()('/dashboard')
+        return authApiClient()('/dashboard')
     }
 
 }

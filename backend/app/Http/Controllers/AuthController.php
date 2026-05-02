@@ -14,6 +14,7 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
@@ -27,12 +28,20 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        return $this->success($user);
-    }
+        // $token = $user->createToken('web_session_token')->plainTextToken;
 
+        return $this->success([
+            'user' => $user,
+            'message' => 'Регистрация успешно завершена! Теперь вы можете войти.',
+            // 'token' => $token,
+            // 'redirect' => '/dashboard',
+        ]);
+
+    }
 
     public function login(Request $request): JsonResponse
     {
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -46,28 +55,51 @@ class AuthController extends Controller
             ]);
         }
 
+        /*
+         * авторизует пользователя
+         * записывает его ID в сессию (через guard web)
+         * говорит Laravel: “этот пользователь теперь залогинен”
+         * пользователь считается вошедшим
+         */
         Auth::guard('web')->login($user);
 
         $request->session()->regenerate();
 
-        return $this->success($user);
+        $user->tokens()->where('name', 'web_session_token')->delete();
+
+        $token = $user->createToken('web_session_token')->plainTextToken;
+
+        return $this->success([
+            'user' => $user,
+            'message' => 'Успешный вход.',
+            'token' => $token,
+        ]);
+
     }
-
-
-    public function me(Request $request): JsonResponse
-    {
-        return $this->success($request->user());
-    }
-
 
     public function logout(Request $request): JsonResponse
     {
-        Auth::logout();
+
+        $user = auth()->user();
+
+        $user?->tokens()->where('name', 'web_session_token')->delete();
+
+        Auth::logout(); // web guard (способ входа и проверки пользователя)
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return $this->success(['message' => 'Logged out']);
+        return $this->success([
+            'message' => 'Выход из системы.'
+        ]);
+
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+
+        return $this->success($request->user());
+
     }
 
 }

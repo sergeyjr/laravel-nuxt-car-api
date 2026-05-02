@@ -2,7 +2,6 @@
 
 use App\API\V1\Controllers\ApiAuthController;
 use App\API\V1\Controllers\ApiCarController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
@@ -23,10 +22,14 @@ use Illuminate\Support\Facades\Route;
  * обычно prefix /api
  */
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC API (без авторизации)
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/cars', [CarController::class, 'list']);
-
 Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
-
 Route::get('/cars/latest', [CarController::class, 'latest']);
 
 Route::get('/page/{code}', [SiteController::class, 'page']);
@@ -34,51 +37,49 @@ Route::get('/page/{code}', [SiteController::class, 'page']);
 Route::post('/contact', [SiteController::class, 'sendContact'])
     ->middleware('throttle:contact_form');
 
-// DASHBOARD, PROFILE
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATED SPA AREA (Sanctum)
+|--------------------------------------------------------------------------
+*/
 
-Route::middleware('auth:sanctum')->prefix('dashboard')->group(function () {
-    Route::delete('/', [DashboardController::class, 'api']);
-});
+Route::middleware('auth:sanctum')->group(function () {
 
-Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
-    Route::delete('/', [ProfileController::class, 'destroy']);
-    Route::post('/password', [ProfileController::class, 'password']);
-    Route::post('/update', [ProfileController::class, 'update']);
-});
+    // Dashboard
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'api']);
+    });
 
-// CART
+    // Profile
+    Route::prefix('profile')->group(function () {
+        Route::delete('/', [ProfileController::class, 'destroy']);
+        Route::post('/password', [ProfileController::class, 'password']);
+        Route::post('/update', [ProfileController::class, 'update']);
+    });
 
-Route::middleware('auth:sanctum')->prefix('cart')->group(function () {
-    Route::get('/', [CartController::class, 'index']);
-    Route::post('/add', [CartController::class, 'add']);
-    Route::post('/remove', [CartController::class, 'remove']);
-    Route::post('/update', [CartController::class, 'update']);
-    Route::post('/clear', [CartController::class, 'clear']);
-});
+    // Cart
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/add', [CartController::class, 'add']);
+        Route::post('/remove', [CartController::class, 'remove']);
+        Route::post('/update', [CartController::class, 'update']);
+        Route::post('/clear', [CartController::class, 'clear']);
+    });
 
-// ORDERS
-
-Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
-    Route::get('/', [OrderController::class, 'index']);
-    Route::post('/checkout', [OrderController::class, 'checkout']);
-    Route::get('/{id}', [OrderController::class, 'show']);
-});
-
-// LOGIN, REGISTER
-
-Route::prefix('auth')->group(function () {
-
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/logout', [AuthController::class, 'logout']);
+    // Orders
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [OrderController::class, 'index']);
+        Route::post('/checkout', [OrderController::class, 'checkout']);
+        Route::get('/{id}', [OrderController::class, 'show']);
     });
 
 });
 
-// API V1
+/*
+|--------------------------------------------------------------------------
+| API V1 (token-based / external API)
+|--------------------------------------------------------------------------
+*/
 
 Route::prefix('v1')->group(function () {
 

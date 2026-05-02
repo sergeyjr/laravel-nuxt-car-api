@@ -8,18 +8,18 @@ export interface Order {
     items?: any[]
 }
 
-function api() {
-    return useNuxtApp().$api
+function authApiClient() {
+    return useNuxtApp().$authApiClient
 }
 
 export const orderApi = {
 
     getOrder(id: number | string): Promise<Order> {
-        return api()(`/orders/${id}`)
+        return authApiClient()(`/orders/${id}`)
     },
 
     getOrders(): Promise<Order[]> {
-        return api()('/orders')
+        return authApiClient()('/orders')
     }
 
 }

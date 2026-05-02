@@ -1,27 +1,27 @@
 import {useNuxtApp} from '#app'
 
-function api() {
-    return useNuxtApp().$api
+function authApiClient() {
+    return useNuxtApp().$authApiClient
 }
 
 export const profileApi = {
 
     update(fd: FormData) {
-        return api()('/profile/update', {
+        return authApiClient()('/profile/update', {
             method: 'POST',
             body: fd
         })
     },
 
     changePassword(payload: any) {
-        return api()('/rofile/password', {
+        return authApiClient()('/rofile/password', {
             method: 'POST',
             body: payload
         })
     },
 
     delete() {
-        return api()('/api/profile', {
+        return authApiClient()('/api/profile', {
             method: 'DELETE'
         })
     }

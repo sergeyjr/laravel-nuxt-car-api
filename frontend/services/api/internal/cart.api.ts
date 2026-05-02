@@ -1,40 +1,40 @@
 import {useNuxtApp} from '#app'
 
-function api() {
-    return useNuxtApp().$api
+function authApiClient() {
+    return useNuxtApp().$authApiClient
 }
 
 export const cartApi = {
 
     getCart() {
-        return api()('/cart', {
+        return authApiClient()('/cart', {
             method: 'GET'
         })
     },
 
     addItem(payload: { id: number; qty: number }) {
-        return api()('/cart/add', {
+        return authApiClient()('/cart/add', {
             method: 'POST',
             body: payload
         })
     },
 
     updateItem(payload: { id: number; qty: number }) {
-        return api()('/cart/update', {
+        return authApiClient()('/cart/update', {
             method: 'POST',
             body: payload
         })
     },
 
     removeItem(id: number) {
-        return api()('/cart/remove', {
+        return authApiClient()('/cart/remove', {
             method: 'POST',
             body: {id}
         })
     },
 
     clear() {
-        return api()('/cart/clear', {
+        return authApiClient()('/cart/clear', {
             method: 'POST'
         })
     },
