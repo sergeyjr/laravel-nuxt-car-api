@@ -1,7 +1,8 @@
 import {defineStore} from 'pinia'
-import {pageApi, type PageResponse} from '~/services/api/internal/page.api'
+import {usePageApi, type PageResponse} from '~/services/api/internal/page.api'
 
 export const usePageStore = defineStore('pages', {
+
     state: () => ({
         pages: {} as Record<string, PageResponse>,
         loading: false,
@@ -24,6 +25,8 @@ export const usePageStore = defineStore('pages', {
             this.loading = true
             this.error = null
             this.activeCode = code
+
+            const pageApi = usePageApi()
 
             try {
                 const data = await pageApi.fetchPage(code)
@@ -52,5 +55,7 @@ export const usePageStore = defineStore('pages', {
             this.pages = {}
             this.activeCode = null
         }
+
     }
+
 })

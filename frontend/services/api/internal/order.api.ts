@@ -1,4 +1,4 @@
-import {useNuxtApp} from '#app'
+import {useApi} from '~/composables/useApi'
 
 export interface Order {
     id: number
@@ -8,18 +8,20 @@ export interface Order {
     items?: any[]
 }
 
-function authApiClient() {
-    return useNuxtApp().$authApiClient
-}
+export const useOrderApi = () => {
 
-export const orderApi = {
+    const {authApi} = useApi()
 
-    getOrder(id: number | string): Promise<Order> {
-        return authApiClient()(`/orders/${id}`)
-    },
+    return {
 
-    getOrders(): Promise<Order[]> {
-        return authApiClient()('/orders')
+        getOrder(id: number | string): Promise<Order> {
+            return authApi(`/orders/${id}`)
+        },
+
+        getOrders(): Promise<Order[]> {
+            return authApi('/orders')
+        }
+
     }
 
 }

@@ -1,29 +1,31 @@
-import {useNuxtApp} from '#app'
+import {useApi} from '~/composables/useApi'
 
-function authApiClient() {
-    return useNuxtApp().$authApiClient
-}
+export const useProfileApi = () => {
 
-export const profileApi = {
+    const {authApi} = useApi()
 
-    update(fd: FormData) {
-        return authApiClient()('/profile/update', {
-            method: 'POST',
-            body: fd
-        })
-    },
+    return {
 
-    changePassword(payload: any) {
-        return authApiClient()('/rofile/password', {
-            method: 'POST',
-            body: payload
-        })
-    },
+        update(fd: FormData) {
+            return authApi('/profile/update', {
+                method: 'POST',
+                body: fd
+            })
+        },
 
-    delete() {
-        return authApiClient()('/api/profile', {
-            method: 'DELETE'
-        })
+        changePassword(payload: any) {
+            return authApi('/profile/password', {
+                method: 'POST',
+                body: payload
+            })
+        },
+
+        delete() {
+            return authApi('/profile', {
+                method: 'DELETE'
+            })
+        }
+
     }
 
 }

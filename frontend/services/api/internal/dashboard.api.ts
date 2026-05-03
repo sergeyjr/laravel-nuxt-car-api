@@ -1,4 +1,4 @@
-import {useNuxtApp} from '#app'
+import {useApi} from '~/composables/useApi'
 
 export interface DashboardResponse {
     orders: any[]
@@ -8,14 +8,16 @@ export interface DashboardResponse {
     cartTotal: number
 }
 
-function authApiClient() {
-    return useNuxtApp().$authApiClient
-}
+export const useDashboardApi = () => {
 
-export const dashboardApi = {
+    const { authApi } = useApi()
 
-    getDashboard(): Promise<DashboardResponse> {
-        return authApiClient()('/dashboard')
+    return {
+
+        getDashboard(): Promise<DashboardResponse> {
+            return authApi('/dashboard')
+        }
+
     }
 
 }

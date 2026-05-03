@@ -1,11 +1,12 @@
 import {defineStore} from 'pinia'
 import {useAlertStore} from './alert'
-import {authApi} from '~/services/api/internal/auth.api'
 import {debugLog} from '~/utils/debug'
+import {useAuthApi} from "~/services/api/internal/auth.api";
 
 const TOKEN_KEY = 'web_session_token'
 
 export const useAuthStore = defineStore('auth', {
+
     state: () => ({
         user: null as any,
         initialized: false,
@@ -72,13 +73,17 @@ export const useAuthStore = defineStore('auth', {
         async fetchUser() {
             debugLog('[auth] fetchUser start')
 
-            if (import.meta.server) {
-                debugLog('[auth] fetchUser skipped on server')
-                return false
-            }
+            // if (import.meta.server) {
+            //     debugLog('[auth] fetchUser skipped on server')
+            //     return false
+            // }
+
+            const authApi = useAuthApi()
 
             try {
+
                 const data: any = await authApi.me()
+
                 debugLog('[auth] fetchUser success:', data)
 
                 this.user = data
@@ -143,9 +148,12 @@ export const useAuthStore = defineStore('auth', {
             this.resetMessages()
 
             const alertStore = useAlertStore()
+            const authApi = useAuthApi()
 
             try {
+
                 const res = await authApi.register(payload)
+
                 debugLog('[auth] register success:', res)
 
                 this.user = null
@@ -177,17 +185,20 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async login(email: string, password: string) {
-            debugLog('[auth] login start:', { email })
+            debugLog('[auth] login start:', {email})
 
             this.loading = true
             this.resetMessages()
 
+            const authApi = useAuthApi()
+
             try {
+
                 const data: any = await authApi.login(email, password)
+
                 debugLog('[auth] login response:', data)
 
                 /**
-                 * ВАЖНО:
                  * Sanctum НЕ возвращает token
                  * user получаем через /me
                  */
@@ -227,8 +238,12 @@ export const useAuthStore = defineStore('auth', {
 
             this.loggingOut = true
 
+            const authApi = useAuthApi()
+
             try {
+
                 await authApi.logout()
+
                 debugLog('[auth] logout api success')
 
             } catch (e) {
@@ -239,6 +254,7 @@ export const useAuthStore = defineStore('auth', {
                 debugLog('[auth] logout finished')
             }
         }
+
     }
 
 })

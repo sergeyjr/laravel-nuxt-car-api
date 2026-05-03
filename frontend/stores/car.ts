@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia'
-import { carApi } from '~/services/api/internal/car.api'
-import { carV1Api } from '~/services/api/external/v1/car.api'
-import { useAlertStore } from './alert'
-import { useAuthStore } from './auth'
-import type { Car, CarsResponse } from '~/types/car'
+import type {Car, CarsResponse} from '~/types/car'
+import {useCarApi} from '~/services/api/internal/car.api'
+import {useCarV1Api} from '~/services/api/external/v1/car.api'
+import {defineStore} from 'pinia'
+import {useAlertStore} from './alert'
+import {useAuthStore} from './auth'
 
 type CarForm = {
     title: string
@@ -19,6 +19,7 @@ type CarForm = {
 }
 
 export const useCarStore = defineStore('car', {
+
     state: () => ({
         cars: [] as Car[],
         meta: null as CarsResponse | null,
@@ -49,58 +50,6 @@ export const useCarStore = defineStore('car', {
 
     actions: {
 
-        showAlert(type: string, message: string) {
-            useAlertStore().add(type, message)
-        },
-
-        clearErrors() {
-            this.errors = {}
-        },
-
-        setError(field: string, message: string) {
-            this.errors[field] = message
-        },
-
-        async fetch(page = 1) {
-            this.loading = true
-            try {
-                const res = await carApi.fetchCars(page)
-                this.cars = res.data || []
-                this.meta = res
-            } catch {
-                this.cars = []
-                this.meta = null
-            } finally {
-                this.loading = false
-            }
-        },
-
-        async fetchCar(id: number) {
-            if (!id) return
-            this.carLoading = true
-            this.car = null
-
-            try {
-                this.car = await carApi.fetchCar(id)
-            } catch {
-                this.car = null
-            } finally {
-                this.carLoading = false
-            }
-        },
-
-        async fetchLatest() {
-            this.latestLoading = true
-
-            try {
-                this.latest = await carApi.fetchLatest()
-            } catch {
-                this.latest = []
-            } finally {
-                this.latestLoading = false
-            }
-        },
-
         validateOptions() {
             const f = this.form
             const required = ['brand', 'model', 'year', 'body', 'mileage'] as const
@@ -127,11 +76,73 @@ export const useCarStore = defineStore('car', {
             this.errors = {}
         },
 
+        showAlert(type: string, message: string) {
+            useAlertStore().add(type, message)
+        },
+
+        clearErrors() {
+            this.errors = {}
+        },
+
+        setError(field: string, message: string) {
+            this.errors[field] = message
+        },
+
+        async fetch(page = 1) {
+            this.loading = true
+
+            const carApi = useCarApi()
+
+            try {
+                const res = await carApi.fetchCars(page)
+                this.cars = res.data || []
+                this.meta = res
+            } catch {
+                this.cars = []
+                this.meta = null
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async fetchCar(id: number) {
+            if (!id) return
+
+            this.carLoading = true
+            this.car = null
+
+            const carApi = useCarApi()
+
+            try {
+                this.car = await carApi.fetchCar(id)
+            } catch {
+                this.car = null
+            } finally {
+                this.carLoading = false
+            }
+        },
+
+        async fetchLatest() {
+            this.latestLoading = true
+
+            const carApi = useCarApi()
+
+            try {
+                this.latest = await carApi.fetchLatest()
+                return this.latest
+            } catch {
+                this.latest = []
+            } finally {
+                this.latestLoading = false
+            }
+        },
+
         async submit() {
             this.clearErrors()
 
             const auth = useAuthStore()
             const missing = this.validateOptions()
+            const carV1Api = useCarV1Api()
 
             if (missing.length) {
                 missing.forEach(f => this.setError(f, 'Обязательно'))
@@ -202,7 +213,10 @@ export const useCarStore = defineStore('car', {
         async generate() {
             this.generating = true
 
+            const carV1Api = useCarV1Api()
+
             try {
+
                 const res = await carV1Api.generateMock()
                 const car = res.data
 
@@ -225,5 +239,7 @@ export const useCarStore = defineStore('car', {
                 this.generating = false
             }
         }
+
     }
+
 })

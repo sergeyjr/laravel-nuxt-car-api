@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
-import {cartApi} from '~/services/api/internal/cart.api'
-import { toRaw } from 'vue'
+import {toRaw} from 'vue'
+import {useCartApi} from '~/services/api/internal/cart.api'
 
 function cleanItems(obj: any) {
     return Object.fromEntries(
@@ -9,6 +9,7 @@ function cleanItems(obj: any) {
 }
 
 export const useCartStore = defineStore('cart', {
+
     state: () => ({
         items: {} as Record<string, any>,
         initialized: false
@@ -37,6 +38,8 @@ export const useCartStore = defineStore('cart', {
         },
 
         async fetch(force = false) {
+            const cartApi = useCartApi()
+
             if (this.initialized && !force) return
             if (!force && Object.keys(this.items).length > 0) {
                 this.initialized = true
@@ -59,6 +62,8 @@ export const useCartStore = defineStore('cart', {
         },
 
         async add(newItem: any) {
+            const cartApi = useCartApi()
+
             const id = newItem.id
             const backup = structuredClone(toRaw(this.items))
 
@@ -88,6 +93,8 @@ export const useCartStore = defineStore('cart', {
         },
 
         async update(id: number, qty: number) {
+            const cartApi = useCartApi()
+
             if (!id || qty < 1) return
 
             const backup = structuredClone(toRaw(this.items))
@@ -107,6 +114,8 @@ export const useCartStore = defineStore('cart', {
         },
 
         async remove(id: number) {
+            const cartApi = useCartApi()
+
             const backup = structuredClone(toRaw(this.items))
 
             delete this.items[id]
@@ -121,6 +130,8 @@ export const useCartStore = defineStore('cart', {
         },
 
         async clear() {
+            const cartApi = useCartApi()
+
             const backup = structuredClone(toRaw(this.items))
 
             this.items = {}
@@ -135,6 +146,8 @@ export const useCartStore = defineStore('cart', {
         },
 
         async checkout(payload: any = {}) {
+            const cartApi = useCartApi()
+
             const backup = structuredClone(toRaw(this.items))
 
             try {
@@ -152,5 +165,7 @@ export const useCartStore = defineStore('cart', {
                 throw e
             }
         }
+
     }
+
 })

@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 
 export const useAlertStore = defineStore('alert', {
+
     state: () => ({
         alerts: [] as {
             id: number
@@ -11,6 +12,7 @@ export const useAlertStore = defineStore('alert', {
     }),
 
     actions: {
+
         add(type: string, message: string) {
             const id = Date.now()
 
@@ -34,5 +36,7 @@ export const useAlertStore = defineStore('alert', {
         clear() {
             this.alerts = []
         }
+
     }
+
 })

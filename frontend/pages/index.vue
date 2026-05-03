@@ -1,14 +1,12 @@
 <script setup>
 
+import BaseButton from '~/components/BaseButton.vue'
 import {computed} from 'vue'
-import {useRouter} from '#app'
-
-import {useAuthStore} from '~/stores/auth'
 import {useAuthActions} from '~/composables/useAuthActions'
+import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
 import {useContactStore} from '~/stores/contact'
-
-import BaseButton from '~/components/BaseButton.vue'
+import {useRouter} from '#app'
 
 // router
 const router = useRouter()
@@ -46,10 +44,7 @@ const swiperOptions = {
 // cars
 const carStore = useCarStore()
 
-await useAsyncData('cars', async () => {
-    await carStore.fetchLatest()
-    return carStore.latest
-})
+await useAsyncData('cars', () => carStore.fetchLatest())
 
 // helpers
 const getImage = (car) => {

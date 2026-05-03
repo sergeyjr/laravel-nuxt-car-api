@@ -1,49 +1,49 @@
-import {useNuxtApp} from '#app'
+import {useApi} from '~/composables/useApi'
 
-function authApiClient() {
-    return useNuxtApp().$authApiClient
-}
+export const useCartApi = () => {
 
-export const cartApi = {
+    const {authApi} = useApi()
 
-    getCart() {
-        return authApiClient()('/cart', {
-            method: 'GET'
-        })
-    },
+    return {
 
-    addItem(payload: { id: number; qty: number }) {
-        return authApiClient()('/cart/add', {
-            method: 'POST',
-            body: payload
-        })
-    },
+        getCart() {
+            return authApi('/cart')
+        },
 
-    updateItem(payload: { id: number; qty: number }) {
-        return authApiClient()('/cart/update', {
-            method: 'POST',
-            body: payload
-        })
-    },
+        addItem(payload: { id: number; qty: number }) {
+            return authApi('/cart/add', {
+                method: 'POST',
+                body: payload
+            })
+        },
 
-    removeItem(id: number) {
-        return authApiClient()('/cart/remove', {
-            method: 'POST',
-            body: {id}
-        })
-    },
+        updateItem(payload: { id: number; qty: number }) {
+            return authApi('/cart/update', {
+                method: 'POST',
+                body: payload
+            })
+        },
 
-    clear() {
-        return authApiClient()('/cart/clear', {
-            method: 'POST'
-        })
-    },
+        removeItem(id: number) {
+            return authApi('/cart/remove', {
+                method: 'POST',
+                body: {id}
+            })
+        },
 
-    checkout(payload: { comment?: string }) {
-        return api()('/orders/checkout', {
-            method: 'POST',
-            body: payload
-        })
+        clear() {
+            return authApi('/cart/clear', {
+                method: 'POST'
+            })
+        },
+
+        checkout(payload: { comment?: string }) {
+            return authApi('/orders/checkout', {
+                method: 'POST',
+                body: payload
+            })
+        }
+
     }
 
 }

@@ -30,6 +30,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             apiBase: 'http://laravel/api',
+            appName: 'Laravel App',
             backendBase: 'http://laravel',
             debugApi: true
         },

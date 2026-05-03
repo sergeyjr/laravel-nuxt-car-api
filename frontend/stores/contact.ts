@@ -1,9 +1,10 @@
 import {defineStore} from 'pinia'
-import {contactApi} from '~/services/api/internal/contact.api'
+import {useContactApi} from '~/services/api/internal/contact.api'
 
 type ContactContext = 'home' | 'contactPage'
 
 export const useContactStore = defineStore('contact', {
+
     state: () => ({
         form: {
             name: '',
@@ -68,6 +69,8 @@ export const useContactStore = defineStore('contact', {
         },
 
         async submit(context: ContactContext = 'home') {
+            const contactApi = useContactApi()
+
             this.loading = true
             this.resetErrors()
             this.resetMessages(context)
@@ -104,5 +107,7 @@ export const useContactStore = defineStore('contact', {
                 this.loading = false
             }
         }
+
     }
+
 })

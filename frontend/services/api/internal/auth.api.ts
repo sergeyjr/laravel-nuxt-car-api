@@ -1,61 +1,54 @@
-import type { ApiResponse } from '~/types/api'
-import type { User, AuthResponse } from '~/types/auth'
-import { useNuxtApp } from '#app'
+import type {ApiResponse} from '~/types/api'
+import type {User, AuthResponse} from '~/types/auth'
+import {useApi} from '~/composables/useApi'
 
-function api() {
-    return useNuxtApp().$api
-}
+export const useAuthApi = () => {
 
-function apiV1() {
-    return useNuxtApp().$apiV1
-}
+    const {authApi, apiV1} = useApi()
 
-function authApiClient() {
-    return useNuxtApp().$authApiClient
-}
+    return {
 
-export const authApi = {
+        // internal
 
-    // SPA (Sanctum Cookie)
+        login(email: string, password: string): Promise<AuthResponse> {
+            return authApi('/auth/login', {
+                method: 'POST',
+                body: {email, password}
+            })
+        },
 
-    async login(email: string, password: string): Promise<AuthResponse> {
-        return authApiClient()('/auth/login', {
-            method: 'POST',
-            body: { email, password }
-        })
-    },
+        register(payload: any): Promise<AuthResponse> {
+            return authApi('/auth/register', {
+                method: 'POST',
+                body: payload
+            })
+        },
 
-    async register(payload: any): Promise<AuthResponse> {
-        return authApiClient()('/auth/register', {
-            method: 'POST',
-            body: payload
-        })
-    },
+        logout(): Promise<ApiResponse<null>> {
+            return authApi('/auth/logout', {
+                method: 'POST'
+            })
+        },
 
-    logout(): Promise<ApiResponse<null>> {
-        return authApiClient()('/auth/logout', {
-            method: 'POST'
-        })
-    },
+        me(): Promise<User> {
+            return authApi('/auth/me')
+        },
 
-    me(): Promise<User> {
-        return authApiClient()('/auth/me')
-    },
+        // external
 
-    // EXTERNAL API (Bearer Token)
+        loginExternal(data: any) {
+            return apiV1('/auth/login', {
+                method: 'POST',
+                body: data
+            })
+        },
 
-    async loginExternal(data: any) {
-        return apiV1()('/auth/login', {
-            method: 'POST',
-            body: data
-        })
-    },
-
-    async registerExternal(data: any) {
-        return apiV1()('/auth/register', {
-            method: 'POST',
-            body: data
-        })
+        registerExternal(data: any) {
+            return apiV1('/auth/register', {
+                method: 'POST',
+                body: data
+            })
+        }
     }
 
 }

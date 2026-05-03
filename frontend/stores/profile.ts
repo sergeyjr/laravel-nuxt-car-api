@@ -1,9 +1,10 @@
 import {defineStore} from 'pinia'
 import {useAuthStore} from './auth'
 import {useAlertStore} from './alert'
-import {profileApi} from '~/services/api/internal/profile.api'
+import {useProfileApi} from '~/services/api/internal/profile.api'
 
 export const useProfileStore = defineStore('profile', {
+
     state: () => ({
         form: {
             name: '',
@@ -28,7 +29,6 @@ export const useProfileStore = defineStore('profile', {
 
     actions: {
 
-        // --- LOAD ---
         load(user: any) {
             if (!user) return
 
@@ -38,7 +38,6 @@ export const useProfileStore = defineStore('profile', {
             this.form.remove_avatar = false
         },
 
-        // --- FILE ---
         onFile(e: Event) {
             const target = e.target as HTMLInputElement
             const file = target.files?.[0] || null
@@ -50,7 +49,6 @@ export const useProfileStore = defineStore('profile', {
             }
         },
 
-        // --- MODAL ---
         openAvatar() {
             this.showAvatarModal = true
         },
@@ -59,15 +57,14 @@ export const useProfileStore = defineStore('profile', {
             this.showAvatarModal = false
         },
 
-        // --- ERRORS ---
         resetErrors() {
             this.errors = {}
         },
 
-        // --- UPDATE PROFILE ---
         async updateProfile() {
             const alert = useAlertStore()
             const auth = useAuthStore()
+            const profileApi = useProfileApi()
 
             this.loading = true
             this.resetErrors()
@@ -112,9 +109,9 @@ export const useProfileStore = defineStore('profile', {
             }
         },
 
-        // --- CHANGE PASSWORD ---
         async changePassword() {
             const alert = useAlertStore()
+            const profileApi = useProfileApi()
 
             this.loading = true
             this.resetErrors()
@@ -146,11 +143,11 @@ export const useProfileStore = defineStore('profile', {
             }
         },
 
-        // --- DELETE ACCOUNT ---
         async deleteAccount() {
             const alert = useAlertStore()
             const auth = useAuthStore()
             const router = useRouter()
+            const profileApi = useProfileApi()
 
             if (!confirm('Удалить аккаунт?')) return
 
@@ -178,5 +175,7 @@ export const useProfileStore = defineStore('profile', {
                 this.loading = false
             }
         }
+
     }
+
 })

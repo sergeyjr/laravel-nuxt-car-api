@@ -1,22 +1,23 @@
-import type {ApiResponse} from '~/types/api'
-import type {Car} from '~/types/car'
-import {useNuxtApp} from '#app'
+import {useApi} from '~/composables/useApi'
 
-function apiV1() {
-    return useNuxtApp().$apiV1
-}
+export const useCarV1Api = () => {
 
-export const carV1Api = {
+    const {apiV1} = useApi()
 
-    async create(payload: any): Promise<ApiResponse<Car>> {
-        return apiV1()('/car/create', {
-            method: 'POST',
-            body: payload
-        })
-    },
+    return {
 
-    async generateMock(): Promise<ApiResponse<Car>> {
-        return apiV1()('/car/generate-mock')
+        create(payload: any) {
+            return apiV1('/cars', {
+                method: 'POST',
+                body: payload
+            })
+        },
+
+        generateMock() {
+            return apiV1('/cars/generate', {
+                method: 'POST'
+            })
+        }
+
     }
-
 }

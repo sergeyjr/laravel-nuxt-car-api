@@ -1,4 +1,5 @@
 <script setup>
+
 import {computed, onMounted} from 'vue'
 import {useAuthStore} from '~/stores/auth'
 import {useDashboardStore} from '~/stores/dashboard'
@@ -13,17 +14,20 @@ onMounted(() => {
 const user = computed(() => auth.user)
 const isApiUser = computed(() => auth.user?.role === 'api')
 
-const ordersCount = computed(() => dashboard.ordersCount)
-const recentOrders = computed(() => dashboard.orders || [])
+const ordersCount = 1 //computed(() => dashboard.ordersCount)
+const recentOrders = 2 //computed(() => dashboard.orders || [])
 
-const cartCount = computed(() =>
-    Object.values(dashboard.cart || {}).reduce(
-        (sum, item) => sum + (item.qty || 0),
-        0
-    )
-)
+const cartCount = 6
 
-const cartTotal = computed(() => dashboard.cartTotal || 0)
+// const cartCount = computed(() =>
+//     Object.values(dashboard.cart || {}).reduce(
+//         (sum, item) => sum + (item.qty || 0),
+//         0
+//     )
+// )
+
+const cartTotal = 5
+//const cartTotal = computed(() => dashboard.cartTotal || 0)
 
 const formatPrice = (v) =>
     new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
@@ -37,6 +41,7 @@ const formatDate = (date) => {
         timeZone: 'Europe/Amsterdam'
     }).format(new Date(date))
 }
+
 </script>
 
 <template>

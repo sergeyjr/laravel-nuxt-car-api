@@ -1,16 +1,18 @@
-import {useNuxtApp} from '#app'
+import {useApi} from '~/composables/useApi'
 
-function api() {
-    return useNuxtApp().$api
-}
+export const useContactApi = () => {
 
-export const contactApi = {
+    const {api} = useApi()
 
-    submit(payload: any) {
-        return api()('/contact', {
-            method: 'POST',
-            body: payload
-        })
+    return {
+
+        submit(payload: any) {
+            return api('/contact', {
+                method: 'POST',
+                body: payload
+            })
+        }
+
     }
 
 }

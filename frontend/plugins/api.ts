@@ -111,7 +111,8 @@ export default defineNuxtPlugin(() => {
     function getCookie(name: string) {
         if (!import.meta.client) return null
         const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
-        return match ? decodeURIComponent(match[1]) : null
+        const value = match?.[1]
+        return value ? decodeURIComponent(value) : null
     }
 
     function withXsrfHeader(options: any) {
@@ -219,7 +220,7 @@ export default defineNuxtPlugin(() => {
 
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            Accept: 'application/json',
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
 

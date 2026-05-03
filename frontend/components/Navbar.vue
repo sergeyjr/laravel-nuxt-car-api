@@ -1,18 +1,18 @@
 <script setup lang="ts">
 
 import {computed, onMounted, ref, watch} from 'vue'
-
+import {useAuthActions} from '~/composables/useAuthActions'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
-import {useAuthActions} from '~/composables/useAuthActions'
 
 const auth = useAuthStore()
+
 const cart = useCartStore()
 
 const {handleLogout} = useAuthActions()
 
 const config = useRuntimeConfig()
-const appName = config.public.appName || 'My App'
+const appName = config.public.appName
 
 const mounted = ref(false)
 

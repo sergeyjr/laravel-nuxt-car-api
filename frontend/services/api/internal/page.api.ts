@@ -1,4 +1,4 @@
-import {useNuxtApp} from '#app'
+import {useApi} from '~/composables/useApi'
 
 export interface PageResponse {
     id: number
@@ -7,14 +7,16 @@ export interface PageResponse {
     content: string
 }
 
-function api() {
-    return useNuxtApp().$api
-}
+export const usePageApi = () => {
 
-export const pageApi = {
+    const {api} = useApi()
 
-    fetchPage(code: string): Promise<PageResponse> {
-        return api()(`/page/${code}`)
+    return {
+
+        fetchPage(code: string): Promise<PageResponse> {
+            return api(`/page/${code}`)
+        }
+
     }
 
 }

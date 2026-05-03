@@ -1,7 +1,8 @@
-import { defineStore } from 'pinia'
-import { orderApi } from '~/services/api/internal/order.api'
+import {defineStore} from 'pinia'
+import {useOrderApi} from '~/services/api/internal/order.api'
 
 export const useOrderStore = defineStore('order', {
+
     state: () => ({
         currentOrder: null as any,
         orders: [] as any[],
@@ -20,6 +21,7 @@ export const useOrderStore = defineStore('order', {
             if (!id) return
 
             const key = String(id)
+            const orderApi = useOrderApi()
 
             this.loading = true
             this.error = null
@@ -52,6 +54,8 @@ export const useOrderStore = defineStore('order', {
             this.loading = true
             this.error = null
 
+            const orderApi = useOrderApi()
+
             try {
                 const data = await orderApi.getOrders()
 
@@ -68,4 +72,5 @@ export const useOrderStore = defineStore('order', {
         }
 
     }
+
 })
