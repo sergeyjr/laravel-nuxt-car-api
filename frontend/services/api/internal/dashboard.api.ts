@@ -10,12 +10,12 @@ export interface DashboardResponse {
 
 export const useDashboardApi = () => {
 
-    const { authApi } = useApi()
+    const { api } = useApi()
 
     return {
 
         getDashboard(): Promise<DashboardResponse> {
-            return authApi('/dashboard')
+            return api('/dashboard')
         }
 
     }

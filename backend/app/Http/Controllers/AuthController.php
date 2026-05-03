@@ -28,6 +28,10 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
+        // АВТОЛОГИН ПОСЛЕ РЕГИСТРАЦИИ (опционально)
+        // Auth::login($user);
+        // $request->session()->regenerate();
+
         // $token = $user->createToken('web_session_token')->plainTextToken;
 
         return $this->success([
@@ -55,18 +59,12 @@ class AuthController extends Controller
             ]);
         }
 
-        /*
-         * авторизует пользователя
-         * записывает его ID в сессию (через guard web)
-         * говорит Laravel: “этот пользователь теперь залогинен”
-         * пользователь считается вошедшим
-         */
-        Auth::guard('web')->login($user);
-
-        $request->session()->regenerate();
+        // Auth::guard('web')->login($user);
+        // $request->session()->regenerate();
 
         $user->tokens()->where('name', 'web_session_token')->delete();
 
+        // TODO: выпилить этот токен
         $token = $user->createToken('web_session_token')->plainTextToken;
 
         return $this->success([
@@ -84,7 +82,7 @@ class AuthController extends Controller
 
         $user?->tokens()->where('name', 'web_session_token')->delete();
 
-        Auth::logout(); // web guard (способ входа и проверки пользователя)
+        // Auth::logout(); // web guard (способ входа и проверки пользователя)
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

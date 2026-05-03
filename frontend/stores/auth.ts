@@ -73,10 +73,10 @@ export const useAuthStore = defineStore('auth', {
         async fetchUser() {
             debugLog('[auth] fetchUser start')
 
-            const authApi = useAuthApi()
+            const api = useAuthApi()
 
             try {
-                const data: any = await authApi.me()
+                const data: any = await api.me()
 
                 debugLog('[auth] fetchUser success:', data)
 
@@ -108,21 +108,18 @@ export const useAuthStore = defineStore('auth', {
                 return this.isAuth
             }
 
-            this.initialized = true
-
-            const token = this.getToken()
-
-            if (!token) {
-                debugLog('[auth] initAuth no token')
-                this.user = null
-                return false
-            }
+            // const token = this.getToken()
+            // if (!token) {
+            //     debugLog('[auth] initAuth no token')
+            //     this.user = null
+            //     this.initialized = true
+            //     return false
+            // }
 
             try {
                 const result = await this.fetchUser()
                 debugLog('[auth] initAuth fetchUser result:', result)
-                return this.isAuth
-
+                return result //this.isAuth
             } catch (e) {
                 debugLog('[auth] initAuth error:', e)
                 this.user = null
@@ -141,11 +138,11 @@ export const useAuthStore = defineStore('auth', {
             this.resetMessages()
 
             const alertStore = useAlertStore()
-            const authApi = useAuthApi()
+            const api = useAuthApi()
 
             try {
 
-                const res = await authApi.register(payload)
+                const res = await api.register(payload)
 
                 debugLog('[auth] register success:', res)
 
@@ -183,29 +180,26 @@ export const useAuthStore = defineStore('auth', {
             this.loading = true
             this.resetMessages()
 
-            const authApi = useAuthApi()
+            const api = useAuthApi()
 
             try {
 
-                const data: any = await authApi.login(email, password)
+                const data: any = await api.login(email, password)
 
                 debugLog('[auth] login response:', data)
 
-                /**
-                 * Sanctum НЕ возвращает token
-                 * user получаем через /me
-                 */
-
-                // fallback (если вдруг backend вернет user)
                 if (data?.user) {
                     this.user = data.user
                 } else {
-                    await this.fetchUser()
+                    await this.fetchUser() // получаем юзера внутри через /me
+                }
+                if (data.token) {
+                    this.setToken(data.token)
                 }
 
                 this.initialized = true
 
-                debugLog('[auth] login success user:', this.user)
+                debugLog('[auth] login success user:', data.user)
 
                 return true
 
@@ -231,11 +225,11 @@ export const useAuthStore = defineStore('auth', {
 
             this.loggingOut = true
 
-            const authApi = useAuthApi()
+            const api = useAuthApi()
 
             try {
 
-                await authApi.logout()
+                await api.logout()
 
                 debugLog('[auth] logout api success')
 

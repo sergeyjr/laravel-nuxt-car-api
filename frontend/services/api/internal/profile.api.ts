@@ -2,26 +2,26 @@ import {useApi} from '~/composables/useApi'
 
 export const useProfileApi = () => {
 
-    const {authApi} = useApi()
+    const {api} = useApi()
 
     return {
 
         update(fd: FormData) {
-            return authApi('/profile/update', {
+            return api('/profile/update', {
                 method: 'POST',
                 body: fd
             })
         },
 
         changePassword(payload: any) {
-            return authApi('/profile/password', {
+            return api('/profile/password', {
                 method: 'POST',
                 body: payload
             })
         },
 
         delete() {
-            return authApi('/profile', {
+            return api('/profile', {
                 method: 'DELETE'
             })
         }

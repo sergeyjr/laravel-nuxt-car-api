@@ -2,6 +2,7 @@
 
 use App\API\V1\Controllers\ApiAuthController;
 use App\API\V1\Controllers\ApiCarController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SiteController;
 use App\Http\Middleware\FixJsonMiddleware;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /**
  * routes/api.php
@@ -71,6 +74,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [OrderController::class, 'index']);
         Route::post('/checkout', [OrderController::class, 'checkout']);
         Route::get('/{id}', [OrderController::class, 'show']);
+    });
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| AUT LOGIN, REGISTER
+|--------------------------------------------------------------------------
+*/
+
+// Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
+
+Route::prefix('auth')->group(function () {
+
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/logout', [AuthController::class, 'logout']);
     });
 
 });

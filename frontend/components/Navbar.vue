@@ -24,14 +24,14 @@ onMounted(async () => {
     }
 })
 
-watch(
-    () => auth.isAuth,
-    async (isAuth) => {
-        if (mounted.value && isAuth) {
-            await cart.fetch()
-        }
-    }
-)
+// watch(
+//     () => auth.isAuth,
+//     async (isAuth) => {
+//         if (mounted.value && isAuth) {
+//             await cart.fetch()
+//         }
+//     }
+// )
 
 const cartCount = computed(() => {
     return Object.values(cart.items || {}).reduce((sum, item: any) => {
@@ -49,6 +49,7 @@ const cartCount = computed(() => {
             </NuxtLink>
 
             <div class="nav-divider d-flex align-items-center">
+
                 <NuxtLink class="nav-link d-inline text-white" to="/cars">
                     Каталог
                 </NuxtLink>
@@ -71,18 +72,19 @@ const cartCount = computed(() => {
                     Инфо (БД)
                 </NuxtLink>
 
-                <template v-if="auth.isAuth">
+                <template v-if="auth.isAuth" key="auth-block">
                     <span class="text-white mx-2">|</span>
 
                     <NuxtLink class="nav-link d-inline text-white" to="/dashboard">
                         Личный кабинет
                     </NuxtLink>
-                </template>
 
-                <template v-if="auth.isAuth">
                     <span class="text-white mx-2">|</span>
 
-                    <NuxtLink class="nav-link d-inline text-white position-relative" to="/cart">
+                    <NuxtLink
+                        class="nav-link d-inline text-white position-relative"
+                        to="/cart"
+                    >
                         Корзина
 
                         <span
@@ -93,26 +95,29 @@ const cartCount = computed(() => {
                             {{ cartCount }}
                         </span>
                     </NuxtLink>
+
+                    <span class="text-white mx-2">|</span>
+
+                    <a
+                        href="#"
+                        class="nav-link d-inline text-white"
+                        @click.prevent="handleLogout"
+                    >
+                        Выход
+                    </a>
                 </template>
 
-                <span class="text-white mx-2">|</span>
+                <template v-else key="guest-block">
+                    <span class="text-white mx-2">|</span>
 
-                <a
-                    v-if="auth.isAuth"
-                    href="#"
-                    class="nav-link d-inline text-white"
-                    @click.prevent="handleLogout"
-                >
-                    Выход
-                </a>
+                    <NuxtLink
+                        class="nav-link d-inline text-white"
+                        to="/login"
+                    >
+                        Вход
+                    </NuxtLink>
+                </template>
 
-                <NuxtLink
-                    v-else
-                    class="nav-link d-inline text-white"
-                    to="/login"
-                >
-                    Вход
-                </NuxtLink>
             </div>
         </div>
     </nav>

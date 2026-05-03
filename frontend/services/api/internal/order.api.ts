@@ -10,16 +10,16 @@ export interface Order {
 
 export const useOrderApi = () => {
 
-    const {authApi} = useApi()
+    const {api} = useApi()
 
     return {
 
         getOrder(id: number | string): Promise<Order> {
-            return authApi(`/orders/${id}`)
+            return api(`/orders/${id}`)
         },
 
         getOrders(): Promise<Order[]> {
-            return authApi('/orders')
+            return api('/orders')
         }
 
     }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\DebugRequest;
 use App\Http\Middleware\EnsureApiRole;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Auth\AuthenticationException;
@@ -18,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        // $middleware->append(DebugRequest::class);
+
+        $middleware->statefulApi();
 
         $middleware->alias([
             'api.role' => EnsureApiRole::class,

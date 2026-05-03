@@ -4,6 +4,5 @@ declare module '#app' {
     interface NuxtApp {
         $api: $Fetch
         $apiV1: $Fetch
-        $authApiClient: $Fetch
     }
 }

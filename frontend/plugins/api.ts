@@ -8,7 +8,7 @@ export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig()
 
     const IGNORE_ALERT_STATUSES = [401, 403]
-    const IGNORE_ALERT_URLS = ['/auth/me']
+    const IGNORE_ALERT_URLS = ['']//['/auth/me']
 
     let csrfCookieObtained = false
 
@@ -21,21 +21,27 @@ export default defineNuxtPlugin(() => {
     */
 
     async function ensureCsrfCookie() {
+        console.log('ensureCsrfCookie')
         if (csrfCookieObtained) return
-        //if (import.meta.server) return
+        console.log('csrfCookieObtained')
+
+        if (import.meta.server) return
 
         try {
+            console.log('ensureCsrfCookie TRY')
+
             await $fetch('/sanctum/csrf-cookie', {
                 baseURL: config.public.backendBase,
                 credentials: 'include',
                 headers: {
-                    Accept: 'application/json',
+                    'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
+            console.log('csrfCookieObtained true')
 
             csrfCookieObtained = true
-            debugLog('[api] ✓ CSRF cookie obtained')
+            debugLog('[api] CSRF cookie obtained')
         } catch (e) {
             console.error('CSRF cookie failed:', e)
         }
@@ -138,7 +144,7 @@ export default defineNuxtPlugin(() => {
 
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            Accept: 'application/json',
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
 
@@ -146,7 +152,7 @@ export default defineNuxtPlugin(() => {
             const method = (options.method || 'GET').toUpperCase()
             const skipCsrf = (options as any).skipCsrf
 
-            console.log('[api req] SPA API', method, options.baseURL || '')
+            console.log('[api req] SPA API', method)
 
             if (
                 import.meta.client &&
@@ -154,7 +160,21 @@ export default defineNuxtPlugin(() => {
                 ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
             ) {
                 await ensureCsrfCookie()
+                withXsrfHeader(options)
+            } else {
+                if (import.meta.server) {
+                    const reqHeaders = useRequestHeaders(['cookie'])
+
+                    const headers = new Headers(options.headers as HeadersInit)
+
+                    if (reqHeaders.cookie) {
+                        headers.set('cookie', reqHeaders.cookie)
+                    }
+
+                    options.headers = headers
+                }
             }
+
         },
 
         onResponse({response, request}) {
@@ -164,6 +184,7 @@ export default defineNuxtPlugin(() => {
         onResponseError({response, request}) {
             handleErrors(response, request)
         }
+
     })
 
     /*
@@ -184,7 +205,7 @@ export default defineNuxtPlugin(() => {
 
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            Accept: 'application/json',
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
 
@@ -193,7 +214,7 @@ export default defineNuxtPlugin(() => {
             const auth = useAuthStore()
             const token = auth.getToken?.() || sessionTokenCookie.value
 
-            console.log('[api req] EXTERNAL API V1', method, options.baseURL || '')
+            console.log('[api req] EXTERNAL API V1', method)
 
             if (!token) return
 
@@ -209,51 +230,13 @@ export default defineNuxtPlugin(() => {
         onResponseError({response, request}) {
             handleErrors(response, request)
         }
-    })
 
-    /*
-    |--------------------------------------------------------------------------
-    | AUTH CLIENT (NO /api prefix, direct backend)
-    |--------------------------------------------------------------------------
-    */
-
-    const authApiClient = $fetch.create({
-
-        baseURL: config.public.backendBase, // http://laravel
-
-        credentials: 'include',
-
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-
-        async onRequest({options}) {
-            const method = (options.method || 'GET').toUpperCase()
-
-            console.log('[api req] AUTH CLIENT', method, options.baseURL || '')
-
-            if (import.meta.client && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-                await ensureCsrfCookie()
-                withXsrfHeader(options)
-            }
-        },
-
-        onResponse({response, request}) {
-            normalizeResponse(response, request)
-        },
-
-        onResponseError({response, request}) {
-            handleErrors(response, request)
-        }
     })
 
     return {
         provide: {
             api,
             apiV1,
-            authApiClient,
             ensureCsrfCookie
         }
     }

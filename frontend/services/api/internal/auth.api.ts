@@ -4,34 +4,34 @@ import {useApi} from '~/composables/useApi'
 
 export const useAuthApi = () => {
 
-    const {authApi, apiV1} = useApi()
+    const {api, apiV1} = useApi()
 
     return {
 
         // internal
 
         login(email: string, password: string): Promise<AuthResponse> {
-            return authApi('/auth/login', {
+            return api('/auth/login', {
                 method: 'POST',
                 body: {email, password}
             })
         },
 
         register(payload: any): Promise<AuthResponse> {
-            return authApi('/auth/register', {
+            return api('/auth/register', {
                 method: 'POST',
                 body: payload
             })
         },
 
         logout(): Promise<ApiResponse<null>> {
-            return authApi('/auth/logout', {
+            return api('/auth/logout', {
                 method: 'POST'
             })
         },
 
         me(): Promise<User> {
-            return authApi('/auth/me')
+            return api('/auth/me')
         },
 
         // external
