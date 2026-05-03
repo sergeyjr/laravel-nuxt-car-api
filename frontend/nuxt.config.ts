@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
 
     // Dev debug-режим
-    debug: false,
+    debug: true,
 
     // Nuxt DevTools
     devtools: {

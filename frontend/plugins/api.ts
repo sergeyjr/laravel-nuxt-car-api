@@ -22,7 +22,7 @@ export default defineNuxtPlugin(() => {
 
     async function ensureCsrfCookie() {
         if (csrfCookieObtained) return
-        if (import.meta.server) return
+        //if (import.meta.server) return
 
         try {
             await $fetch('/sanctum/csrf-cookie', {
@@ -146,6 +146,8 @@ export default defineNuxtPlugin(() => {
             const method = (options.method || 'GET').toUpperCase()
             const skipCsrf = (options as any).skipCsrf
 
+            console.log('[api req] SPA API', method, options.baseURL || '')
+
             if (
                 import.meta.client &&
                 !skipCsrf &&
@@ -187,8 +189,11 @@ export default defineNuxtPlugin(() => {
         },
 
         onRequest({options}) {
+            const method = (options.method || 'GET').toUpperCase()
             const auth = useAuthStore()
             const token = auth.getToken?.() || sessionTokenCookie.value
+
+            console.log('[api req] EXTERNAL API V1', method, options.baseURL || '')
 
             if (!token) return
 
@@ -226,6 +231,8 @@ export default defineNuxtPlugin(() => {
 
         async onRequest({options}) {
             const method = (options.method || 'GET').toUpperCase()
+
+            console.log('[api req] AUTH CLIENT', method, options.baseURL || '')
 
             if (import.meta.client && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
                 await ensureCsrfCookie()

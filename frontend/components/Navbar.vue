@@ -42,7 +42,7 @@ const cartCount = computed(() => {
 </script>
 
 <template>
-    <nav v-if="auth.initialized" class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <NuxtLink class="navbar-brand text-white text-decoration-none" to="/">
                 {{ appName }}

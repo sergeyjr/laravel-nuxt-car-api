@@ -1,49 +1,27 @@
-import {useAuthStore} from '~/stores/auth'
-import {useAuthApi} from '~/services/api/internal/auth.api'
+import { useAuthStore } from '~/stores/auth'
 
 export default defineNuxtRouteMiddleware(async (to) => {
-
     const auth = useAuthStore()
 
     const isDashboard = to.path.startsWith('/dashboard')
     const isLogin = to.path === '/login'
 
-    // ---------------------------
-    // SSR / server-safe init
-    // ---------------------------
+    console.log('[mw]', to.fullPath, {
+        initialized: auth.initialized,
+        isAuth: auth.isAuth
+    })
 
     if (import.meta.server) {
+        const token = auth.getToken()
 
-        if (isDashboard && !auth.isAuth) {
+        if (isDashboard && !token) {
             return navigateTo('/login')
         }
 
         return
     }
 
-    // ---------------------------
-    // hydrate auth only once
-    // ---------------------------
-
-    if (!auth.initialized) {
-
-        const authApi = useAuthApi()
-
-        try {
-            const res: any = await authApi.me()
-
-            auth.user = res?.user ?? res
-
-        } catch {
-            auth.user = null
-        } finally {
-            auth.initialized = true
-        }
-    }
-
-    // ---------------------------
-    // guards
-    // ---------------------------
+    await auth.initAuth()
 
     if (!auth.isAuth && isDashboard) {
         return navigateTo('/login')
@@ -52,5 +30,4 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (auth.isAuth && isLogin) {
         return navigateTo('/dashboard')
     }
-
 })

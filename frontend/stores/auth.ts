@@ -73,15 +73,9 @@ export const useAuthStore = defineStore('auth', {
         async fetchUser() {
             debugLog('[auth] fetchUser start')
 
-            // if (import.meta.server) {
-            //     debugLog('[auth] fetchUser skipped on server')
-            //     return false
-            // }
-
             const authApi = useAuthApi()
 
             try {
-
                 const data: any = await authApi.me()
 
                 debugLog('[auth] fetchUser success:', data)
@@ -121,7 +115,6 @@ export const useAuthStore = defineStore('auth', {
             if (!token) {
                 debugLog('[auth] initAuth no token')
                 this.user = null
-                this.initialized = true
                 return false
             }
 
