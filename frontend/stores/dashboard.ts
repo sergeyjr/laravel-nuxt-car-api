@@ -1,66 +1,60 @@
 import {defineStore} from 'pinia'
 import {useDashboardApi, type DashboardResponse} from '~/services/api/internal/dashboard.api'
 
-export const useDashboardStore = defineStore('dashboard',
+export const useDashboardStore = defineStore('dashboard', {
 
-    state
-:
-() => ({
-    orders: [] as any[],
-    ordersCount: 0,
-    carsCount: 0,
+    state: () => ({
+        orders: [] as any[],
+        ordersCount: 0,
+        carsCount: 0,
 
-    cart: {} as Record<string, any>,
-    cartTotal: 0,
+        cart: {} as Record<string, any>,
+        cartTotal: 0,
 
-    loading: false,
-    loaded: false,
-    error: null as any,
+        loading: false,
+        loaded: false,
+        error: null as any,
 
-    _promise: null as Promise<void> | null
-}),
+        _promise: null as Promise<void> | null
+    }),
 
-    actions
-:
-{
+    actions: {
 
-    async
-    fetchDashboard(force = false)
-    {
-        const dashboardApi = useDashboardApi()
+        async fetchDashboard(force = false) {
+            const dashboardApi = useDashboardApi()
 
-        if (this._promise && !force) return this._promise
-        if (this.loaded && !force) return
+            if (this._promise && !force) return this._promise
+            if (this.loaded && !force) return
 
-        this.loading = true
-        this.error = null
+            this.loading = true
+            this.error = null
 
-        this._promise = (async () => {
-            try {
-                const data: DashboardResponse = await dashboardApi.getDashboard()
+            this._promise = (async () => {
+                try {
+                    const data: DashboardResponse = await dashboardApi.getDashboard()
 
-                this.carsCount = data.carsCount ?? 0
-                this.ordersCount = data.ordersCount ?? 0
-                this.orders = data.orders ?? []
+                    this.carsCount = data.carsCount ?? 0
+                    this.ordersCount = data.ordersCount ?? 0
+                    this.orders = data.orders ?? []
 
-                this.cart = data.cart ?? {}
-                this.cartTotal = data.cartTotal ?? 0
+                    this.cart = data.cart ?? {}
+                    this.cartTotal = data.cartTotal ?? 0
 
-                this.loaded = true
+                    this.loaded = true
 
-            } catch (e: any) {
-                this.error = e
-                console.error('Dashboard error:', e)
+                } catch (e: any) {
+                    this.error = e
+                    console.error('Dashboard error:', e)
 
-            } finally {
-                this.loading = false
-                this._promise = null
-            }
-        })()
+                } finally {
+                    this.loading = false
+                    this._promise = null
+                }
+            })()
 
-        return this._promise
+            return this._promise
+        }
+
     }
-
-}
 
 })
