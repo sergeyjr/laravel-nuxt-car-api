@@ -20,18 +20,24 @@ export const usePageStore = defineStore('pages', {
     actions: {
 
         async fetch(code: string) {
-            if (!code) return
+            if (!code) return null
 
-            this.loading = true
             this.error = null
             this.activeCode = code
+
+            const cached = this.pages[code]
+            if (cached) {
+                this.loading = false
+                return cached
+            }
+
+            this.loading = true
 
             const pageApi = usePageApi()
 
             try {
                 const data = await pageApi.fetchPage(code)
 
-                // кешируем по коду
                 this.pages[code] = data
 
                 return data
@@ -54,6 +60,8 @@ export const usePageStore = defineStore('pages', {
         clearCache() {
             this.pages = {}
             this.activeCode = null
+            this.loading = false
+            this.error = null
         }
 
     }

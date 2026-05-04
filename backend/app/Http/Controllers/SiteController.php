@@ -62,9 +62,8 @@ class SiteController extends Controller
 
         Contact::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ваше сообщение успешно отправлено!'
+        return $this->success([
+            'message' => 'Ваше сообщение успешно отправлено.',
         ]);
 
     }

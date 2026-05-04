@@ -10,7 +10,7 @@ export interface DashboardResponse {
 
 export const useDashboardApi = () => {
 
-    const { api } = useApi()
+    const {api} = useApi()
 
     return {
 

@@ -117,7 +117,7 @@ watch(
                                 Авторизуйтесь, чтобы увидеть цену
                             </button>
 
-                            <AuthModal v-model="showAuth" />
+                            <AuthModal v-model="showAuth"/>
                         </p>
                     </div>
 
@@ -149,7 +149,7 @@ watch(
 
             <hr>
 
-            <NuxtLink to="/cars" class="btn btn-outline-secondary">
+            <NuxtLink to="/cars" class="btn btn-secondary">
                 В каталог
             </NuxtLink>
 

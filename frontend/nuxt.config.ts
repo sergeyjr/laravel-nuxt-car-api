@@ -14,7 +14,7 @@ export default defineNuxtConfig({
         enabled: false
     },
 
-    // SSR (серверный рендеринг)
+    // SSR (серверный рендеринг HTML)
     ssr: true,
 
     // Глобальные стили проекта
@@ -29,9 +29,9 @@ export default defineNuxtConfig({
     // Конфигурация окружений (SSR + client)
     runtimeConfig: {
         public: {
-            apiBase: 'http://laravel/api',
+            apiBase: 'http://laravel/api', // для /api/*
             appName: 'Laravel App',
-            backendBase: 'http://laravel',
+            backendBase: 'http://laravel', // для /sanctum/csrf-cookie
             debugApi: true
         },
     },
@@ -45,7 +45,7 @@ export default defineNuxtConfig({
     // Vite сборка
     vite: {
         build: {
-            // отключение минификации в dev (ускоряет сборку/отладку)
+            // минификация в dev (включение ускоряет сборку/отладку)
             minify: false
         },
 

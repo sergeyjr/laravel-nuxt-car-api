@@ -1,10 +1,19 @@
 <script setup>
 
-import { useContactStore } from '~/stores/contact'
+import {useContactStore} from '~/stores/contact'
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
+import BaseTextarea from '~/components/BaseTextarea.vue'
 
 const store = useContactStore()
+
+const onSubmit = async (e) => {
+    if (!e.target.checkValidity()) {
+        return
+    }
+
+    await store.submit('contactPage')
+}
 
 </script>
 
@@ -16,7 +25,16 @@ const store = useContactStore()
                 <h1 class="mb-4">Контактная форма</h1>
 
                 <div v-if="store.contexts.contactPage.successMessage" class="alert alert-success">
-                    {{ store.contexts.contactPage.successMessage }}
+
+                    <div>
+                        {{ store.contexts.contactPage.successMessage }}
+                    </div>
+
+                    <div v-if="store.successCountdown !== null" class="mt-1 small text-muted">
+                        Следующее сообщение можно отправить через
+                        <strong>{{ store.successCountdown }}</strong> сек
+                    </div>
+
                 </div>
 
                 <div v-if="store.contexts.contactPage.errorMessage" class="alert alert-danger">
@@ -24,10 +42,10 @@ const store = useContactStore()
                 </div>
 
                 <div v-if="store.retryAfter" class="alert alert-warning mt-4">
-                    Подождите {{ store.retryAfter }} сек перед повторной отправкой
+                    Подождите {{ store.retryAfter }} сек
                 </div>
 
-                <form @submit.prevent="store.submit">
+                <form @submit.prevent="onSubmit">
 
                     <BaseInput
                         v-model="store.form.name"
@@ -53,9 +71,8 @@ const store = useContactStore()
                         :error="store.errors.subject"
                     />
 
-                    <BaseInput
+                    <BaseTextarea
                         v-model="store.form.body"
-                        type="textarea"
                         label="Сообщение"
                         required
                         :error="store.errors.body"

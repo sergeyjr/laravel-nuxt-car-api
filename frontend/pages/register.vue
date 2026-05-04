@@ -85,7 +85,9 @@ const submit = async () => {
 
                     <BaseInput
                         v-model="name"
+                        type="text"
                         label="Имя"
+                        required
                         :error="store.errors.name"
                     />
 
@@ -93,6 +95,7 @@ const submit = async () => {
                         v-model="email"
                         type="email"
                         label="Email"
+                        required
                         :error="store.errors.email"
                     />
 
@@ -100,6 +103,7 @@ const submit = async () => {
                         v-model="password"
                         type="password"
                         label="Пароль"
+                        required
                         :error="store.errors.password"
                     />
 
@@ -107,6 +111,7 @@ const submit = async () => {
                         v-model="password_confirmation"
                         type="password"
                         label="Повтор пароля"
+                        required
                         :error="store.errors.password_confirmation"
                     />
 

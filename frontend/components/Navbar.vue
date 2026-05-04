@@ -1,94 +1,108 @@
 <script setup lang="ts">
 
-import {computed, onMounted, ref, watch} from 'vue'
+import {computed, watch} from 'vue'
+import {useRoute} from 'vue-router'
 import {useAuthActions} from '~/composables/useAuthActions'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
 const auth = useAuthStore()
-
 const cart = useCartStore()
+const route = useRoute()
 
 const {handleLogout} = useAuthActions()
 
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
-const mounted = ref(false)
+/* грузим корзину при логине (и при первой загрузке) */
+watch(
+    () => auth.isAuth,
+    async (isAuth) => {
+        if (isAuth && !cart.initialized) {
+            await cart.fetch()
+        }
+    },
+    {immediate: true}
+)
 
-onMounted(async () => {
-    mounted.value = true
-
-    if (auth.isAuth) {
-        await cart.fetch()
-    }
-})
-
-// watch(
-//     () => auth.isAuth,
-//     async (isAuth) => {
-//         if (mounted.value && isAuth) {
-//             await cart.fetch()
-//         }
-//     }
-// )
-
+/* количество товаров */
 const cartCount = computed(() => {
     return Object.values(cart.items || {}).reduce((sum, item: any) => {
         return item ? sum + Number(item.qty || 0) : sum
     }, 0)
 })
 
+/* активная ссылка */
+const isActive = (path: string) => {
+    return route.path.startsWith(path)
+}
+
 </script>
 
 <template>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <NuxtLink class="navbar-brand text-white text-decoration-none" to="/">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container d-flex justify-content-between align-items-center">
+
+            <!-- логотип -->
+            <NuxtLink class="navbar-brand text-white" to="/">
                 {{ appName }}
             </NuxtLink>
 
-            <div class="nav-divider d-flex align-items-center">
+            <!-- меню -->
+            <div class="d-flex flex-wrap gap-2">
 
-                <NuxtLink class="nav-link d-inline text-white" to="/cars">
+                <NuxtLink
+                    to="/cars"
+                    class="btn btn-sm"
+                    :class="isActive('/cars') ? 'btn-primary' : 'btn-outline-light'"
+                >
                     Каталог
                 </NuxtLink>
 
-                <span class="text-white mx-2">|</span>
-
-                <NuxtLink class="nav-link d-inline text-white" to="/contact">
+                <NuxtLink
+                    to="/contact"
+                    class="btn btn-sm"
+                    :class="isActive('/contact') ? 'btn-primary' : 'btn-outline-light'"
+                >
                     Контакты
                 </NuxtLink>
 
-                <span class="text-white mx-2">|</span>
-
-                <NuxtLink class="nav-link d-inline text-white" to="/page/about">
+                <NuxtLink
+                    to="/page/about"
+                    class="btn btn-sm"
+                    :class="isActive('/page/about') ? 'btn-primary' : 'btn-outline-light'"
+                >
                     О проекте
                 </NuxtLink>
 
-                <span class="text-white mx-2">|</span>
-
-                <NuxtLink class="nav-link d-inline text-white" to="/page/info">
-                    Инфо (БД)
+                <NuxtLink
+                    to="/page/info"
+                    class="btn btn-sm"
+                    :class="isActive('/page/info') ? 'btn-primary' : 'btn-outline-light'"
+                >
+                    Инфо
                 </NuxtLink>
 
-                <template v-if="auth.isAuth" key="auth-block">
-                    <span class="text-white mx-2">|</span>
-
-                    <NuxtLink class="nav-link d-inline text-white" to="/dashboard">
-                        Личный кабинет
-                    </NuxtLink>
-
-                    <span class="text-white mx-2">|</span>
+                <template v-if="auth.isAuth">
 
                     <NuxtLink
-                        class="nav-link d-inline text-white position-relative"
+                        to="/dashboard"
+                        class="btn btn-sm"
+                        :class="isActive('/dashboard') ? 'btn-primary' : 'btn-outline-light'"
+                    >
+                        Кабинет
+                    </NuxtLink>
+
+                    <NuxtLink
                         to="/cart"
+                        class="btn btn-sm position-relative"
+                        :class="isActive('/cart') ? 'btn-primary' : 'btn-outline-light'"
                     >
                         Корзина
 
                         <span
-                            v-if="mounted && cart.initialized && cartCount > 0"
+                            v-if="cart.initialized && cartCount > 0"
                             class="badge bg-danger ms-1"
                             style="font-size: 11px;"
                         >
@@ -96,26 +110,25 @@ const cartCount = computed(() => {
                         </span>
                     </NuxtLink>
 
-                    <span class="text-white mx-2">|</span>
-
-                    <a
-                        href="#"
-                        class="nav-link d-inline text-white"
-                        @click.prevent="handleLogout"
+                    <button
+                        class="btn btn-sm btn-outline-danger"
+                        @click="handleLogout"
                     >
                         Выход
-                    </a>
+                    </button>
+
                 </template>
 
-                <template v-else key="guest-block">
-                    <span class="text-white mx-2">|</span>
+                <template v-else>
 
                     <NuxtLink
-                        class="nav-link d-inline text-white"
                         to="/login"
+                        class="btn btn-sm"
+                        :class="isActive('/login') ? 'btn-primary' : 'btn-outline-light'"
                     >
                         Вход
                     </NuxtLink>
+
                 </template>
 
             </div>
@@ -126,16 +139,23 @@ const cartCount = computed(() => {
 <style scoped>
 
 .navbar {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-.navbar .nav-link {
-    transition: 0.2s;
+.btn {
+    transition: all 0.2s ease;
 }
 
-.navbar .nav-link:hover {
-    opacity: 0.8;
-    text-decoration: underline;
+.btn-outline-light {
+    border: none;
+}
+
+.btn-outline-light:hover {
+    border-color: #fff;
+}
+
+.btn-primary {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
 </style>

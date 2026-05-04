@@ -18,6 +18,7 @@ export const useContactStore = defineStore('contact', {
 
         retryAfter: null as number | null,
         timer: null as ReturnType<typeof setInterval> | null,
+        successCountdown: null as number | null,
 
         contexts: {
             home: {
@@ -68,6 +69,24 @@ export const useContactStore = defineStore('contact', {
             }, 1000)
         },
 
+        startSuccessCountdown() {
+            if (!this.retryAfter) return
+
+            this.successCountdown = this.retryAfter
+
+            if (this.timer) clearInterval(this.timer)
+
+            this.timer = setInterval(() => {
+                if (this.successCountdown && this.successCountdown > 0) {
+                    this.successCountdown--
+                } else {
+                    if (this.timer) clearInterval(this.timer)
+                    this.timer = null
+                    this.successCountdown = null
+                }
+            }, 1000)
+        },
+
         async submit(context: ContactContext = 'home') {
             const contactApi = useContactApi()
 
@@ -78,28 +97,33 @@ export const useContactStore = defineStore('contact', {
             try {
                 const data: any = await contactApi.submit(this.form)
 
+                debugLog(data)
+
                 this.resetForm()
 
                 this.contexts[context].successMessage =
                     data?.message || 'Сообщение отправлено'
 
+                this.startSuccessCountdown()
+
             } catch (e: any) {
 
-                const status = e?.response?.status
+                const status = e?.status
+                const data = e?.data
 
                 if (status === 422) {
-                    this.errors = e.response.data?.errors || {}
+                    this.errors = data?.errors || {}
                     return
                 }
 
                 if (status === 429) {
-                    this.retryAfter = e.response.data?.retry_after ?? null
+                    this.retryAfter = data?.retry_after ?? null
                     this.startCountdown()
                     return
                 }
 
                 this.contexts[context].errorMessage =
-                    'Ошибка отправки формы'
+                    data?.message || 'Ошибка отправки формы'
 
                 console.error('Contact error:', e)
 
