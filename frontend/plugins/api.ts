@@ -117,6 +117,62 @@ export default defineNuxtPlugin(() => {
         options.headers = headers
     }
 
+    function prettyOptions(options: any) {
+        const headers = options.headers instanceof Headers
+            ? Object.fromEntries(options.headers.entries())
+            : options.headers
+
+        return {
+            url: options.baseURL + (options.url || ''),
+            method: options.method || 'GET',
+            query: options.query || null,
+            body: options.body || null,
+            headers: headers || {},
+            credentials: options.credentials || null
+        }
+    }
+
+    function debugRequest(name: string, options: any) {
+        console.group(`🟡 ${name} REQUEST`)
+        console.log(prettyOptions(options))
+        console.groupEnd()
+    }
+
+    function debugResponse(name: string, response: any, request: any) {
+        console.group(`🟢 ${name} RESPONSE`)
+        console.log('url:', request)
+        console.log('status:', response.status)
+        console.log('data:', response._data)
+        console.groupEnd()
+    }
+
+    function debugError(name: string, response: any, request: any) {
+        console.group(`🔴 ${name} ERROR`)
+        console.log('url:', request)
+        console.log('status:', response.status)
+        console.log('data:', response._data)
+        console.groupEnd()
+    }
+
+    function debugTokenFlow(name: string) {
+        const token = tokenCookie.value
+        const xsrf = xsrfToken.value
+
+        console.group(`${name} TOKENS`)
+
+        console.log('cookie token (web_session_token):', token)
+        console.log('Authorization header:', token ? `Bearer ${token}` : null)
+
+        console.log('XSRF cookie:', xsrf)
+        console.log('XSRF header (will be sent):', xsrf ? decodeURIComponent(xsrf) : null)
+
+        console.groupEnd()
+    }
+
+    function trace(label: string) {
+        return `[TRACE ${label}] ${Date.now()}`
+    }
+
     const csrf = $fetch.create({
 
         baseURL: config.public.backendBase,
@@ -127,18 +183,19 @@ export default defineNuxtPlugin(() => {
         },
 
         onRequest({options}) {
-            debugLog('csrf', options)
+            debugLog('csrf onRequest', options)
+
             applySsrCookie(options)
         },
 
         onResponse({response, request}) {
-            debugLog('response', response)
-            debugLog('request', request)
+            debugLog('csrf request onResponse', request)
+            debugLog('csrf response onResponse', response)
         },
 
         onResponseError({response, request}) {
-            debugLog('response err', response)
-            debugLog('request err', request)
+            debugLog('csrf request onResponseError', request)
+            debugLog('csrf response onResponseError', response)
         }
 
     })
@@ -150,7 +207,9 @@ export default defineNuxtPlugin(() => {
         headers: defaultHeaders,
 
         onRequest({options}) {
-            debugLog('backend', options)
+            debugLog('backend onRequest', options)
+            debugTokenFlow('backend BEFORE APPLY')
+
             applySsrCookie(options)
             /*
             fetch (в отличие от axios) не добавляет автоматически заголовок X-XSRF-TOKEN,
@@ -165,17 +224,24 @@ export default defineNuxtPlugin(() => {
             это устраняет ошибку 419 CSRF token mismatch в web.php маршрутах
             */
             applyXsrfHeader(options)
+            debugTokenFlow('backend AFTER APPLY')
+
+            console.log('backend FINAL REQUEST HEADERS:', Object.fromEntries(
+                (options.headers instanceof Headers
+                    ? options.headers.entries()
+                    : Object.entries(options.headers || {}))
+            ))
         },
 
         onResponse({response, request}) {
-            debugLog('response', response)
-            debugLog('request', request)
+            debugLog('backend response onResponse', response._data)
+            console.log(trace('RESPONSE OK'), request, response.status)
+
             normalizeResponse(response, request)
         },
 
         onResponseError({response, request}) {
-            debugLog('response err', response)
-            debugLog('request err', request)
+            debugLog('backend response onResponseError', response)
             handleErrors(response, request)
         }
 
@@ -188,19 +254,27 @@ export default defineNuxtPlugin(() => {
         headers: defaultHeaders,
 
         onRequest({options}) {
-            debugLog('api', options)
+            debugLog('api onRequest', options)
+            debugTokenFlow('api BEFORE APPLY')
             applySsrCookie(options)
+            debugTokenFlow('api AFTER APPLY')
+
+            console.log('api FINAL REQUEST HEADERS:', Object.fromEntries(
+                (options.headers instanceof Headers
+                    ? options.headers.entries()
+                    : Object.entries(options.headers || {}))
+            ))
         },
 
         onResponse({response, request}) {
-            debugLog('response', response)
-            debugLog('request', request)
+            debugLog('api response onResponse', response)
+            console.log(trace('RESPONSE OK'), request, response.status)
+
             normalizeResponse(response, request)
         },
 
         onResponseError({response, request}) {
-            debugLog('response err', response)
-            debugLog('request err', request)
+            debugLog('api response onResponseError', response)
             handleErrors(response, request)
         }
 
@@ -213,7 +287,11 @@ export default defineNuxtPlugin(() => {
 
         onRequest({options}) {
             debugLog('apiToken', options)
+
+            debugTokenFlow('apiToken BEFORE APPLY')
             applyBearerToken(options)
+            debugTokenFlow('apiToken AFTER APPLY')
+
             if (import.meta.server && ssrCookie) {
                 const headers = new Headers(options.headers as HeadersInit)
                 headers.set('cookie', ssrCookie)
@@ -231,13 +309,23 @@ export default defineNuxtPlugin(() => {
             //     headers.set('cookie', ssrCookie)
             // }
             // options.headers = headers
+
+            console.log('apiToken FINAL REQUEST HEADERS:', Object.fromEntries(
+                (options.headers instanceof Headers
+                    ? options.headers.entries()
+                    : Object.entries(options.headers || {}))
+            ))
         },
 
         onResponse({response, request}) {
+            debugResponse('apiToken', response, request)
+            console.log(trace('RESPONSE OK'), request, response.status)
+
             normalizeResponse(response, request)
         },
 
         onResponseError({response, request}) {
+            debugError('apiToken', response, request)
             handleErrors(response, request)
         }
 
@@ -250,7 +338,11 @@ export default defineNuxtPlugin(() => {
 
         onRequest({options}) {
             debugLog('apiV1', options)
+
+            debugTokenFlow('apiV1 BEFORE APPLY')
             applyBearerToken(options)
+            debugTokenFlow('apiV1 AFTER APPLY')
+
             if (import.meta.server && ssrCookie) {
                 const headers = new Headers(options.headers as HeadersInit)
                 headers.set('cookie', ssrCookie)
@@ -268,13 +360,23 @@ export default defineNuxtPlugin(() => {
             //     headers.set('cookie', ssrCookie)
             // }
             // options.headers = headers
+
+            console.log('apiV1 FINAL REQUEST HEADERS:', Object.fromEntries(
+                (options.headers instanceof Headers
+                    ? options.headers.entries()
+                    : Object.entries(options.headers || {}))
+            ))
         },
 
         onResponse({response, request}) {
+            debugResponse('apiV1', response, request)
+            console.log(trace('RESPONSE OK'), request, response.status)
+
             normalizeResponse(response, request)
         },
 
         onResponseError({response, request}) {
+            debugError('apiV1', response, request)
             handleErrors(response, request)
         }
 

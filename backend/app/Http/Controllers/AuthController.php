@@ -58,9 +58,13 @@ class AuthController extends Controller
         // Auth::guard('web')->login($user);
 
         $request->session()->regenerate();
+        $user->tokens()->where('name', 'web_session_token')->delete();
+
+        $token = $user->createToken('web_session_token')->plainTextToken;
 
         return $this->success([
             'user' => $user,
+            'token' => $token,
         ]);
 
     }

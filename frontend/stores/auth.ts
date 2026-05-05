@@ -31,11 +31,14 @@ export const useAuthStore = defineStore('auth', {
         },
 
         getToken() {
-            return this.token ?? useCookie<string | null>('web_session_token').value
+            let token = this.token ?? useCookie<string | null>('web_session_token').value
+            debugLog('getToken', token)
+            return token
         },
 
         setToken(token: string | null) {
             this.token = token
+            debugLog('setToken', token)
             useCookie<string | null>('web_session_token', {
                 path: '/',
                 sameSite: 'lax',
@@ -45,6 +48,7 @@ export const useAuthStore = defineStore('auth', {
 
         clearToken() {
             this.token = null
+            debugLog('clearToken')
             useCookie<string | null>('web_session_token', {
                 path: '/',
                 sameSite: 'lax',
@@ -126,24 +130,18 @@ export const useAuthStore = defineStore('auth', {
             this.errors = {}
             const api = useAuthApi()
             try {
-                //const data: any = await api.login(email, password)
+                const data: any = await api.login(email, password)
 
-                const webRes: any = await api.loginWeb(email, password)
-                const tokenRes: any = await api.loginToken(email, password)
-
-                if (tokenRes?.token) {
-                    this.setToken(tokenRes.token)
+                if (data?.user) {
+                    this.user = data.user
+                } else {
+                    await this.fetchUser() // получаем юзера внутри через /me
                 }
 
-                this.user = webRes?.user ?? tokenRes?.user ?? null
-
-                // if (data?.user) {
-                //     this.user = data.user
-                // } else {
-                //     await this.fetchUser() // получаем юзера внутри через /me
-                // }
+                this.setToken(data.token)
 
                 this.initialized = true
+
                 return true
             } catch (e: any) {
                 if (e?.status === 422) {
