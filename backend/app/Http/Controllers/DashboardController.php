@@ -13,20 +13,28 @@ class DashboardController extends Controller
 
     public function api(Request $request, CarService $carService): JsonResponse
     {
+
         $user = $request->user();
 
-        // CARS
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         $carsCount = $carService->getCarsCount();
 
-        // ORDERS
         $orders = Order::where('user_id', $user->id)
             ->latest()
             ->take(3)
-            ->get();
+            ->get()
+            ->map(fn($o) => [
+                'id' => $o->id,
+                'total' => $o->total ?? null,
+                'status' => $o->status ?? null,
+                'created_at' => $o->created_at,
+            ]);
 
         $ordersCount = Order::where('user_id', $user->id)->count();
 
-        // CART
         $cart = Cart::where('user_id', $user->id)
             ->with('items.car')
             ->first();
@@ -49,10 +57,8 @@ class DashboardController extends Controller
 
         return response()->json([
             'carsCount' => $carsCount,
-
             'ordersCount' => $ordersCount,
             'orders' => $orders,
-
             'cart' => $cartItems,
             'cartTotal' => $cartTotal,
         ]);

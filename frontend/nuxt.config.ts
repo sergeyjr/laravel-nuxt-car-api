@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 export default defineNuxtConfig({
 
     // Совместимость с конкретной версией Nuxt
-    compatibilityDate: '2025-07-15',
+    compatibilityDate: '2026-05-04',
 
     // Dev debug-режим
     debug: true,
@@ -39,7 +39,7 @@ export default defineNuxtConfig({
     // Dev server настройки Nuxt
     devServer: {
         host: '0.0.0.0', // доступ извне контейнера
-        port: 3000
+        port: 3000,
     },
 
     // Vite сборка

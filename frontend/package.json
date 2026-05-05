@@ -21,6 +21,7 @@
     },
     "devDependencies": {
         "@types/bootstrap": "^5.2.10",
+        "@vue/language-core": "^3.2.8",
         "vite-tsconfig-paths": "^6.1.1"
     }
 }

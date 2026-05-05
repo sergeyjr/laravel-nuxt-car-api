@@ -1,9 +1,7 @@
 import {defineStore} from 'pinia'
-import {useAlertStore} from './alert'
-import {debugLog} from '~/utils/debug'
-import {useAuthApi} from "~/services/api/internal/auth.api";
-
-const TOKEN_KEY = 'web_session_token'
+import {useAuthApi} from '~/services/api/internal/auth.api'
+import {useCookie} from '#app'
+import {useAlertStore} from "~/stores/alert";
 
 export const useAuthStore = defineStore('auth', {
 
@@ -14,25 +12,15 @@ export const useAuthStore = defineStore('auth', {
         error: null as string | null,
         errors: {} as Record<string, string>,
         success: null as string | null,
+        token: null as string | null,
         loggingOut: false
     }),
 
     getters: {
-        isAuth: (state) => {
-            const result = !!state.user
-            debugLog('[auth] isAuth getter:', result)
-            return result
-        }
+        isAuth: (state) => !!state.user
     },
 
     actions: {
-
-        resetMessages() {
-            debugLog('[auth] resetMessages')
-            this.error = null
-            this.errors = {}
-            this.success = null
-        },
 
         getCookie() {
             return useCookie<string | null>('web_session_token', {
@@ -43,204 +31,160 @@ export const useAuthStore = defineStore('auth', {
         },
 
         getToken() {
-            const token = this.getCookie().value
-            debugLog('[auth] getToken:', token)
-            return token
+            return this.token ?? useCookie<string | null>('web_session_token').value
         },
 
         setToken(token: string | null) {
-            debugLog('[auth] setToken:', token)
-            this.getCookie().value = token
+            this.token = token
+            useCookie<string | null>('web_session_token', {
+                path: '/',
+                sameSite: 'lax',
+                default: () => null
+            }).value = token
         },
 
         clearToken() {
-            debugLog('[auth] clearToken')
+            this.token = null
+            useCookie<string | null>('web_session_token', {
+                path: '/',
+                sameSite: 'lax',
+                default: () => null
+            }).value = null
+        },
+
+        getToken2(): string | null {
+            return this.getCookie().value
+        },
+
+        setToken2(token: string | null) {
+            this.getCookie().value = token
+        },
+
+        clearToken2() {
             this.getCookie().value = null
         },
 
+        showAlert(type: string, message: string) {
+            useAlertStore().add(type, message)
+        },
+
         clearErrors() {
-            debugLog('[auth] clearErrors')
             this.errors = {}
         },
 
-        logoutLocal() {
-            debugLog('[auth] logoutLocal')
-            this.user = null
-            this.clearToken()
-            this.initialized = true
-        },
-
         async fetchUser() {
-            debugLog('[auth] fetchUser start')
-
             const api = useAuthApi()
-
+            debugLog('fetchUser')
             try {
                 const data: any = await api.me()
-
-                debugLog('[auth] fetchUser success:', data)
-
+                debugLog('ME data', data)
                 this.user = data
                 return true
-
-            } catch (e: any) {
-                debugLog('[auth] fetchUser error:', e)
-
+            } catch {
                 this.user = null
-
-                if (e?.status === 401) {
-                    debugLog('[auth] fetchUser 401 -> clearToken')
-                    this.clearToken()
-                }
-
                 return false
-
-            } finally {
-                debugLog('[auth] fetchUser end')
             }
         },
 
         async initAuth() {
-            debugLog('[auth] initAuth start')
-
-            if (this.initialized) {
-                debugLog('[auth] initAuth already initialized:', this.isAuth)
-                return this.isAuth
-            }
-
-            // const token = this.getToken()
-            // if (!token) {
-            //     debugLog('[auth] initAuth no token')
-            //     this.user = null
-            //     this.initialized = true
-            //     return false
-            // }
-
+            debugLog('initAuth')
+            if (this.initialized) return this.isAuth
             try {
-                const result = await this.fetchUser()
-                debugLog('[auth] initAuth fetchUser result:', result)
-                return result //this.isAuth
+                return await this.fetchUser()
             } catch (e) {
-                debugLog('[auth] initAuth error:', e)
                 this.user = null
                 return false
-
             } finally {
                 this.initialized = true
-                debugLog('[auth] initAuth finished')
             }
         },
 
         async register(payload: any) {
-            debugLog('[auth] register payload:', payload)
-
             this.loading = true
-            this.resetMessages()
-
-            const alertStore = useAlertStore()
+            this.error = null
+            this.errors = {}
             const api = useAuthApi()
-
             try {
-
-                const res = await api.register(payload)
-
-                debugLog('[auth] register success:', res)
-
+                await api.register(payload)
                 this.user = null
-                alertStore.add('success', 'Успешная регистрация')
-
                 return true
-
             } catch (e: any) {
-                debugLog('[auth] register error:', e)
-
                 if (e?.status === 422) {
-                    const raw = e.data?.errors || {}
-
-                    this.errors = Object.fromEntries(
-                        Object.entries(raw).map(([key, value]: any) => [
-                            key,
-                            Array.isArray(value) ? value[0] : value
-                        ])
-                    )
+                    this.errors = e.data?.errors || {}
                 } else {
                     this.error = e.data?.message || 'Ошибка регистрации'
                 }
                 return false
-
             } finally {
                 this.loading = false
-                debugLog('[auth] register end')
             }
         },
 
         async login(email: string, password: string) {
-            debugLog('[auth] login start:', {email})
-
             this.loading = true
-            this.resetMessages()
-
+            this.error = null
+            this.errors = {}
             const api = useAuthApi()
-
             try {
+                //const data: any = await api.login(email, password)
 
-                const data: any = await api.login(email, password)
+                const webRes: any = await api.loginWeb(email, password)
+                const tokenRes: any = await api.loginToken(email, password)
 
-                debugLog('[auth] login response:', data)
-
-                if (data?.user) {
-                    this.user = data.user
-                } else {
-                    await this.fetchUser() // получаем юзера внутри через /me
+                if (tokenRes?.token) {
+                    this.setToken(tokenRes.token)
                 }
-                if (data.token) {
-                    this.setToken(data.token)
-                }
+
+                this.user = webRes?.user ?? tokenRes?.user ?? null
+
+                // if (data?.user) {
+                //     this.user = data.user
+                // } else {
+                //     await this.fetchUser() // получаем юзера внутри через /me
+                // }
 
                 this.initialized = true
-
-                debugLog('[auth] login success user:', data.user)
-
                 return true
-
             } catch (e: any) {
-                debugLog('[auth] login error:', e)
-
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
                 } else {
                     this.error = e.data?.message || 'Ошибка авторизации'
                 }
-
+                const status = e?.status || e?.response?.status
+                const message = e?.message || e?.data?.message
+                const responseData = e?.response?._data || e?.data
+                debugLog('[auth] login error details:', {
+                    status,
+                    message,
+                    responseData,
+                })
                 return false
-
             } finally {
                 this.loading = false
-                debugLog('[auth] login end')
             }
         },
 
         async logout() {
-            debugLog('[auth] logout start')
-
             this.loggingOut = true
-
             const api = useAuthApi()
-
             try {
-
                 await api.logout()
-
-                debugLog('[auth] logout api success')
-
             } catch (e) {
-                debugLog('[auth] logout api error (ignored):', e)
+                console.error(e)
             } finally {
+                debugLog('[auth] logout logoutLocal')
                 this.logoutLocal()
                 this.loggingOut = false
-                debugLog('[auth] logout finished')
             }
-        }
+        },
+
+        logoutLocal() {
+            debugLog('[auth] logoutLocal')
+            this.clearToken()
+            this.user = null
+            this.initialized = true
+        },
 
     }
 

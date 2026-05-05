@@ -41,14 +41,17 @@ export const useCartStore = defineStore('cart', {
             const cartApi = useCartApi()
 
             if (this.initialized && !force) return
+
             if (!force && Object.keys(this.items).length > 0) {
                 this.initialized = true
                 return
             }
 
             try {
+                debugLog('[fetch] getCart')
                 const data = await cartApi.getCart()
                 const serverItems = cleanItems(data)
+                debugLog('getCart data', data)
 
                 if (Object.keys(serverItems).length > 0) {
                     this.items = serverItems

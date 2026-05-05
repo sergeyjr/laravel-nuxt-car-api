@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {useDashboardApi, type DashboardResponse} from '~/services/api/internal/dashboard.api'
+import {useDashboardApi} from '~/services/api/internal/dashboard.api'
 
 export const useDashboardStore = defineStore('dashboard', {
 
@@ -31,7 +31,7 @@ export const useDashboardStore = defineStore('dashboard', {
 
             this._promise = (async () => {
                 try {
-                    const data: DashboardResponse = await dashboardApi.getDashboard()
+                    const data = await dashboardApi.getDashboard()
 
                     this.carsCount = data.carsCount ?? 0
                     this.ordersCount = data.ordersCount ?? 0

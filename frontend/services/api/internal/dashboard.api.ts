@@ -1,21 +1,15 @@
+import type { DashboardResponse } from '~/types/dashboard'
 import {useApi} from '~/composables/useApi'
-
-export interface DashboardResponse {
-    orders: any[]
-    ordersCount: number
-    carsCount: number
-    cart: Record<string, any>
-    cartTotal: number
-}
 
 export const useDashboardApi = () => {
 
-    const {api} = useApi()
+    const {apiToken} = useApi()
 
     return {
 
-        getDashboard(): Promise<DashboardResponse> {
-            return api('/dashboard')
+        async getDashboard(): Promise<DashboardResponse> {
+            const res: any = await apiToken('/dashboard')
+            return res?.data ?? res
         }
 
     }

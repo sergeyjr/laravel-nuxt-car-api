@@ -7,17 +7,18 @@ export const useCarV1Api = () => {
     return {
 
         create(payload: any) {
-            return apiV1('/cars', {
+            return apiV1('/car/create', {
                 method: 'POST',
                 body: payload
             })
         },
 
         generateMock() {
-            return apiV1('/cars/generate', {
-                method: 'POST'
+            return apiV1('/car/generate-mock', {
+                method: 'GET'
             })
         }
 
     }
+
 }

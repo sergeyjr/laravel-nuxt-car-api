@@ -2,43 +2,43 @@ import {useApi} from '~/composables/useApi'
 
 export const useCartApi = () => {
 
-    const {api} = useApi()
+    const {apiToken} = useApi()
 
     return {
 
-        getCart() {
-            return api('/cart')
+        async getCart() {
+            return apiToken('/cart')
         },
 
         addItem(payload: { id: number; qty: number }) {
-            return api('/cart/add', {
+            return apiToken('/cart/add', {
                 method: 'POST',
                 body: payload
             })
         },
 
         updateItem(payload: { id: number; qty: number }) {
-            return api('/cart/update', {
+            return apiToken('/cart/update', {
                 method: 'POST',
                 body: payload
             })
         },
 
         removeItem(id: number) {
-            return api('/cart/remove', {
+            return apiToken('/cart/remove', {
                 method: 'POST',
                 body: {id}
             })
         },
 
         clear() {
-            return api('/cart/clear', {
+            return apiToken('/cart/clear', {
                 method: 'POST'
             })
         },
 
         checkout(payload: { comment?: string }) {
-            return api('/orders/checkout', {
+            return apiToken('/orders/checkout', {
                 method: 'POST',
                 body: payload
             })

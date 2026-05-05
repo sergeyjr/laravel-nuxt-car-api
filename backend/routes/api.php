@@ -80,26 +80,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| AUT LOGIN, REGISTER
-|--------------------------------------------------------------------------
-*/
-
-// Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
-
-Route::prefix('auth')->group(function () {
-
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/logout', [AuthController::class, 'logout']);
-    });
-
-});
-
-/*
-|--------------------------------------------------------------------------
 | API V1 (token-based / external API)
 |--------------------------------------------------------------------------
 */

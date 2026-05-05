@@ -1,5 +1,4 @@
 import type {FetchResponse, FetchRequest} from 'ofetch'
-import {debugLog} from '~/utils/debug'
 import {useAlertStore} from '~/stores/alert'
 import {useAuthStore} from '~/stores/auth'
 
@@ -8,50 +7,30 @@ export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig()
 
     const IGNORE_ALERT_STATUSES = [401, 403]
-    const IGNORE_ALERT_URLS = ['']//['/auth/me']
+    const IGNORE_ALERT_URLS = [
+        '/auth/me',
+        '/api/cart'
+    ]
 
-    let csrfCookieObtained = false
+    const ssrCookie = import.meta.server
+        ? useRequestHeaders(['cookie']).cookie
+        : ''
 
-    debugLog('[api plugin] init')
+    const xsrfToken = useCookie<string | null>('XSRF-TOKEN', {
+        default: () => null
+    })
 
-    /*
-    |--------------------------------------------------------------------------
-    | CSRF (SPA only)
-    |--------------------------------------------------------------------------
-    */
+    const tokenCookie = useCookie<string | null>('web_session_token', {
+        default: () => null,
+        path: '/',
+        sameSite: 'lax'
+    })
 
-    async function ensureCsrfCookie() {
-        console.log('ensureCsrfCookie')
-        if (csrfCookieObtained) return
-        console.log('csrfCookieObtained')
-
-        if (import.meta.server) return
-
-        try {
-            console.log('ensureCsrfCookie TRY')
-
-            await $fetch('/sanctum/csrf-cookie', {
-                baseURL: config.public.backendBase,
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            console.log('csrfCookieObtained true')
-
-            csrfCookieObtained = true
-            debugLog('[api] CSRF cookie obtained')
-        } catch (e) {
-            console.error('CSRF cookie failed:', e)
-        }
+    const defaultHeaders: Record<string, string> = {
+        'X-Requested-With': 'XMLHttpRequest',
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Response normalizer
-    |--------------------------------------------------------------------------
-    */
 
     function normalizeResponse(response: FetchResponse<any>, request: FetchRequest) {
         const data = response?._data
@@ -71,12 +50,6 @@ export default defineNuxtPlugin(() => {
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Error handler
-    |--------------------------------------------------------------------------
-    */
-
     function handleErrors(response: FetchResponse<any>, request: FetchRequest) {
         if (!import.meta.client) return
 
@@ -90,15 +63,14 @@ export default defineNuxtPlugin(() => {
         const isIgnoredUrl = IGNORE_ALERT_URLS.some(u => url.includes(u))
 
         if (status === 401) {
-            if (!isIgnoredUrl) auth.logoutLocal()
+            debugLog('[auth] handleErrors 401')
+            if (!isIgnoredUrl) {
+                auth.logoutLocal()
+            }
             return
         }
 
-        if (status === 419) {
-            csrfCookieObtained = false
-            return
-        }
-
+        if (status === 419) return
         if (isIgnoredStatus || isIgnoredUrl) return
 
         const data = response._data
@@ -114,67 +86,151 @@ export default defineNuxtPlugin(() => {
         }
     }
 
-    function getCookie(name: string) {
-        if (!import.meta.client) return null
-        const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
-        const value = match?.[1]
-        return value ? decodeURIComponent(value) : null
-    }
-
-    function withXsrfHeader(options: any) {
-        const token = getCookie('XSRF-TOKEN')
-        if (!token) return
+    function applySsrCookie(options: any) {
+        if (!import.meta.server || !ssrCookie) return
 
         const headers = new Headers(options.headers as HeadersInit)
-        headers.set('X-XSRF-TOKEN', token)
+        headers.set('cookie', ssrCookie)
         options.headers = headers
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SPA API (/api)
-    |--------------------------------------------------------------------------
-    */
+    function applyXsrfHeader(options: any) {
+        const method = String(options.method || 'GET').toUpperCase()
+        const unsafeMethods = ['POST', 'PUT', 'PATCH', 'DELETE']
+
+        if (!unsafeMethods.includes(method)) return
+
+        const token = xsrfToken.value
+        if (!token) return
+
+        const headers = new Headers(options.headers as HeadersInit)
+        headers.set('X-XSRF-TOKEN', decodeURIComponent(token))
+        options.headers = headers
+    }
+
+    function applyBearerToken(options: any) {
+        const token = tokenCookie.value
+        if (!token) return
+
+        const headers = new Headers(options.headers as HeadersInit)
+        headers.set('Authorization', `Bearer ${token}`)
+        options.headers = headers
+    }
+
+    const csrf = $fetch.create({
+
+        baseURL: config.public.backendBase,
+        credentials: 'include',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: 'application/json'
+        },
+
+        onRequest({options}) {
+            debugLog('csrf', options)
+            applySsrCookie(options)
+        },
+
+        onResponse({response, request}) {
+            debugLog('response', response)
+            debugLog('request', request)
+        },
+
+        onResponseError({response, request}) {
+            debugLog('response err', response)
+            debugLog('request err', request)
+        }
+
+    })
+
+    const backend = $fetch.create({
+
+        baseURL: config.public.backendBase,
+        credentials: 'include',
+        headers: defaultHeaders,
+
+        onRequest({options}) {
+            debugLog('backend', options)
+            applySsrCookie(options)
+            /*
+            fetch (в отличие от axios) не добавляет автоматически заголовок X-XSRF-TOKEN,
+            поэтому Laravel Sanctum не может сопоставить CSRF-токен только по cookies.
+            Laravel для web.php POST-запросов требует одновременно:
+            - cookie XSRF-TOKEN
+            - заголовок X-XSRF-TOKEN (из этого cookie)
+            backend interceptor добавляет X-XSRF-TOKEN вручную для unsafe методов
+            (POST, PUT, PATCH, DELETE), извлекая значение из cookie.
+            login/register/logout сначала выполняют запрос к /sanctum/csrf-cookie,
+            чтобы установить корректные CSRF cookies до выполнения POST-запроса.
+            это устраняет ошибку 419 CSRF token mismatch в web.php маршрутах
+            */
+            applyXsrfHeader(options)
+        },
+
+        onResponse({response, request}) {
+            debugLog('response', response)
+            debugLog('request', request)
+            normalizeResponse(response, request)
+        },
+
+        onResponseError({response, request}) {
+            debugLog('response err', response)
+            debugLog('request err', request)
+            handleErrors(response, request)
+        }
+
+    })
 
     const api = $fetch.create({
 
-        baseURL: config.public.apiBase, // http://laravel/api
-
+        baseURL: config.public.apiBase,
         credentials: 'include',
+        headers: defaultHeaders,
 
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+        onRequest({options}) {
+            debugLog('api', options)
+            applySsrCookie(options)
         },
 
-        async onRequest({options}) {
-            const method = (options.method || 'GET').toUpperCase()
-            const skipCsrf = (options as any).skipCsrf
+        onResponse({response, request}) {
+            debugLog('response', response)
+            debugLog('request', request)
+            normalizeResponse(response, request)
+        },
 
-            console.log('[api req] SPA API', method)
+        onResponseError({response, request}) {
+            debugLog('response err', response)
+            debugLog('request err', request)
+            handleErrors(response, request)
+        }
 
-            if (
-                import.meta.client &&
-                !skipCsrf &&
-                ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
-            ) {
-                await ensureCsrfCookie()
-                withXsrfHeader(options)
-            } else {
-                if (import.meta.server) {
-                    const reqHeaders = useRequestHeaders(['cookie'])
+    })
 
-                    const headers = new Headers(options.headers as HeadersInit)
+    const apiToken = $fetch.create({
 
-                    if (reqHeaders.cookie) {
-                        headers.set('cookie', reqHeaders.cookie)
-                    }
+        baseURL: config.public.apiBase,
+        headers: defaultHeaders,
 
-                    options.headers = headers
-                }
+        onRequest({options}) {
+            debugLog('apiToken', options)
+            applyBearerToken(options)
+            if (import.meta.server && ssrCookie) {
+                const headers = new Headers(options.headers as HeadersInit)
+                headers.set('cookie', ssrCookie)
+                options.headers = headers
             }
-
+            // const auth = useAuthStore()
+            // const token = auth.getToken()
+            // const headers = new Headers(options.headers as HeadersInit)
+            // if (token) {
+            //     headers.set('Authorization', `Bearer ${token}`)
+            // }
+            //
+            // applyBearerToken(options)
+            // if (import.meta.server && ssrCookie) {
+            //     headers.set('cookie', ssrCookie)
+            // }
+            // options.headers = headers
         },
 
         onResponse({response, request}) {
@@ -187,40 +243,31 @@ export default defineNuxtPlugin(() => {
 
     })
 
-    /*
-    |--------------------------------------------------------------------------
-    | EXTERNAL API V1 (/api/v1)
-    |--------------------------------------------------------------------------
-    */
-
-    const sessionTokenCookie = useCookie<string | null>('web_session_token', {
-        default: () => null,
-        path: '/',
-        sameSite: 'lax'
-    })
-
     const apiV1 = $fetch.create({
 
-        baseURL: config.public.apiBase + '/v1', // http://laravel/api/v1
-
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
+        baseURL: config.public.apiBase + '/v1',
+        headers: defaultHeaders,
 
         onRequest({options}) {
-            const method = (options.method || 'GET').toUpperCase()
-            const auth = useAuthStore()
-            const token = auth.getToken?.() || sessionTokenCookie.value
-
-            console.log('[api req] EXTERNAL API V1', method)
-
-            if (!token) return
-
-            const headers = new Headers(options.headers as HeadersInit)
-            headers.set('Authorization', `Bearer ${token}`)
-            options.headers = headers
+            debugLog('apiV1', options)
+            applyBearerToken(options)
+            if (import.meta.server && ssrCookie) {
+                const headers = new Headers(options.headers as HeadersInit)
+                headers.set('cookie', ssrCookie)
+                options.headers = headers
+            }
+            // const auth = useAuthStore()
+            // const token = auth.getToken()
+            // const headers = new Headers(options.headers as HeadersInit)
+            // if (token) {
+            //     headers.set('Authorization', `Bearer ${token}`)
+            // }
+            //
+            // applyBearerToken(options)
+            // if (import.meta.server && ssrCookie) {
+            //     headers.set('cookie', ssrCookie)
+            // }
+            // options.headers = headers
         },
 
         onResponse({response, request}) {
@@ -235,9 +282,11 @@ export default defineNuxtPlugin(() => {
 
     return {
         provide: {
+            backend,
+            csrf,
             api,
-            apiV1,
-            ensureCsrfCookie
+            apiToken,
+            apiV1
         }
     }
 

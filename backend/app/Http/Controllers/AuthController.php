@@ -28,16 +28,12 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        // АВТОЛОГИН ПОСЛЕ РЕГИСТРАЦИИ (опционально)
         // Auth::login($user);
         // $request->session()->regenerate();
-
-        // $token = $user->createToken('web_session_token')->plainTextToken;
 
         return $this->success([
             'user' => $user,
             'message' => 'Регистрация успешно завершена! Теперь вы можете войти.',
-            // 'token' => $token,
             // 'redirect' => '/dashboard',
         ]);
 
@@ -60,17 +56,11 @@ class AuthController extends Controller
         }
 
         // Auth::guard('web')->login($user);
-        // $request->session()->regenerate();
 
-        $user->tokens()->where('name', 'web_session_token')->delete();
-
-        // TODO: выпилить этот токен
-        $token = $user->createToken('web_session_token')->plainTextToken;
+        $request->session()->regenerate();
 
         return $this->success([
             'user' => $user,
-            'message' => 'Успешный вход.',
-            'token' => $token,
         ]);
 
     }
@@ -95,9 +85,8 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-
-        return $this->success($request->user());
-
+        $user = $request->user();
+        return response()->json(['user' => $user]);
     }
 
 }

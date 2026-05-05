@@ -15,25 +15,21 @@ const {handleLogout} = useAuthActions()
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
-/* грузим корзину при логине (и при первой загрузке) */
 watch(
     () => auth.isAuth,
     async (isAuth) => {
         if (isAuth && !cart.initialized) {
             await cart.fetch()
         }
-    },
-    {immediate: true}
+    }
 )
 
-/* количество товаров */
 const cartCount = computed(() => {
     return Object.values(cart.items || {}).reduce((sum, item: any) => {
         return item ? sum + Number(item.qty || 0) : sum
     }, 0)
 })
 
-/* активная ссылка */
 const isActive = (path: string) => {
     return route.path.startsWith(path)
 }
@@ -111,7 +107,7 @@ const isActive = (path: string) => {
                     </NuxtLink>
 
                     <button
-                        class="btn btn-sm btn-outline-danger"
+                        class="btn btn-sm btn-outline-light"
                         @click="handleLogout"
                     >
                         Выход

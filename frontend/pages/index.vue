@@ -44,7 +44,9 @@ const swiperOptions = {
 // cars
 const carStore = useCarStore()
 
-await useAsyncData('cars', () => carStore.fetchLatest())
+useFetch(async () => {
+    await carStore.fetchLatest()
+})
 
 // helpers
 const getImage = (car) => {
@@ -138,38 +140,42 @@ const contactStore = useContactStore()
 
                 <ClientOnly>
 
-                    <template #fallback>
+                    <template v-if="carStore.latestLoading">
                         <div>Загрузка...</div>
                     </template>
 
-                    <Swiper
-                        v-if="!carStore.latestLoading"
-                        :modules="modules"
-                        v-bind="swiperOptions"
-                        class="swiper-custom"
-                    >
-                        <SwiperSlide v-for="car in carStore.latest" :key="car.id">
-                            <div class="card h-100" style="cursor:pointer" @click="openCar(car.id)">
-                                <img
-                                    :src="getImage(car)"
-                                    class="card-img-top"
-                                    alt=""
-                                />
+                    <template v-else>
 
-                                <div class="card-body">
-                                    <h5>{{ car.title }}</h5>
+                        <Swiper
+                            v-if="carStore.latest.length"
+                            :modules="modules"
+                            v-bind="swiperOptions"
+                            class="swiper-custom"
+                        >
+                            <SwiperSlide v-for="car in carStore.latest" :key="car.id">
+                                <div class="card h-100" style="cursor:pointer" @click="openCar(car.id)">
+                                    <img
+                                        :src="getImage(car)"
+                                        class="card-img-top"
+                                        alt=""
+                                    />
 
-                                    <p v-if="auth.user">
-                                        {{ formatPrice(car.price) }}
-                                    </p>
+                                    <div class="card-body">
+                                        <h5>{{ car.title }}</h5>
 
-                                    <p v-else class="text-muted">
-                                        Авторизуйтесь, чтобы увидеть цену
-                                    </p>
+                                        <p v-if="auth.user">
+                                            {{ formatPrice(car.price) }}
+                                        </p>
+
+                                        <p v-else class="text-muted">
+                                            Авторизуйтесь, чтобы увидеть цену
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </SwiperSlide>
-                    </Swiper>
+                            </SwiperSlide>
+                        </Swiper>
+
+                    </template>
 
                 </ClientOnly>
 

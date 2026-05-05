@@ -17,12 +17,8 @@ export const useCarApi = () => {
             })
         },
 
-        async fetchLatest(): Promise<Car[]> {
-            const res: any = await api('/cars/latest')
-
-            return Array.isArray(res)
-                ? res
-                : res?.data ?? []
+        fetchLatest(): Promise<CarsResponse> {
+            return api('/cars/latest')
         }
 
     }

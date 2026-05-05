@@ -4,51 +4,60 @@ import {useApi} from '~/composables/useApi'
 
 export const useAuthApi = () => {
 
-    const {api, apiV1} = useApi()
+    const {api, apiV1, backend, csrf} = useApi()
 
     return {
 
-        // internal
+        ensureCsrfCookie() {
+            return csrf('/sanctum/csrf-cookie')
+        },
 
-        login(email: string, password: string): Promise<AuthResponse> {
-            return api('/auth/login', {
+        async login(email: string, password: string): Promise<AuthResponse> {
+            await this.ensureCsrfCookie()
+
+            return backend('/auth/login', {
                 method: 'POST',
                 body: {email, password}
             })
         },
 
-        register(payload: any): Promise<AuthResponse> {
-            return api('/auth/register', {
+        async loginWeb(email: string, password: string): Promise<AuthResponse> {
+            await this.ensureCsrfCookie()
+
+            return backend('/auth/login', {
+                method: 'POST',
+                body: { email, password }
+            })
+        },
+
+        async loginToken(email: string, password: string): Promise<AuthResponse> {
+            return apiV1('/auth/login', {
+                method: 'POST',
+                body: { email, password }
+            })
+        },
+
+        async register(payload: any): Promise<AuthResponse> {
+            await this.ensureCsrfCookie()
+
+            return backend('/auth/register', {
                 method: 'POST',
                 body: payload
             })
         },
 
-        logout(): Promise<ApiResponse<null>> {
-            return api('/auth/logout', {
+        async logout(): Promise<ApiResponse<null>> {
+            await this.ensureCsrfCookie()
+
+            return backend('/auth/logout', {
                 method: 'POST'
             })
         },
 
         me(): Promise<User> {
-            return api('/auth/me')
-        },
-
-        // external
-
-        loginExternal(data: any) {
-            return apiV1('/auth/login', {
-                method: 'POST',
-                body: data
-            })
-        },
-
-        registerExternal(data: any) {
-            return apiV1('/auth/register', {
-                method: 'POST',
-                body: data
-            })
+            return backend('/auth/me')
         }
+
     }
 
 }
