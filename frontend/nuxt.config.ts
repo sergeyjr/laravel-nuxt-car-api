@@ -29,9 +29,8 @@ export default defineNuxtConfig({
     // Конфигурация окружений (SSR + client)
     runtimeConfig: {
         public: {
-            apiBase: 'http://laravel/api', // для /api/*
+            apiBase: 'http://laravel',
             appName: 'Laravel App',
-            backendBase: 'http://laravel', // для /sanctum/csrf-cookie
             debugApi: true
         },
     },
@@ -67,12 +66,12 @@ export default defineNuxtConfig({
 
         // Dev server (HMR + watch)
         server: {
-            hmr: {
-                // домен, через который идёт websocket hot reload
-                host: 'laravel',
-                protocol: 'ws',
-                clientPort: 80
-            },
+            // hmr: {
+            //     // домен, через который идёт websocket hot reload
+            //     host: 'laravel',
+            //     protocol: 'ws',
+            //     clientPort: 80
+            // },
 
             // следит за файлами внутри docker volume
             watch: {

@@ -1,11 +1,51 @@
-export const useApi = () => {
-    const { $api, $apiToken, $apiV1, $backend, $csrf} = useNuxtApp()
+export function useApi() {
+
+    const {$api} = useNuxtApp()
 
     return {
-        api: $api,
-        apiToken: $apiToken,
-        apiV1: $apiV1,
-        backend: $backend,
-        csrf: $csrf,
+
+        get<T>(url: string, options: any = {}) {
+            return $api<T>(url, {
+                ...options,
+                method: 'GET'
+            })
+        },
+
+        post<T>(url: string, body?: any, options: any = {}) {
+            return $api<T>(url, {
+                ...options,
+                method: 'POST',
+                body
+            })
+        },
+
+        put<T>(url: string, body?: any, options: any = {}) {
+            return $api<T>(url, {
+                ...options,
+                method: 'PUT',
+                body
+            })
+        },
+
+        patch<T>(url: string, body?: any, options: any = {}) {
+            return $api<T>(url, {
+                ...options,
+                method: 'PATCH',
+                body
+            })
+        },
+
+        delete<T>(url: string, options: any = {}) {
+            return $api<T>(url, {
+                ...options,
+                method: 'DELETE'
+            })
+        },
+
+        request<T>(url: string, options: any = {}) {
+            return $api<T>(url, options)
+        }
+
     }
+
 }

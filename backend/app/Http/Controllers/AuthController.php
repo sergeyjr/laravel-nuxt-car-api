@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -42,29 +41,31 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
 
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+        if (!Auth::attempt($credentials)) {
+            return response()->json(
+                ['message' => 'Имя пользователя и пароль не совпадают.'],
+                422
+            );
         }
 
-        // Auth::guard('web')->login($user);
+        $user = Auth::user(); // или auth()->user()
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'success' => false
+            ], 401);
+        }
 
         $request->session()->regenerate();
-        $user->tokens()->where('name', 'web_session_token')->delete();
-
-        $token = $user->createToken('web_session_token')->plainTextToken;
 
         return $this->success([
             'user' => $user,
-            'token' => $token,
+            'message' => 'Авторизация успешна.'
         ]);
 
     }
@@ -72,11 +73,7 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
 
-        $user = auth()->user();
-
-        $user?->tokens()->where('name', 'web_session_token')->delete();
-
-        // Auth::logout(); // web guard (способ входа и проверки пользователя)
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -90,7 +87,7 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-        return response()->json(['user' => $user]);
+        return response()->json($user);
     }
 
 }

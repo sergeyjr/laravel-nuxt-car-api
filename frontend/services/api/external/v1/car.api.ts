@@ -1,22 +1,17 @@
-import {useApi} from '~/composables/useApi'
-
 export const useCarV1Api = () => {
 
-    const {apiV1} = useApi()
+    const api = useApi()
 
     return {
 
         create(payload: any) {
-            return apiV1('/car/create', {
-                method: 'POST',
+            return api.post('/car/create', {
                 body: payload
             })
         },
 
         generateMock() {
-            return apiV1('/car/generate-mock', {
-                method: 'GET'
-            })
+            return api.get('/car/generate-mock')
         }
 
     }

@@ -1,5 +1,3 @@
-import {useApi} from '~/composables/useApi'
-
 export interface PageResponse {
     id: number
     code: string
@@ -9,12 +7,12 @@ export interface PageResponse {
 
 export const usePageApi = () => {
 
-    const {api} = useApi()
+    const api = useApi()
 
     return {
 
         fetchPage(code: string): Promise<PageResponse> {
-            return api(`/page/${code}`)
+            return api.get(`/page/${code}`)
         }
 
     }

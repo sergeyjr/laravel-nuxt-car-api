@@ -11,8 +11,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SiteController;
 use App\Http\Middleware\FixJsonMiddleware;
 use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /**
  * routes/api.php
@@ -27,6 +25,20 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /*
 |--------------------------------------------------------------------------
+| AUT LOGIN, REGISTER
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+/*
+|--------------------------------------------------------------------------
 | PUBLIC API (без авторизации)
 |--------------------------------------------------------------------------
 */
@@ -37,8 +49,7 @@ Route::get('/cars/latest', [CarController::class, 'latest']);
 
 Route::get('/page/{code}', [SiteController::class, 'page']);
 
-Route::post('/contact', [SiteController::class, 'sendContact'])
-    ->middleware('throttle:contact_form');
+Route::post('/contact', [SiteController::class, 'sendContact'])->middleware('throttle:contact_form');
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +57,7 @@ Route::post('/contact', [SiteController::class, 'sendContact'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dashboard
     Route::prefix('dashboard')->group(function () {

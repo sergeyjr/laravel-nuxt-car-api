@@ -1,5 +1,3 @@
-import {useApi} from '~/composables/useApi'
-
 export interface Order {
     id: number
     created_at: string
@@ -10,16 +8,16 @@ export interface Order {
 
 export const useOrderApi = () => {
 
-    const {apiToken} = useApi()
+    const api = useApi()
 
     return {
 
         getOrder(id: number | string): Promise<Order> {
-            return apiToken(`/orders/${id}`)
+            return api.get(`/orders/${id}`)
         },
 
         getOrders(): Promise<Order[]> {
-            return apiToken('/orders')
+            return api.get('/orders')
         }
 
     }

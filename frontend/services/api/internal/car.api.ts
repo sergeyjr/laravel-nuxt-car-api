@@ -1,24 +1,23 @@
 import type {Car, CarsResponse} from '~/types/car'
-import {useApi} from '~/composables/useApi'
 
 export const useCarApi = () => {
 
-    const {api} = useApi()
+    const api = useApi()
 
     return {
 
         fetchCar(id: number): Promise<Car> {
-            return api(`/cars/${id}`)
+            return api.get(`/cars/${id}`)
         },
 
         fetchCars(page = 1): Promise<CarsResponse> {
-            return api('/cars', {
+            return api.get('/cars', {
                 query: {page}
             })
         },
 
         fetchLatest(): Promise<CarsResponse> {
-            return api('/cars/latest')
+            return api.get('/cars/latest')
         }
 
     }

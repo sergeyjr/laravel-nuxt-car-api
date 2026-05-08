@@ -1,79 +1,45 @@
-import type {ApiResponse} from '~/types/api'
-import type {User, AuthResponse} from '~/types/auth'
-import {useApi} from '~/composables/useApi'
+import type {User} from '~/types/auth'
 
 export const useAuthApi = () => {
 
-    const {api, apiV1, backend, csrf} = useApi()
+    const api = useApi()
 
     return {
 
-        ensureCsrfCookie() {
-            debugLog('[auth api ts] ensureCsrfCookie')
-            return csrf('/sanctum/csrf-cookie')
+        csrf() {
+            return api.get('/sanctum/csrf-cookie')
         },
 
-        async login(email: string, password: string): Promise<AuthResponse> {
-            await this.ensureCsrfCookie()
-            debugLog('[auth api ts] login')
-            debugLog('[auth api ts] /auth/login')
-
-            return backend('/auth/login', {
-                method: 'POST',
-                body: {email, password}
-            })
-        },
-
-        async register(payload: any): Promise<AuthResponse> {
-            debugLog('[auth api ts] register')
-
-            await this.ensureCsrfCookie()
-            debugLog('[auth api ts] /auth/register')
-
-            return backend('/auth/register', {
-                method: 'POST',
-                body: payload
-            })
-        },
-
-        async logout(): Promise<ApiResponse<null>> {
-            debugLog('[auth api ts] logout')
-
-            await this.ensureCsrfCookie()
-            debugLog('[auth api ts] /auth/logout')
-
-            return backend('/auth/logout', {
-                method: 'POST'
-            })
-        },
-
-        me(): Promise<User> {
-            debugLog('[auth api ts] me START')
-
-            const request = '/auth/me'
-
-            debugLog('[auth api ts] me REQUEST', {
-                url: request,
-                method: 'GET'
-            })
-
-            return backend(request, {
-                method: 'GET'
-            }).then((res) => {
-                debugLog('[auth api ts] me SUCCESS', res)
+        async me() {
+            try {
+                const res = await api.get<User>('/api/me')
+                console.log('[auth api] me success', res)
                 return res
-            }).catch((err) => {
-                debugLog('[auth api ts] me ERROR', {
-                    message: err?.message,
-                    status: err?.status,
-                    data: err?.data || err
-                })
-                throw err
-            }).finally(() => {
-                debugLog('[auth api ts] me END')
+            } catch (e) {
+                console.log('[auth api] me failed', e)
+                throw e
+            }
+        },
+
+        login(email: string, password: string) {
+            return api.post('/api/login', {
+                email,
+                password
             })
+        },
+
+        register(payload: {
+            name: string
+            email: string
+            password: string
+            password_confirmation: string
+        }) {
+            return api.post('/api/register', payload)
+        },
+
+        logout() {
+            return api.post('/api/logout')
         }
 
     }
-
 }

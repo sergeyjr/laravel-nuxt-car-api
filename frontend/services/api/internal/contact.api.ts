@@ -1,14 +1,11 @@
-import {useApi} from '~/composables/useApi'
-
 export const useContactApi = () => {
 
-    const {api} = useApi()
+    const api = useApi()
 
     return {
 
         submit(payload: any) {
-            return api('/contact', {
-                method: 'POST',
+            return api.post('/contact', {
                 body: payload
             })
         }

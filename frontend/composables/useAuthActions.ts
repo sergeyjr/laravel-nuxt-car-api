@@ -8,7 +8,9 @@ export function useAuthActions() {
     const route = useRoute()
 
     const handleLogout = async () => {
+
         const confirmed = confirm('Вы уверены, что хотите выйти?')
+
         if (!confirmed) return
 
         try {
@@ -16,6 +18,8 @@ export function useAuthActions() {
         } catch (e) {
             console.warn('Запрос на выход из системы не удался:', e)
         }
+
+        // TODO: очищай локальное состояние (useState)
 
         const path = route.path
 
@@ -25,6 +29,7 @@ export function useAuthActions() {
         ) {
             await router.push('/login')
         }
+
     }
 
     return {handleLogout}
