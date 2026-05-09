@@ -21,6 +21,20 @@ export default defineNuxtPlugin(() => {
 
             const headers = new Headers(options.headers || {})
 
+            // TODO: чекнуть
+            // const headers = useRequestHeaders([
+            //     'cookie',
+            //     'origin',
+            //     'referer'
+            // ])
+            //
+            // options.headers = {
+            //     ...options.headers,
+            //     cookie: headers.cookie || '',
+            //     origin: headers.origin || config.public.apiBase,
+            //     referer: headers.referer || config.public.apiBase,
+            // }
+
             headers.forEach((value, key) => {
                 console.log('headers', key, value)
             })

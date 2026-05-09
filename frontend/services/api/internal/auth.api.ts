@@ -38,6 +38,12 @@ export const useAuthApi = () => {
          * или: { cookie, referer }
          * переводит Sanctum в stateful mode,
          * после чего session auth начинает работать.
+         *
+         * https://laravel.com/docs/10.x/sanctum
+         * you should ensure that you send the Accept: application/json header and either the Referer or Origin header with your request.
+         *
+         * Внутри middleware: EnsureFrontendRequestsAreStateful есть логика:
+         * $domain = $request->headers->get('referer') ?: $request->headers->get('origin');
          */
 
         me() {
