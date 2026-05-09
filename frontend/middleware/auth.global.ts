@@ -1,50 +1,46 @@
-import {protectedPages} from '~/utils/protected-pages'
+import {useProtected} from "~/composables/useProtected";
 
 export default defineNuxtRouteMiddleware(async (to) => {
 
-    const auth = useAuthStore()
+    const config = useRuntimeConfig()
 
-    console.log('[auth-middleware] START', {path: to.path})
-
-    // Восстанавливаем auth на любой странице после F5
-    if (!auth.initialized) {
-        console.log('[auth-middleware] initAuth() START')
-        await auth.initAuth()
-        console.log('[auth-middleware] initAuth() DONE', {
-            initialized: auth.initialized,
-            isAuth: auth.isAuth,
-            user: auth.user
-        })
+    if (import.meta.dev) {
+        console.log('[middleware] route:', to.path)
     }
 
-    const requiresAuth = protectedPages.some((page) => {
-        const match = to.path === page || to.path.startsWith(page + '/')
-        if (match) {
-            console.log('[auth-middleware] MATCH protected page', page)
-        }
-        return match
+    if (to.path === '/' || to.path.startsWith('/public')) return
+
+    const auth = useAuthStore()
+
+    if (!auth.initialized) {
+        await auth.initAuth()
+    }
+
+    const {requiresAuth} = useProtected()
+
+    const needsAuth = requiresAuth(to.path)
+
+    console.log('[middleware] auth state before init:', {
+        initialized: auth.initialized,
+        isAuth: auth.isAuth,
+        user: auth.user
     })
 
-    console.log('[auth-middleware] requiresAuth', requiresAuth)
-    console.log('[auth-middleware] initialized', auth.initialized)
-    console.log('[auth-middleware] isAuth', auth.isAuth)
-
-    if (!requiresAuth) {
-        // Чтобы уже авторизованного пользователя не оставлять на /login после F5
+    if (!needsAuth) {
+        if (auth.isAuth) return
         if (to.path === '/login' && auth.isAuth) {
-            console.log('[auth-middleware] REDIRECT /login -> /dashboard')
+            console.log('[middleware] redirect login -> dashboard')
             return navigateTo('/dashboard')
         }
-
-        console.log('[auth-middleware] SKIP (public route)')
+        console.log('[middleware] allow public route')
         return
     }
 
-    if (!auth.isAuth) {
-        console.log('[auth-middleware] REDIRECT -> /login')
+    if (needsAuth && !auth.isAuth) {
+        console.log('[middleware] blocked -> redirect to login')
         return navigateTo('/login')
     }
 
-    console.log('[auth-middleware] ALLOW access')
+    console.log('[middleware] access granted')
 
 })

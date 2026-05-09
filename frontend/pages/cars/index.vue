@@ -1,45 +1,56 @@
-<script setup>
+<script setup lang="ts">
 
-import {computed} from 'vue'
+import {computed, watch} from 'vue'
+import {useRoute} from 'vue-router'
+
 import {useCarStore} from '~/stores/car'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
-import {useRoute} from 'vue-router'
-import {watch} from 'vue'
+import {useUiStore} from '~/stores/ui'
+import BaseButton from "../../components/BaseButton.vue";
 
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
+const ui = useUiStore()
 
 const route = useRoute()
 
 watch(
     () => route.query.page,
-    (page) => {
-        const p = Number(page) || 1
-        store.fetch(p)
+    async (page) => {
+        const currentPage = Number(page) || 1
+
+        try {
+            ui.showLoader('Загрузка...')
+            await store.fetch(currentPage)
+        } finally {
+            ui.hideLoader()
+        }
     },
     {immediate: true}
 )
 
-const changePage = (p) => {
+const changePage = (page: number) => {
     navigateTo({
         path: '/cars',
-        query: {page: p}
+        query: {page}
     })
 }
 
-const openCar = (id) => navigateTo(`/cars/show/${id}`)
-
-const getImage = (car) => {
-    if (!car.photo_url) return '/images/default_car.jpg'
-    return car.photo_url
+const openCar = (id: number) => {
+    navigateTo(`/cars/show/${id}`)
 }
 
-const formatPrice = (price) =>
-    new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
+const getImage = (car: any) => {
+    return car.photo_url || '/images/default_car.jpg'
+}
 
-const addToCart = (car) => {
+const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
+}
+
+const addToCart = (car: any) => {
     cart.add({
         id: car.id,
         name: car.title,
@@ -49,22 +60,20 @@ const addToCart = (car) => {
     })
 }
 
-const isInCart = (carId) => {
+const isInCart = (carId: number) => {
     return Object.values(cart.items || {}).some(
-        item => item?.id === carId
+        (item: any) => item?.id === carId
     )
 }
 
-/* pagination states */
-const isFirstPage = computed(() =>
-    !store.meta || store.meta.current_page <= 1
-)
+const isFirstPage = computed(() => {
+    return !store.meta || store.meta.current_page <= 1
+})
 
-const isLastPage = computed(() =>
-    !store.meta || store.meta.current_page >= store.meta.last_page
-)
+const isLastPage = computed(() => {
+    return !store.meta || store.meta.current_page >= store.meta.last_page
+})
 
-/* список страниц */
 const pages = computed(() => {
     if (!store.meta) return []
     return Array.from({length: store.meta.last_page}, (_, i) => i + 1)
@@ -77,13 +86,11 @@ const pages = computed(() => {
 
         <h1 class="mb-3">Каталог</h1>
 
-        <div v-if="store.loading" class="loading-bar mb-3">
-            Загрузка данных...
-        </div>
-
-        <!-- pagination TOP -->
-        <div v-if="store.meta" class="d-flex gap-2 mb-3 align-items-center flex-wrap">
-
+        <!-- top pagination -->
+        <div
+            v-if="store.meta"
+            class="d-flex gap-2 mb-3 align-items-center flex-wrap"
+        >
             <BaseButton
                 :variant="isFirstPage ? 'outline-primary' : 'primary'"
                 :disabled="isFirstPage || store.loading"
@@ -109,12 +116,10 @@ const pages = computed(() => {
             >
                 Вперёд
             </BaseButton>
-
         </div>
 
-        <!-- cars -->
+        <!-- cars list -->
         <div class="row">
-
             <div
                 v-for="car in store.cars"
                 :key="car.id"
@@ -125,14 +130,10 @@ const pages = computed(() => {
                     :class="{ loading: store.loading }"
                     @click="openCar(car.id)"
                 >
-
-                    <!-- shimmer -->
-                    <div v-if="store.loading" class="shimmer"></div>
-
                     <img
                         :src="getImage(car)"
                         class="card-img-top"
-                        style="height:200px;object-fit:contain;"
+                        style="height: 200px; object-fit: contain;"
                         alt=""
                     >
 
@@ -149,7 +150,6 @@ const pages = computed(() => {
                     </div>
 
                     <div v-if="auth.user" class="p-3 pt-0">
-
                         <BaseButton
                             v-if="isInCart(car.id)"
                             variant="light"
@@ -167,16 +167,16 @@ const pages = computed(() => {
                         >
                             В корзину
                         </BaseButton>
-
                     </div>
-
                 </div>
             </div>
         </div>
 
-        <!-- pagination BOTTOM -->
-        <div v-if="store.meta" class="d-flex gap-2 mt-3 align-items-center flex-wrap">
-
+        <!-- bottom pagination -->
+        <div
+            v-if="store.meta"
+            class="d-flex gap-2 mt-3 align-items-center flex-wrap"
+        >
             <BaseButton
                 :variant="isFirstPage ? 'outline-primary' : 'primary'"
                 :disabled="isFirstPage || store.loading"
@@ -202,9 +202,9 @@ const pages = computed(() => {
             >
                 Вперёд
             </BaseButton>
-
         </div>
 
+        <!-- meta info -->
         <div v-if="store.meta" class="mt-2 text-muted small">
             Страница {{ store.meta.current_page }} / {{ store.meta.last_page }}
             · Показано {{ store.meta.from }}–{{ store.meta.to }}
@@ -213,58 +213,3 @@ const pages = computed(() => {
 
     </div>
 </template>
-
-<style scoped>
-
-.loading-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 10px 14px;
-    border-radius: 8px;
-
-    background: rgba(13, 110, 253, 0.08);
-    border: 1px solid rgba(13, 110, 253, 0.2);
-
-    color: #0d6efd;
-    font-weight: 500;
-}
-
-.car-card {
-    position: relative;
-    cursor: pointer;
-    min-height: 320px;
-}
-
-.car-card.loading {
-    filter: grayscale(1);
-    opacity: 0.75;
-    pointer-events: none;
-}
-
-.shimmer {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        110deg,
-        rgba(255, 255, 255, 0.05) 25%,
-        rgba(255, 255, 255, 0.35) 50%,
-        rgba(255, 255, 255, 0.05) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite;
-    z-index: 2;
-    border-radius: 6px;
-}
-
-@keyframes shimmer {
-    from {
-        background-position: -200% 0;
-    }
-    to {
-        background-position: 200% 0;
-    }
-}
-
-</style>

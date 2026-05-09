@@ -15,14 +15,14 @@ const {handleLogout} = useAuthActions()
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
-// watch(
-//     () => auth.isAuth,
-//     async (isAuth) => {
-//         if (isAuth && !cart.initialized) {
-//             await cart.fetch()
-//         }
-//     }
-// )
+watch(
+    () => auth.isAuth,
+    async (isAuth) => {
+        if (isAuth && !cart.initialized) {
+            await cart.fetch()
+        }
+    }
+)
 
 const cartCount = computed(() => {
     return Object.values(cart.items || {}).reduce((sum, item: any) => {

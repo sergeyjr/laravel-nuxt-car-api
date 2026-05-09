@@ -92,7 +92,7 @@ const formatDate = (date) => {
                                 Добавить авто
                             </NuxtLink>
 
-                            <NuxtLink
+                            <NuxtLink v-else
                                 to="/cars"
                                 class="btn btn-outline-primary w-100 mt-3"
                             >

@@ -5,19 +5,19 @@ export const useProfileApi = () => {
     return {
 
         update(fd: FormData) {
-            return api.post('/profile/update', {
+            return api.post('/api/profile/update', {
                 body: fd
             })
         },
 
         changePassword(payload: any) {
-            return api.post('/profile/password', {
+            return api.post('/api/profile/password', {
                 body: payload
             })
         },
 
         delete() {
-            return api.delete('/profile')
+            return api.delete('/api/profile')
         }
 
     }

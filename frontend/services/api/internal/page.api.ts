@@ -12,7 +12,7 @@ export const usePageApi = () => {
     return {
 
         fetchPage(code: string): Promise<PageResponse> {
-            return api.get(`/page/${code}`)
+            return api.get(`/api/page/${code}`)
         }
 
     }

@@ -13,11 +13,11 @@ export const useOrderApi = () => {
     return {
 
         getOrder(id: number | string): Promise<Order> {
-            return api.get(`/orders/${id}`)
+            return api.get(`/api/orders/${id}`)
         },
 
         getOrders(): Promise<Order[]> {
-            return api.get('/orders')
+            return api.get('/api/orders')
         }
 
     }

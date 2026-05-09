@@ -6,6 +6,7 @@ import {useCarStore} from '~/stores/car'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 import AuthModal from '~/components/modals/AuthModal.vue'
+import {useUiStore} from "~/stores/ui.ts";
 
 const showAuth = ref(false)
 
@@ -14,6 +15,8 @@ const route = useRoute()
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
+
+const ui = useUiStore()
 
 const carId = computed(() => {
     const id = route.params.id
@@ -24,7 +27,6 @@ if (!carId.value) {
     await navigateTo('/404')
 } else {
     await store.fetchCar(carId.value)
-
     if (!store.car) {
         await navigateTo('/404')
     } else {
@@ -64,8 +66,12 @@ const isInCart = (carId) => {
 watch(
     () => route.params.id,
     async (id) => {
+        try {
+            ui.showLoader('Загрузка...')
+        } finally {
+            ui.hideLoader()
+        }
         if (!id || Array.isArray(id)) return
-
         await store.fetchCar(Number(id))
     },
     {immediate: true}
@@ -76,9 +82,7 @@ watch(
 <template>
     <div class="container mt-4">
 
-        <div v-if="loading">Загрузка...</div>
-
-        <div v-else-if="!car">
+        <div v-if="!car">
             Автомобиль не найден
         </div>
 

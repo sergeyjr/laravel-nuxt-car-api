@@ -1,9 +1,17 @@
-import type { $Fetch } from 'ofetch'
+import type {$Fetch} from 'ofetch'
 
 declare module '#app' {
     interface NuxtApp {
-        $backend: $Fetch
         $api: $Fetch
-        $apiV1: $Fetch
+        $apiToken: $Fetch
     }
 }
+
+// declare module 'vue' {
+//     interface ComponentCustomProperties {
+//         $api: $Fetch
+//         $apiToken: $Fetch
+//     }
+// }
+
+export {}

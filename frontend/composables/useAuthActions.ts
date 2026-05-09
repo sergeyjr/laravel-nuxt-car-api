@@ -4,22 +4,25 @@ import {useRouter, useRoute} from 'vue-router'
 export function useAuthActions() {
 
     const auth = useAuthStore()
+
     const router = useRouter()
+
     const route = useRoute()
 
     const handleLogout = async () => {
 
-        const confirmed = confirm('Вы уверены, что хотите выйти?')
-
-        if (!confirmed) return
+        if (import.meta.client) {
+            const confirmed = window.confirm('Вы уверены, что хотите выйти?')
+            if (!confirmed) {
+                return
+            }
+        }
 
         try {
             await auth.logout()
         } catch (e) {
-            console.warn('Запрос на выход из системы не удался:', e)
+            console.error('Запрос на выход из системы не удался:', e)
         }
-
-        // TODO: очищай локальное состояние (useState)
 
         const path = route.path
 
@@ -32,6 +35,8 @@ export function useAuthActions() {
 
     }
 
-    return {handleLogout}
+    return {
+        handleLogout
+    }
 
 }

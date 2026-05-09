@@ -5,7 +5,7 @@ export const useContactApi = () => {
     return {
 
         submit(payload: any) {
-            return api.post('/contact', {
+            return api.post('/api/contact', {
                 body: payload
             })
         }

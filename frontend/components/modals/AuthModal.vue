@@ -23,17 +23,18 @@ const close = () => {
 }
 
 const submit = async () => {
+
     store.errors = {}
 
     let hasError = false
 
     if (!email.value) {
-        store.errors.email = 'Email обязателен'
+        store.errors.email = ['Email обязателен']
         hasError = true
     }
 
     if (!password.value) {
-        store.errors.password = 'Пароль обязателен'
+        store.errors.password = ['Пароль обязателен']
         hasError = true
     }
 
@@ -44,6 +45,7 @@ const submit = async () => {
     if (ok) {
         close()
     }
+
 }
 
 watch(() => props.modelValue, (val) => {
@@ -80,7 +82,7 @@ watch(() => props.modelValue, (val) => {
                     type="email"
                     label="Email"
                     required
-                    :error="store.errors.email"
+                    :error="store.errors.email?.[0]"
                 />
 
                 <BaseInput
@@ -88,7 +90,7 @@ watch(() => props.modelValue, (val) => {
                     type="password"
                     label="Пароль"
                     required
-                    :error="store.errors.password"
+                    :error="store.errors.password?.[0]"
                 />
 
                 <BaseButton
@@ -114,11 +116,13 @@ watch(() => props.modelValue, (val) => {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .6);
+    background: rgba(0, 0, 0, .55);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
+    backdrop-filter: blur(2px);
+    pointer-events: all;
 }
 
 .modal-box {
@@ -131,7 +135,6 @@ watch(() => props.modelValue, (val) => {
     box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
 }
 
-/* CLOSE BUTTON */
 .modal-close {
     position: absolute;
     top: 10px;

@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     compatibilityDate: '2026-05-04',
 
     // Dev debug-режим
-    debug: true,
+    debug: false,
 
     // Nuxt DevTools
     devtools: {
@@ -28,8 +28,9 @@ export default defineNuxtConfig({
 
     // Конфигурация окружений (SSR + client)
     runtimeConfig: {
+        apiBase: 'http://laravel.local', // SSR
         public: {
-            apiBase: 'http://laravel',
+            apiBase: 'http://laravel.local', // Browser
             appName: 'Laravel App',
             debugApi: true
         },

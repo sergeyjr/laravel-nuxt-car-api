@@ -5,8 +5,9 @@ import {useAuthApi} from '~/services/api/internal/auth.api'
 export const useAuthStore = defineStore('auth', {
 
     state: () => ({
-        user: useState<User | null>('auth.user', () => null),
+        user: null as User | null,
         initialized: false,
+        initializing: false,
         loading: false,
         loggingOut: false,
         success: null as string | null,
@@ -21,25 +22,31 @@ export const useAuthStore = defineStore('auth', {
     actions: {
 
         showAlert(type: string, message: string) {
+            console.log('[authStore] showAlert:', {type, message})
             useAlertStore().add(type, message)
         },
 
         clearErrors() {
+            console.log('[authStore] clearErrors')
             this.errors = {}
             this.error = null
         },
 
         async fetchUser() {
-            console.log('fetchUser')
+
+            console.log('[authStore] fetchUser:start')
 
             const api = useAuthApi()
 
             try {
-                this.user = await api.me()
-                console.log('user', this.user)
+                const user = await api.me()
+                console.log('[authStore] fetchUser:success', user)
 
+                this.user = user
                 return true
-            } catch {
+            } catch (err) {
+                console.error('[authStore] fetchUser:error', err)
+
                 this.user = null
                 return false
             }
@@ -48,58 +55,81 @@ export const useAuthStore = defineStore('auth', {
 
         async initAuth() {
 
-            console.log('initAuth')
+            console.log('[authStore] initAuth:start', {
+                initialized: this.initialized,
+                initializing: this.initializing
+            })
+
             if (this.initialized) {
-                console.log('initAuth return')
+                console.log('[authStore] initAuth:already initialized')
                 return this.isAuth
             }
 
+            if (this.initializing) {
+                console.log('[authStore] initAuth:already running')
+                return this.isAuth
+            }
+
+            this.initializing = true
+
             try {
-                return await this.fetchUser()
+                const result = await this.fetchUser()
+                console.log('[authStore] initAuth:result', result)
+                return result
             } catch (e) {
+                console.error('[authStore] initAuth:error', e)
                 this.user = null
                 return false
             } finally {
                 this.initialized = true
+                this.initializing = false
+                console.log('[authStore] initAuth:done')
             }
 
         },
 
-        async login(
-            email: string,
-            password: string
-        ) {
+        async login(email: string, password: string) {
+
+            console.log('[authStore] login:start', {email})
 
             this.loading = true
             this.clearErrors()
+
             const api = useAuthApi()
 
             try {
+
+                console.log('[authStore] login:csrf')
                 await api.csrf()
-                const res: any = await api.login(email, password)
-                //const user = res?.data?.user
-                // if (user) {
-                //     this.user = user
-                // } else {
-                //     await this.fetchUser()
-                // }
-                const ok = await this.fetchUser()
-                if (!ok) {
-                    this.error = 'Auth session was not established'
-                    return false
+
+                console.log('[authStore] login:request')
+                const data: any = await api.login(email, password)
+
+                if (data.user) {
+                    console.log('[authStore] login:fetchUser')
+                    this.user = data.user
+                } else {
+                    console.error('[authStore] login:user not established')
+                    await this.fetchUser()
                 }
+
                 this.initialized = true
+                console.log('[authStore] login:success')
                 return true
             } catch (e: any) {
+                console.error('[authStore] login:error', e)
+
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
+                    console.log('[authStore] login:validation errors', this.errors)
                 } else {
-                    this.error = e.data?.message || 'Login failed'
+                    this.error = e.data?.message || 'Ошибка входа'
                 }
-                console.error(e)
+
                 return false
             } finally {
                 this.loading = false
+                console.log('[authStore] login:end')
             }
 
         },
@@ -111,51 +141,70 @@ export const useAuthStore = defineStore('auth', {
             password_confirmation: string
         }) {
 
+            console.log('[authStore] register:start', payload)
+
             this.loading = true
             this.clearErrors()
+
             const api = useAuthApi()
 
             try {
+
                 await api.csrf()
+                console.log('[authStore] register:csrf ok')
+
                 await api.register(payload)
+                console.log('[authStore] register:success')
+
                 this.user = null
                 this.initialized = true
                 return true
             } catch (e: any) {
+                console.error('[authStore] register:error', e)
+
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
                 } else {
-                    this.error = e.data?.message || 'Register failed'
+                    this.error = e.data?.message || 'Регистрация не удалась'
                 }
-                console.error(e)
+
                 return false
             } finally {
                 this.loading = false
+                console.log('[authStore] register:end')
             }
 
         },
 
         async logout() {
 
+            console.log('[authStore] logout:start')
+
             this.loggingOut = true
             const api = useAuthApi()
 
             try {
+
                 await api.logout()
+                console.log('[authStore] logout:api success')
+
             } catch (e) {
-                console.error(e)
+                console.error('[authStore] logout:error', e)
             } finally {
                 this.logoutLocal()
                 this.loggingOut = false
+                console.log('[authStore] logout:end')
             }
 
         },
 
         logoutLocal() {
+
+            console.log('[authStore] logoutLocal')
+
             this.user = null
             this.initialized = true
+
         }
-
     }
-
 })

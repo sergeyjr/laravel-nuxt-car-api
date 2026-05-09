@@ -7,17 +7,17 @@ export const useCarApi = () => {
     return {
 
         fetchCar(id: number): Promise<Car> {
-            return api.get(`/cars/${id}`)
+            return api.get(`/api/cars/${id}`)
         },
 
         fetchCars(page = 1): Promise<CarsResponse> {
-            return api.get('/cars', {
+            return api.get('/api/cars', {
                 query: {page}
             })
         },
 
         fetchLatest(): Promise<CarsResponse> {
-            return api.get('/cars/latest')
+            return api.get('/api/cars/latest')
         }
 
     }
