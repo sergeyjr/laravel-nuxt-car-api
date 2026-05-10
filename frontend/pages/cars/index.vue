@@ -1,13 +1,15 @@
 <script setup lang="ts">
 
-import {computed, watch} from 'vue'
+import {watch} from 'vue'
 import {useRoute} from 'vue-router'
 
 import {useCarStore} from '~/stores/car'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 import {useUiStore} from '~/stores/ui'
+
 import BaseButton from "../../components/BaseButton.vue";
+import Pagination from '~/components/Pagination.vue'
 
 const store = useCarStore()
 const auth = useAuthStore()
@@ -46,9 +48,8 @@ const getImage = (car: any) => {
     return car.photo_url || '/images/default_car.jpg'
 }
 
-const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
-}
+const formatPrice = (price?: number | null) =>
+    new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
 
 const addToCart = (car: any) => {
     cart.add({
@@ -66,19 +67,6 @@ const isInCart = (carId: number) => {
     )
 }
 
-const isFirstPage = computed(() => {
-    return !store.meta || store.meta.current_page <= 1
-})
-
-const isLastPage = computed(() => {
-    return !store.meta || store.meta.current_page >= store.meta.last_page
-})
-
-const pages = computed(() => {
-    if (!store.meta) return []
-    return Array.from({length: store.meta.last_page}, (_, i) => i + 1)
-})
-
 </script>
 
 <template>
@@ -91,65 +79,49 @@ const pages = computed(() => {
             v-if="store.meta"
             class="d-flex gap-2 mb-3 align-items-center flex-wrap"
         >
-            <BaseButton
-                :variant="isFirstPage ? 'outline-primary' : 'primary'"
-                :disabled="isFirstPage || store.loading"
-                @click="changePage(store.meta.current_page - 1)"
-            >
-                Назад
-            </BaseButton>
-
-            <BaseButton
-                v-for="p in pages"
-                :key="p"
-                :variant="p === store.meta.current_page ? 'primary' : 'outline-primary'"
-                :disabled="store.loading"
-                @click="changePage(p)"
-            >
-                {{ p }}
-            </BaseButton>
-
-            <BaseButton
-                :variant="isLastPage ? 'outline-primary' : 'primary'"
-                :disabled="isLastPage || store.loading"
-                @click="changePage(store.meta.current_page + 1)"
-            >
-                Вперёд
-            </BaseButton>
+            <Pagination
+                :meta="store.meta"
+                :loading="store.loading"
+                @change="changePage"
+            />
         </div>
 
         <!-- cars list -->
         <div class="row">
+
             <div
                 v-for="car in store.cars"
                 :key="car.id"
                 class="col-4 mb-3"
             >
-                <div
-                    class="card car-card"
-                    :class="{ loading: store.loading }"
-                    @click="openCar(car.id)"
-                >
-                    <img
-                        :src="getImage(car)"
-                        class="card-img-top"
-                        style="height: 200px; object-fit: contain;"
-                        alt=""
-                    >
 
-                    <div class="card-body">
-                        <h5>{{ car.title }}</h5>
+                <div class="card car-card" :class="{ loading: store.loading }">
 
-                        <p v-if="auth.user">
-                            {{ formatPrice(car.price) }}
-                        </p>
+                    <NuxtLink :to="`/cars/show/${car.id}`" class="text-decoration-none text-dark">
 
-                        <p v-else class="text-muted">
-                            Авторизуйтесь, чтобы увидеть цену
-                        </p>
-                    </div>
+                        <img
+                            :src="getImage(car)"
+                            class="card-img-top"
+                            style="height: 200px; object-fit: contain;"
+                            alt=""
+                        >
+
+                        <div class="card-body">
+                            <h5>{{ car.title }}</h5>
+
+                            <p v-if="auth.user">
+                                {{ formatPrice(car.price) }}
+                            </p>
+
+                            <p v-else class="text-muted">
+                                Авторизуйтесь, чтобы увидеть цену
+                            </p>
+                        </div>
+
+                    </NuxtLink>
 
                     <div v-if="auth.user" class="p-3 pt-0">
+
                         <BaseButton
                             v-if="isInCart(car.id)"
                             variant="light"
@@ -167,41 +139,24 @@ const pages = computed(() => {
                         >
                             В корзину
                         </BaseButton>
+
                     </div>
+
                 </div>
+
             </div>
         </div>
 
         <!-- bottom pagination -->
         <div
             v-if="store.meta"
-            class="d-flex gap-2 mt-3 align-items-center flex-wrap"
+            class="d-flex gap-2 mb-3 align-items-center flex-wrap"
         >
-            <BaseButton
-                :variant="isFirstPage ? 'outline-primary' : 'primary'"
-                :disabled="isFirstPage || store.loading"
-                @click="changePage(store.meta.current_page - 1)"
-            >
-                Назад
-            </BaseButton>
-
-            <BaseButton
-                v-for="p in pages"
-                :key="p"
-                :variant="p === store.meta.current_page ? 'primary' : 'outline-primary'"
-                :disabled="store.loading"
-                @click="changePage(p)"
-            >
-                {{ p }}
-            </BaseButton>
-
-            <BaseButton
-                :variant="isLastPage ? 'outline-primary' : 'primary'"
-                :disabled="isLastPage || store.loading"
-                @click="changePage(store.meta.current_page + 1)"
-            >
-                Вперёд
-            </BaseButton>
+            <Pagination
+                :meta="store.meta"
+                :loading="store.loading"
+                @change="changePage"
+            />
         </div>
 
         <!-- meta info -->

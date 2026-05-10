@@ -6,7 +6,16 @@ import BaseButton from '~/components/BaseButton.vue'
 
 const cart = useCartStore()
 
-await callOnce(() => cart.fetch())
+// Ждем пока все данные загрузятся
+// await callOnce(() => cart.fetch())
+
+// Более мягкий вариант
+// const { data } = await useAsyncData('cart', () => cart.fetch())
+
+// Не блокируем навигацию
+onMounted(() => {
+    cart.fetch()
+})
 
 const isSubmitting = ref(false)
 const comment = ref('')

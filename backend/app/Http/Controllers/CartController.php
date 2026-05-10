@@ -12,6 +12,7 @@ class CartController extends Controller
 
     public function index(Request $request)
     {
+
         $cart = Cart::where('user_id', $request->user()->id)
             ->with(['items' => function ($query) {
                 $query->orderBy('created_at', 'asc');
@@ -31,13 +32,26 @@ class CartController extends Controller
                 'photo_url' => $item->car->photo_url ?? null,
             ];
         });
+
     }
 
     public function add(Request $request)
     {
+
+        $dd = $request->all();
+
         $user = $request->user();
 
-        $car = Car::findOrFail($request->id);
+        $request->validate([
+            'id' => 'required|integer|exists:cars,id',
+            'qty' => 'nullable|integer|min:1'
+        ]);
+
+        $car = Car::find($request->id);
+
+        if (!$car) {
+            return response()->json(['message' => 'Car not found'], 404);
+        }
 
         $cart = Cart::firstOrCreate([
             'user_id' => $user->id
@@ -60,20 +74,29 @@ class CartController extends Controller
             ]);
         }
 
-        return response()->json([
-            'message' => 'added'
-        ]);
+        return response()->json(['message' => 'added']);
+
     }
 
     public function update(Request $request)
     {
+
         $user = $request->user();
+
+        $request->validate([
+            'id' => 'required|integer|exists:cars,id',
+            'qty' => 'required|integer|min:1'
+        ]);
+
+        $car = Car::find($request->id);
+
+        if (!$car) {
+            return response()->json(['message' => 'Car not found'], 404);
+        }
 
         $cart = Cart::firstOrCreate([
             'user_id' => $user->id
         ]);
-
-        $car = Car::findOrFail($request->id);
 
         $item = CartItem::where('cart_id', $cart->id)
             ->where('car_id', $car->id)
@@ -92,13 +115,13 @@ class CartController extends Controller
             ]);
         }
 
-        return response()->json([
-            'ok' => true
-        ]);
+        return response()->json(['ok' => true]);
+
     }
 
     public function remove(Request $request)
     {
+
         $cart = Cart::where('user_id', $request->user()->id)->first();
 
         if (!$cart) {
@@ -110,10 +133,12 @@ class CartController extends Controller
             ->delete();
 
         return response()->json(['ok' => true]);
+
     }
 
     public function clear(Request $request)
     {
+
         $cart = Cart::where('user_id', $request->user()->id)->first();
 
         if ($cart) {
@@ -121,6 +146,7 @@ class CartController extends Controller
         }
 
         return response()->json([]);
+
     }
 
 }

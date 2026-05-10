@@ -14,7 +14,10 @@ export const useAuthApi = () => {
             return api.get<User>('/api/me')
         },
 
-        login(email: string, password: string) {
+        login(
+            email: string,
+            password: string
+        ) {
             return api.post('/api/login', {
                 email,
                 password

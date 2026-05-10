@@ -8,17 +8,6 @@ export default defineNuxtPlugin(() => {
         ? useRequestHeaders(['cookie', 'origin', 'referer'])
         : {}
 
-    const IGNORE_ALERT_STATUSES = [
-        401, // Unauthorized
-        403, // Forbidden
-        419, // Page Expired
-    ];
-
-    const IGNORE_ALERT_URLS = [
-        '/api/me',
-        '/sanctum/csrf-cookie',
-    ];
-
     const api = $fetch.create({
 
         baseURL: import.meta.server
@@ -28,8 +17,9 @@ export default defineNuxtPlugin(() => {
         credentials: 'include',
 
         headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            Accept: 'application/json',
+            //'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
         },
 
         async onRequest({options}) {
@@ -124,16 +114,6 @@ export default defineNuxtPlugin(() => {
         onResponseError({response, request}) {
 
             if (!import.meta.client) {
-                return
-            }
-
-            const status = response.status
-            const url = String(request)
-
-            const ignoredStatus = IGNORE_ALERT_STATUSES.includes(status)
-            const ignoredUrl = IGNORE_ALERT_URLS.some(u => url.includes(u))
-
-            if (ignoredStatus || ignoredUrl) {
                 return
             }
 

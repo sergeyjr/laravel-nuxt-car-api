@@ -8,21 +8,25 @@ export const useCartApi = () => {
             return api.get('/api/cart')
         },
 
-        addItem(payload: { id: number; qty: number }) {
-            return api.post('/api/cart/add', {
-                body: payload
-            })
+        addItem(payload: {
+            id: number;
+            qty: number
+        }) {
+            return api.post('/api/cart/add', payload)
         },
 
-        updateItem(payload: { id: number; qty: number }) {
-            return api.post('/api/cart/update', {
-                body: payload
-            })
+        updateItem(payload: {
+            id: number;
+            qty: number
+        }) {
+            return api.post('/api/cart/update', payload)
         },
 
-        removeItem(id: number) {
+        removeItem(
+            id: number
+        ) {
             return api.post('/api/cart/remove', {
-                body: {id}
+                id
             })
         },
 
@@ -30,10 +34,10 @@ export const useCartApi = () => {
             return api.post('/api/cart/clear')
         },
 
-        checkout(payload: { comment?: string }) {
-            return api.post('/api/orders/checkout', {
-                body: payload
-            })
+        checkout(payload: {
+            comment?: string
+        }) {
+            return api.post('/api/orders/checkout', payload)
         }
 
     }

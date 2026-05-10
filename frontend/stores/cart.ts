@@ -67,7 +67,12 @@ export const useCartStore = defineStore('cart', {
         async add(newItem: any) {
             const cartApi = useCartApi()
 
-            const id = newItem.id
+            const id = Number(newItem?.id)
+            if (!id) {
+                console.error('Cart add aborted: invalid id', newItem)
+                return
+            }
+
             const backup = structuredClone(toRaw(this.items))
 
             if (this.items[id]) {
@@ -89,7 +94,7 @@ export const useCartStore = defineStore('cart', {
                     id,
                     qty: newItem.qty ?? 1
                 })
-            } catch (e) {
+            } catch {
                 this.items = backup
                 this.save()
             }

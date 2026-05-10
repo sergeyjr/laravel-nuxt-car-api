@@ -1,6 +1,27 @@
-import type {Car, CarsResponse} from '~/types/car'
-import {useCarApi} from '~/services/api/internal/car.api'
-import {defineStore} from 'pinia'
+import type { Car, CarsResponse } from '~/types/car'
+import { useCarApi } from '~/services/api/internal/car.api'
+import { defineStore } from 'pinia'
+
+function createDelayedLoader(
+    show: () => void,
+    hide: () => void,
+    delay = 150
+) {
+    let visible = false
+
+    const timer = setTimeout(() => {
+        visible = true
+        show()
+    }, delay)
+
+    return () => {
+        clearTimeout(timer)
+
+        if (visible) {
+            hide()
+        }
+    }
+}
 
 export const useCarStore = defineStore('car', {
     state: () => ({
@@ -15,12 +36,26 @@ export const useCarStore = defineStore('car', {
         loading: false,
         carLoading: false,
         latestLoading: false,
+
+        carPending: false,
+        loadingPending: false,
+        latestPending: false,
     }),
 
     actions: {
 
         async fetch(page = 1) {
-            this.loading = true
+            this.loadingPending = true
+            this.loading = false
+
+            const stopLoading = createDelayedLoader(
+                () => {
+                    this.loading = true
+                },
+                () => {
+                    this.loading = false
+                }
+            )
 
             const carApi = useCarApi()
 
@@ -34,31 +69,48 @@ export const useCarStore = defineStore('car', {
                 this.meta = null
                 return null
             } finally {
-                this.loading = false
+                this.loadingPending = false
+                stopLoading()
             }
         },
 
         async fetchCar(id: number) {
-            if (!id) return null
+            if (!id) {
+                this.car = null
+                this.carPending = false
+                this.carLoading = false
+                return null
+            }
 
-            this.carLoading = true
+            this.carPending = true
+            this.carLoading = false
             this.car = null
+
+            const stopLoading = createDelayedLoader(
+                () => {
+                    this.carLoading = true
+                },
+                () => {
+                    this.carLoading = false
+                }
+            )
 
             const carApi = useCarApi()
 
             try {
-                this.car = await carApi.fetchCar(id)
-                return this.car
+                const car = await carApi.fetchCar(id)
+                this.car = car
+                return car
             } catch {
                 this.car = null
                 return null
             } finally {
-                this.carLoading = false
+                this.carPending = false
+                stopLoading()
             }
         },
 
         async fetchLatest(force = false) {
-
             const now = Date.now()
 
             const isCached =
@@ -69,7 +121,17 @@ export const useCarStore = defineStore('car', {
                 return this.latest
             }
 
-            this.latestLoading = true
+            this.latestPending = true
+            this.latestLoading = false
+
+            const stopLoading = createDelayedLoader(
+                () => {
+                    this.latestLoading = true
+                },
+                () => {
+                    this.latestLoading = false
+                }
+            )
 
             const carApi = useCarApi()
 
@@ -82,9 +144,9 @@ export const useCarStore = defineStore('car', {
                 this.latest = []
                 return []
             } finally {
-                this.latestLoading = false
+                this.latestPending = false
+                stopLoading()
             }
-
         }
 
     }
