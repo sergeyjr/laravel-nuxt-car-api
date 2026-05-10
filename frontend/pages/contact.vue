@@ -8,10 +8,7 @@ import BaseTextarea from '~/components/BaseTextarea.vue'
 const store = useContactStore()
 
 const onSubmit = async (e) => {
-    if (!e.target.checkValidity()) {
-        return
-    }
-
+    if (!e.target.checkValidity()) return
     await store.submit('contactPage')
 }
 
@@ -24,25 +21,8 @@ const onSubmit = async (e) => {
 
                 <h1 class="mb-4">Контактная форма</h1>
 
-                <div v-if="store.contexts.contactPage.successMessage" class="alert alert-success">
-
-                    <div>
-                        {{ store.contexts.contactPage.successMessage }}
-                    </div>
-
-                    <div v-if="store.successCountdown !== null" class="mt-1 small text-muted">
-                        Следующее сообщение можно отправить через
-                        <strong>{{ store.successCountdown }}</strong> сек
-                    </div>
-
-                </div>
-
-                <div v-if="store.contexts.contactPage.errorMessage" class="alert alert-danger">
-                    {{ store.contexts.contactPage.errorMessage }}
-                </div>
-
                 <div v-if="store.retryAfter" class="alert alert-warning mt-4">
-                    Подождите {{ store.retryAfter }} сек
+                    Следующее сообщение можно отправить через {{ store.retryAfter }} сек
                 </div>
 
                 <form @submit.prevent="onSubmit">
@@ -51,7 +31,7 @@ const onSubmit = async (e) => {
                         v-model="store.form.name"
                         label="Имя"
                         required
-                        :error="store.errors.name"
+                        :error="store.errors.name?.[0]"
                         autocomplete="name"
                     />
 
@@ -60,7 +40,7 @@ const onSubmit = async (e) => {
                         type="email"
                         label="Email"
                         required
-                        :error="store.errors.email"
+                        :error="store.errors.email?.[0]"
                         autocomplete="email"
                     />
 
@@ -68,14 +48,14 @@ const onSubmit = async (e) => {
                         v-model="store.form.subject"
                         label="Тема"
                         required
-                        :error="store.errors.subject"
+                        :error="store.errors.subject?.[0]"
                     />
 
                     <BaseTextarea
                         v-model="store.form.body"
                         label="Сообщение"
                         required
-                        :error="store.errors.body"
+                        :error="store.errors.body?.[0]"
                     />
 
                     <BaseButton

@@ -53,7 +53,7 @@ const goBack = () => {
             <h2>Заказ #{{ order.id }}</h2>
 
             <p class="text-muted">
-                Статус: <strong>{{ getLabel(order.status) }}</strong>
+                Статус: <span class="fw-bold">{{ getLabel(order.status) }}</span>
             </p>
 
             <hr>
@@ -78,9 +78,9 @@ const goBack = () => {
                             </NuxtLink>
 
                             <div>
-                                <strong>
+                                <span class="fw-bold">
                                     {{ item.name || ('Машина #' + item.car_id) }}
-                                </strong>
+                                </span>
 
                                 <div class="text-muted small">
                                     {{ item.qty }} × {{ item.price }} ₽

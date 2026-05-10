@@ -22,7 +22,7 @@ const page = computed(() => store.current)
 const loading = computed(() => store.loading)
 
 const title = computed(() => {
-    if (loading.value) return 'Загрузка страницы...'
+    // if (loading.value) return 'Загрузка страницы...'
     return page.value?.title || 'Страница'
 })
 
@@ -42,7 +42,7 @@ const formattedContent = computed(() => {
                     {{ title }}
                 </h1>
 
-                <div v-if="loading" class="loading-bar mb-3">
+                <div v-if="loading" class="alert alert-light mb-3">
                     Идёт загрузка страницы...
                 </div>
 
@@ -64,21 +64,6 @@ const formattedContent = computed(() => {
 </template>
 
 <style scoped>
-
-.loading-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 10px 14px;
-    border-radius: 8px;
-
-    background: rgba(13, 110, 253, 0.08);
-    border: 1px solid rgba(13, 110, 253, 0.2);
-
-    color: #0d6efd;
-    font-weight: 500;
-}
 
 .content-loading {
     opacity: 0.6;

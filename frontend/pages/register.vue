@@ -73,14 +73,6 @@ const submit = async () => {
 
                 <h1 class="mb-4">Регистрация</h1>
 
-                <p v-if="store.success" class="text-success text-center">
-                    {{ store.success }}
-                </p>
-
-                <p v-if="store.error" class="text-danger text-center">
-                    {{ store.error }}
-                </p>
-
                 <form @submit.prevent="submit">
 
                     <BaseInput

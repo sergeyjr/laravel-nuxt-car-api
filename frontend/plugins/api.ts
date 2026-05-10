@@ -4,45 +4,83 @@ export default defineNuxtPlugin(() => {
 
     const config = useRuntimeConfig()
 
-    const baseURL = import.meta.server
-        ? config.apiBase
-        : config.public.apiBase
-
     const ssrHeaders = import.meta.server
-        ? useRequestHeaders(['cookie'])
+        ? useRequestHeaders(['cookie', 'origin', 'referer'])
         : {}
+
+    const IGNORE_ALERT_STATUSES = [
+        401, // Unauthorized
+        403, // Forbidden
+        419, // Page Expired
+    ];
+
+    const IGNORE_ALERT_URLS = [
+        '/api/me',
+        '/sanctum/csrf-cookie',
+    ];
 
     const api = $fetch.create({
 
-        baseURL: baseURL,
+        baseURL: import.meta.server
+            ? config.apiBase
+            : config.public.apiBase,
+
         credentials: 'include',
 
-        async onRequest({request, options}) {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: 'application/json',
+        },
+
+        async onRequest({options}) {
 
             const headers = new Headers(options.headers || {})
 
-            // TODO: чекнуть
-            // const headers = useRequestHeaders([
-            //     'cookie',
-            //     'origin',
-            //     'referer'
-            // ])
-            //
-            // options.headers = {
-            //     ...options.headers,
-            //     cookie: headers.cookie || '',
-            //     origin: headers.origin || config.public.apiBase,
-            //     referer: headers.referer || config.public.apiBase,
-            // }
-
-            headers.forEach((value, key) => {
-                console.log('headers', key, value)
-            })
-
             if (import.meta.server) {
 
-                if (import.meta.server && ssrHeaders.cookie) {
+                /**
+                 * Почему для SSR + Laravel Sanctum недостаточно только cookie
+                 * Браузер автоматически отправляет:
+                 * - Cookie
+                 * - Origin
+                 * - Referer
+                 * Sanctum через middleware: EnsureFrontendRequestsAreStateful
+                 * определяет, является ли запрос trusted SPA frontend request.
+                 * Внутри Sanctum проверяется: referer ?: origin
+                 * и домен сверяется с: SANCTUM_STATEFUL_DOMAINS
+                 * Только после этого Sanctum включает session auth
+                 * и восстанавливает auth()->user().
+                 * ---
+                 * SSR-запрос делает не браузер, а Nuxt(Node.js): Browser -> Nuxt SSR -> Laravel API
+                 * Node-fetch/ofetch автоматически НЕ отправляют:
+                 * - Origin
+                 * - Referer
+                 * Поэтому запрос только с cookie: { cookie }
+                 * Sanctum считает stateless и auth:sanctum возвращает 401.
+                 * А запрос: { cookie, origin } или: { cookie, referer }
+                 * переводит Sanctum в stateful mode,
+                 * после чего session auth начинает работать.
+                 *
+                 * Внутри middleware: EnsureFrontendRequestsAreStateful есть логика:
+                 * $domain = $request->headers->get('referer') ?: $request->headers->get('origin');
+                 *
+                 * https://laravel.com/docs/13.x/sanctum
+                 * Для аутентификации ваше SPA и API должны использовать один и тот же домен верхнего уровня.
+                 * Однако они могут располагаться на разных поддоменах.
+                 * Кроме того, убедитесь, что вы отправляете заголовок
+                 * Accept: application/json и либо заголовок Referer, либо Origin вместе с вашим запросом.
+                 */
+
+                if (ssrHeaders.cookie) {
                     headers.set('cookie', ssrHeaders.cookie)
+                }
+
+                if (ssrHeaders.origin) {
+                    headers.set('origin', ssrHeaders.origin)
+                }
+
+                if (ssrHeaders.referer) {
+                    headers.set('referer', ssrHeaders.referer)
                 }
 
             } else {
@@ -50,12 +88,17 @@ export default defineNuxtPlugin(() => {
                 const method = String(options.method || 'GET').toUpperCase()
 
                 if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-                    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/)
-                    const xsrf = match?.[1] ? decodeURIComponent(match[1]) : null
 
-                    if (xsrf) {
-                        headers.set('X-XSRF-TOKEN', xsrf)
+                    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/)
+
+                    const token = match?.[1]
+                        ? decodeURIComponent(match[1])
+                        : null
+
+                    if (token) {
+                        headers.set('X-XSRF-TOKEN', token)
                     }
+
                 }
 
             }
@@ -64,11 +107,15 @@ export default defineNuxtPlugin(() => {
 
         },
 
-        onResponse({response, request}) {
+        onResponse({response}) {
 
             const data = response._data
 
-            if (data && typeof data === 'object' && data.success === true) {
+            if (
+                data &&
+                typeof data === 'object' &&
+                data.success === true
+            ) {
                 response._data = data.data
             }
 
@@ -76,20 +123,36 @@ export default defineNuxtPlugin(() => {
 
         onResponseError({response, request}) {
 
-            if (!import.meta.client) return
+            if (!import.meta.client) {
+                return
+            }
+
+            const status = response.status
+            const url = String(request)
+
+            const ignoredStatus = IGNORE_ALERT_STATUSES.includes(status)
+            const ignoredUrl = IGNORE_ALERT_URLS.some(u => url.includes(u))
+
+            if (ignoredStatus || ignoredUrl) {
+                return
+            }
 
             const alert = useAlertStore()
-            const data = response._data
 
-            if (response.status === 401 || response.status === 419) return
+            const data = response._data
 
             if (data?.errors) {
                 Object.values(data.errors).forEach((arr: any) => {
                     if (Array.isArray(arr)) {
-                        arr.forEach((msg: string) => alert.add('error', msg))
+                        arr.forEach((msg: string) => {
+                            alert.add('error', msg)
+                        })
                     }
                 })
-            } else if (data?.message) {
+                return
+            }
+
+            if (data?.message) {
                 alert.add('error', data.message)
             }
 

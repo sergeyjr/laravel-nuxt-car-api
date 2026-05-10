@@ -7,7 +7,9 @@ export const useDashboardStore = defineStore('dashboard', {
     state: () => ({
         orders: [] as any[],
         ordersCount: 0,
+
         carsCount: 0,
+        myCarsCount: 0,
 
         cart: {} as Record<string, any>,
         cartTotal: 0,
@@ -33,6 +35,7 @@ export const useDashboardStore = defineStore('dashboard', {
             try {
                 const data: any = await dashboardApi.getDashboard()
                 this.carsCount = data.carsCount ?? 0
+                this.myCarsCount = data.myCarsCount ?? 0
                 this.ordersCount = data.ordersCount ?? 0
                 this.orders = data.orders ?? []
                 this.cart = data.cart ?? {}

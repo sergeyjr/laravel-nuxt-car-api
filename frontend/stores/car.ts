@@ -7,7 +7,10 @@ export const useCarStore = defineStore('car', {
         cars: [] as Car[],
         meta: null as CarsResponse | null,
         car: null as Car | null,
+
         latest: [] as Car[],
+        latestFetchedAt: 0,
+        latestCacheTtl: 1000 * 60 * 60,
 
         loading: false,
         carLoading: false,
@@ -54,7 +57,18 @@ export const useCarStore = defineStore('car', {
             }
         },
 
-        async fetchLatest() {
+        async fetchLatest(force = false) {
+
+            const now = Date.now()
+
+            const isCached =
+                this.latest.length > 0 &&
+                now - this.latestFetchedAt < this.latestCacheTtl
+
+            if (!force && isCached) {
+                return this.latest
+            }
+
             this.latestLoading = true
 
             const carApi = useCarApi()
@@ -62,7 +76,7 @@ export const useCarStore = defineStore('car', {
             try {
                 const res = await carApi.fetchLatest()
                 this.latest = res.data || []
-
+                this.latestFetchedAt = Date.now()
                 return this.latest
             } catch {
                 this.latest = []
@@ -70,6 +84,7 @@ export const useCarStore = defineStore('car', {
             } finally {
                 this.latestLoading = false
             }
+
         }
 
     }

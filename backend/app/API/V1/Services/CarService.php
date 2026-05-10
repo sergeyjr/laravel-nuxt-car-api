@@ -170,9 +170,4 @@ class CarService
         }
     }
 
-    public function getCarsCount(): int
-    {
-        return Car::count();
-    }
-
 }

@@ -104,16 +104,16 @@ watch(
 
                 <div class="col-md-7">
 
-                    <p><strong>Описание:</strong> {{ car.description }}</p>
+                    <p><span class="fw-bold">Описание:</span> {{ car.description }}</p>
 
                     <div v-if="car.option">
-                        <p><strong>Бренд:</strong> {{ car.option.brand }}</p>
-                        <p><strong>Модель:</strong> {{ car.option.model }}</p>
-                        <p><strong>Год:</strong> {{ car.option.year }}</p>
-                        <p><strong>Пробег:</strong> {{ car.option.mileage }}</p>
+                        <p><span class="fw-bold">Бренд:</span> {{ car.option.brand }}</p>
+                        <p><span class="fw-bold">Модель:</span> {{ car.option.model }}</p>
+                        <p><span class="fw-bold">Год:</span> {{ car.option.year }}</p>
+                        <p><span class="fw-bold">Пробег:</span> {{ car.option.mileage }}</p>
 
                         <p v-if="auth.user">
-                            <strong>Цена:</strong> {{ formatPrice(car.price) }}
+                            <span class="fw-bold">Цена:</span> {{ formatPrice(car.price) }}
                         </p>
 
                         <p v-else class="text-muted">

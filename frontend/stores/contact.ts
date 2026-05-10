@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia'
 import {useContactApi} from '~/services/api/internal/contact.api'
+import {useAlertStore} from '~/stores/alert'
 
 type ContactContext = 'home' | 'contactPage'
 
@@ -13,26 +14,13 @@ export const useContactStore = defineStore('contact', {
             body: ''
         },
 
-        errors: {} as Record<string, string>,
+        errors: {} as Record<string, string[]>,
+
         loading: false,
 
         retryAfter: null as number | null,
         timer: null as ReturnType<typeof setInterval> | null,
-        successCountdown: null as number | null,
-
-        contexts: {
-            home: {
-                successMessage: '',
-                errorMessage: ''
-            },
-            contactPage: {
-                successMessage: '',
-                errorMessage: ''
-            }
-        } as Record<ContactContext, {
-            successMessage: string
-            errorMessage: string
-        }>
+        successCountdown: null as number | null
     }),
 
     actions: {
@@ -49,11 +37,6 @@ export const useContactStore = defineStore('contact', {
                 body: ''
             }
             this.errors = {}
-        },
-
-        resetMessages(context: ContactContext) {
-            this.contexts[context].successMessage = ''
-            this.contexts[context].errorMessage = ''
         },
 
         startCountdown() {
@@ -88,21 +71,22 @@ export const useContactStore = defineStore('contact', {
         },
 
         async submit(context: ContactContext = 'home') {
+
             const contactApi = useContactApi()
+            const alert = useAlertStore()
 
             this.loading = true
             this.resetErrors()
-            this.resetMessages(context)
 
             try {
-                const data: any = await contactApi.submit(this.form)
 
-                debugLog(data)
+                const data: any = await contactApi.submit(this.form)
 
                 this.resetForm()
 
-                this.contexts[context].successMessage =
-                    data?.message || 'Сообщение отправлено'
+                const message = data?.message || 'Сообщение отправлено'
+
+                alert.add('success', message)
 
                 this.startSuccessCountdown()
 
@@ -119,13 +103,19 @@ export const useContactStore = defineStore('contact', {
                 if (status === 429) {
                     this.retryAfter = data?.retry_after ?? null
                     this.startCountdown()
+
+                    alert.add(
+                        'warning',
+                        `Подождите ${this.retryAfter ?? ''} сек перед следующим сообщением`
+                    )
+
                     return
                 }
 
-                this.contexts[context].errorMessage =
+                const message =
                     data?.message || 'Ошибка отправки формы'
 
-                console.error('Contact error:', e)
+                alert.add('error', message)
 
             } finally {
                 this.loading = false

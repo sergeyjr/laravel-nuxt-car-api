@@ -7,8 +7,8 @@ import {useDashboardStore} from '~/stores/dashboard'
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
 
-onMounted(() => {
-    dashboard.fetchDashboard()
+onMounted(async () => {
+    await dashboard.fetchDashboard()
 })
 
 const user = computed(() => auth.user)
@@ -48,7 +48,9 @@ const formatDate = (date) => {
 
         <h1 class="mb-3">Панель управления</h1>
 
-        <div v-if="dashboard.loading">Загрузка...</div>
+        <div v-if="dashboard.loading" class="alert alert-light">
+            Идёт загрузка страницы...
+        </div>
 
         <template v-else>
 
@@ -60,7 +62,7 @@ const formatDate = (date) => {
 
                             <h5>Мой профиль</h5>
                             <p>Добро пожаловать, {{ user?.name || 'пользователь' }}</p>
-                            <p>{{ user?.email || '—' }}</p>
+                            <p>Email: {{ user?.email || '—' }}</p>
 
                             <NuxtLink
                                 to="/dashboard/profile"
@@ -80,8 +82,13 @@ const formatDate = (date) => {
                             <h5>Каталог</h5>
 
                             <p class="mb-0">
-                                Машины:
+                                Машины всего:
                                 <span class="fw-bold">{{ dashboard.carsCount }}</span>
+                            </p>
+
+                            <p class="mb-0">
+                                Мои машины:
+                                <span class="fw-bold">{{ dashboard.myCarsCount }}</span>
                             </p>
 
                             <NuxtLink
@@ -93,8 +100,8 @@ const formatDate = (date) => {
                             </NuxtLink>
 
                             <NuxtLink v-else
-                                to="/cars"
-                                class="btn btn-outline-primary w-100 mt-3"
+                                      to="/cars"
+                                      class="btn btn-outline-primary w-100 mt-3"
                             >
                                 Перейти в каталог
                             </NuxtLink>
@@ -109,30 +116,34 @@ const formatDate = (date) => {
 
                             <h5>Корзина</h5>
 
-                            <p class="mb-1 text-muted">
-                                Товаров:
-                                <span class="fw-bold">{{ cartCount }}</span>
-                            </p>
+                            <div v-if="cartTotal === 0">
 
-                            <p class="mb-0">
-                                Стоимость:
-                                <span class="fw-bold">{{ formatPrice(cartTotal) }}</span>
-                            </p>
+                                <div class="btn btn-outline-secondary w-100 mt-3">
+                                    Корзина пустая
+                                </div>
 
-                            <div
-                                v-if="cartTotal === 0"
-                                class="btn btn-outline-secondary w-100 mt-3"
-                            >
-                                Корзина пустая
                             </div>
 
-                            <NuxtLink
-                                v-else
-                                to="/cart"
-                                class="btn btn-outline-success w-100 mt-3"
-                            >
-                                Перейти в корзину
-                            </NuxtLink>
+                            <div v-else>
+
+                                <p class="text-muted">
+                                    Товаров:
+                                    <span class="fw-bold">{{ cartCount }}</span>
+                                </p>
+
+                                <p class="mb-0">
+                                    Стоимость:
+                                    <span class="fw-bold">{{ formatPrice(cartTotal) }}</span>
+                                </p>
+
+                                <NuxtLink
+                                    to="/cart"
+                                    class="btn btn-outline-success w-100 mt-3"
+                                >
+                                    Перейти в корзину
+                                </NuxtLink>
+
+                            </div>
 
                         </div>
                     </div>

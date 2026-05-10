@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\API\V1\Services\CarService;
 use App\Models\Cart;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\Car;
 
 class DashboardController extends Controller
 {
 
-    public function api(Request $request, CarService $carService): JsonResponse
+    public function api(Request $request): JsonResponse
     {
 
         $user = $request->user();
@@ -20,7 +20,8 @@ class DashboardController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $carsCount = $carService->getCarsCount();
+        $carsCount = Car::count();
+        $myCarsCount = Car::where('user_id', $user->id)->count();
 
         $orders = Order::where('user_id', $user->id)
             ->latest()
@@ -57,6 +58,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'carsCount' => $carsCount,
+            'myCarsCount' => $myCarsCount,
             'ordersCount' => $ordersCount,
             'orders' => $orders,
             'cart' => $cartItems,

@@ -24,13 +24,15 @@ export default defineNuxtConfig({
     ],
 
     // Pinia (state management)
-    modules: ['@pinia/nuxt'],
+    modules: [
+        '@pinia/nuxt'
+    ],
 
-    // Конфигурация окружений (SSR + client)
+    // Конфигурация окружений
     runtimeConfig: {
-        apiBase: 'http://laravel.local', // SSR
+        apiBase: 'http://laravel.local', // SSR (server)
         public: {
-            apiBase: 'http://laravel.local', // Browser
+            apiBase: 'http://laravel.local', // Браузер (client)
             appName: 'Laravel App',
             debugApi: true
         },
@@ -45,8 +47,7 @@ export default defineNuxtConfig({
     // Vite сборка
     vite: {
         build: {
-            // минификация в dev (включение ускоряет сборку/отладку)
-            minify: false
+            minify: false // минификация в dev (включение ускоряет сборку/отладку)
         },
 
         // зависимости, которые заранее бандлятся для ускорения
@@ -76,7 +77,7 @@ export default defineNuxtConfig({
 
             // следит за файлами внутри docker volume
             watch: {
-                usePolling: true,
+                usePolling: false,
             }
         }
     }
