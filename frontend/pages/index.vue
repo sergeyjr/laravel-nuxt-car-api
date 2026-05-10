@@ -71,10 +71,11 @@ const contactStore = useContactStore()
     <div class="container my-4">
         <div class="text-center mb-5">
             <h1 class="display-5 fw-bold">Главная страница</h1>
-            <p class="text-muted">Nuxt 4 + Pinia</p>
+            <p class="text-muted">Nuxt 4 + Pinia 3</p>
         </div>
 
         <div class="row g-4">
+
             <!-- USER STATUS -->
             <div class="col-md-6">
                 <div class="card shadow-sm h-100">
@@ -198,6 +199,7 @@ const contactStore = useContactStore()
                 </div>
 
                 <form @submit.prevent="contactStore.submit">
+
                     <input
                         v-model="contactStore.form.name"
                         class="form-control mb-2"
@@ -232,6 +234,7 @@ const contactStore = useContactStore()
                         <template #loading>Отправляем...</template>
                         Отправить
                     </BaseButton>
+
                 </form>
 
             </div>

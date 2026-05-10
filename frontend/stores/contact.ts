@@ -20,7 +20,21 @@ export const useContactStore = defineStore('contact', {
 
         retryAfter: null as number | null,
         timer: null as ReturnType<typeof setInterval> | null,
-        successCountdown: null as number | null
+        successCountdown: null as number | null,
+
+        contexts: {
+            home: {
+                successMessage: '',
+                errorMessage: ''
+            },
+            contactPage: {
+                successMessage: '',
+                errorMessage: ''
+            }
+        } as Record<ContactContext, {
+            successMessage: string
+            errorMessage: string
+        }>
     }),
 
     actions: {
@@ -37,6 +51,11 @@ export const useContactStore = defineStore('contact', {
                 body: ''
             }
             this.errors = {}
+        },
+
+        resetMessages(context: ContactContext) {
+            this.contexts[context].successMessage = ''
+            this.contexts[context].errorMessage = ''
         },
 
         startCountdown() {
@@ -77,6 +96,7 @@ export const useContactStore = defineStore('contact', {
 
             this.loading = true
             this.resetErrors()
+            this.resetMessages(context)
 
             try {
 
@@ -84,9 +104,10 @@ export const useContactStore = defineStore('contact', {
 
                 this.resetForm()
 
-                const message = data?.message || 'Сообщение отправлено'
+                this.contexts[context].successMessage =
+                    data?.message || 'Сообщение отправлено'
 
-                alert.add('success', message)
+                alert.add('success', this.contexts[context].successMessage)
 
                 this.startSuccessCountdown()
 
@@ -112,10 +133,12 @@ export const useContactStore = defineStore('contact', {
                     return
                 }
 
-                const message =
+                this.contexts[context].errorMessage =
                     data?.message || 'Ошибка отправки формы'
 
-                alert.add('error', message)
+                alert.add('error', this.contexts[context].errorMessage)
+
+                console.error('Contact error:', e)
 
             } finally {
                 this.loading = false

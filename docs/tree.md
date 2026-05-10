@@ -1,26 +1,4 @@
-C:\Projects\DockerEnv\
-│
-├── docker-compose.yml
-├── logs.bat
-├── rebuild.bat
-├── start.bat
-├── stop.bat
-│
-├── php/
-│   ├── Dockerfile
-│   ├── php.ini
-│   ├── xdebug.ini
-│
-├── nginx/
-│   ├── sites-enabled/
-│   │   ├── espocada.conf
-│   │   ├── info-autoglass.conf
-│   │   ├── laravel.conf
-│   │   ├── localhost.conf
-│   │   ├── symfony.conf
-│   │   ├── yii2.conf
-
-e:\www\laravel\backend\_
+e:\www\laravel\backend\
 │
 ├── .env
 ├── artisan
@@ -91,7 +69,6 @@ e:\www\laravel\backend\_
 ├── public
 │   ├── index.php
 │   ├── storage
-│   └── .env (не указан, но обычно рядом)
 │
 ├── routes
 │   ├── api.php
