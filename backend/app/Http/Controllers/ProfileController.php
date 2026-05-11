@@ -18,6 +18,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request): JsonResponse
     {
+
         $user = $request->user();
 
         $validated = $request->validate([
@@ -31,6 +32,15 @@ class ProfileController extends Controller
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:65536'],
             'remove_avatar' => ['nullable', 'boolean'],
         ]);
+
+        // EMAIL ЗАБЛОКИРОВАН (заглушка)
+        // Только через админку / ручной процесс
+        if ($request->has('email')) {
+            return response()->json([
+                'message' => 'Изменение email запрещено. Обратитесь в администрацию.',
+                'admin_email' => 'admin@laravel.local',
+            ], 403);
+        }
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
@@ -53,6 +63,7 @@ class ProfileController extends Controller
             'message' => 'Профиль обновлён',
             'user' => $user,
         ]);
+
     }
 
     /**
@@ -60,6 +71,7 @@ class ProfileController extends Controller
      */
     public function password(Request $request): JsonResponse
     {
+
         $validated = $request->validate([
             'current_password' => ['required'],
             'password' => ['required', 'confirmed', Password::min(6)],
@@ -91,6 +103,7 @@ class ProfileController extends Controller
         return response()->json([
             'message' => 'Пароль успешно изменён',
         ]);
+
     }
 
     /**

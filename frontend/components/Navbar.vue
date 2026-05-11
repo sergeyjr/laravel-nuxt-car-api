@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {computed, onMounted, watch} from 'vue'
+import {computed} from 'vue'
 
 import {useAuthActions} from '~/composables/useAuthActions'
 
@@ -17,36 +17,22 @@ const {handleLogout} = useAuthActions()
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
+// Кол-ва позиций
 const cartCount = computed(() => {
     return Object.keys(cart.items || {}).length
 })
+
+// Кол-ва товаров
+// const cartCount = computed(() => {
+//     return Object.values(cart.items || {}).reduce((sum: number, item: any) => {
+//         return sum + Number(item.qty || 0)
+//     }, 0)
+// })
 
 const isActive = (path: string) => {
     return route.path.startsWith(path)
 }
 
-onMounted(async () => {
-    cart.hydrate()
-
-    if (auth.isAuth) {
-        await cart.fetch()
-    } else {
-        cart.initialized = true
-    }
-
-    watch(
-        () => auth.isAuth,
-        async (isAuth) => {
-            if (isAuth) {
-                await cart.fetch(true)
-            } else {
-                cart.items = {}
-                cart.initialized = true
-                cart.save()
-            }
-        }
-    )
-})
 </script>
 
 <template>

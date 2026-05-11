@@ -1,8 +1,12 @@
 <script setup>
 
 import {computed} from 'vue'
+
 import {useAuthStore} from '~/stores/auth'
 import {useProfileStore} from '~/stores/profile'
+
+import BaseButton from '~/components/BaseButton.vue'
+import BaseInput from '~/components/BaseInput.vue'
 
 const auth = useAuthStore()
 const profile = useProfileStore()
@@ -46,7 +50,13 @@ const goBack = () => {
     <div class="container mt-4">
         <div class="row">
 
-            <h1 class="mb-3">Мой профиль</h1>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Мой профиль</h2>
+
+                <button class="btn btn-outline-secondary" @click="goBack">
+                    ← Назад
+                </button>
+            </div>
 
             <!-- LEFT -->
             <div class="col-md-4">
@@ -86,16 +96,15 @@ const goBack = () => {
                         alt=""/>
                 </div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <button
-                            class="btn btn-danger w-100"
-                            @click="profile.deleteAccount(auth)"
-                        >
-                            Удалить аккаунт
-                        </button>
-                    </div>
-                </div>
+                <!-- DELETE ACCOUNT -->
+                <BaseButton
+                    variant="danger"
+                    class="w-100"
+                    :loading="profile.loading"
+                    @click="profile.deleteAccount(auth)"
+                >
+                    Удалить аккаунт
+                </BaseButton>
 
             </div>
 
@@ -104,6 +113,7 @@ const goBack = () => {
 
                 <!-- PROFILE UPDATE -->
                 <div class="card mb-3">
+
                     <div class="card-header">
                         Редактирование профиля
                     </div>
@@ -116,31 +126,27 @@ const goBack = () => {
 
                         <form @submit.prevent="profile.updateProfile">
 
-                            <div class="mb-3">
-                                <label class="form-label">Имя</label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    :class="{ 'is-invalid': profile.errors.name }"
-                                    v-model="profile.form.name"
-                                >
-                                <small v-if="profile.errors.name" class="text-danger">
-                                    {{ profile.errors.name[0] }}
-                                </small>
-                            </div>
+                            <BaseInput
+                                v-model="profile.form.name"
+                                label="Имя"
+                                type="text"
+                                required
+                                :error="profile.errors.name?.[0]"
+                            />
 
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input
-                                    type="email"
-                                    class="form-control"
-                                    :class="{ 'is-invalid': profile.errors.email }"
-                                    v-model="profile.form.email"
-                                >
-                                <small v-if="profile.errors.email" class="text-danger">
-                                    {{ profile.errors.email[0] }}
-                                </small>
-                            </div>
+                            <BaseInput
+                                v-model="profile.form.email"
+                                label="Email"
+                                type="email"
+                                :disabled="true"
+                                :error="profile.errors.email?.[0]"
+                            />
+
+                            <small class="text-muted d-block mt-1 mb-3">
+                                Email нельзя изменить самостоятельно.
+                                Для смены email отправьте запрос в поддержку:
+                                <a href="mailto:admin@laravel.local">admin@laravel.local</a>
+                            </small>
 
                             <div class="mb-3">
                                 <label class="form-label">Аватар</label>
@@ -166,12 +172,16 @@ const goBack = () => {
                                 </label>
                             </div>
 
-                            <button
-                                class="btn btn-primary w-100"
-                                :disabled="profile.loading"
+                            <BaseButton
+                                type="submit"
+                                class="w-100"
+                                :loading="profile.loading"
                             >
-                                {{ profile.loading ? 'Сохраняем...' : 'Сохранить' }}
-                            </button>
+                                <template #loading>
+                                    Сохраняем...
+                                </template>
+                                Сохранить
+                            </BaseButton>
 
                         </form>
                     </div>
@@ -189,39 +199,38 @@ const goBack = () => {
                                 Пароль обновлён
                             </div>
 
-                            <input
-                                type="password"
-                                class="form-control mb-2"
-                                placeholder="Текущий пароль"
+                            <BaseInput
                                 v-model="profile.passwordForm.current_password"
+                                label="Текущий пароль"
+                                type="password"
                             />
 
-                            <input
-                                type="password"
-                                class="form-control mb-2"
-                                placeholder="Новый пароль"
+                            <BaseInput
                                 v-model="profile.passwordForm.password"
-                            />
-
-                            <input
+                                label="Новый пароль"
                                 type="password"
-                                class="form-control mb-3"
-                                placeholder="Подтверждение"
-                                v-model="profile.passwordForm.password_confirmation"
                             />
 
-                            <button class="btn btn-warning w-100">
-                                Обновить пароль
-                            </button>
+                            <BaseInput
+                                v-model="profile.passwordForm.password_confirmation"
+                                label="Подтверждение"
+                                type="password"
+                            />
 
+                            <BaseButton
+                                type="submit"
+                                variant="warning"
+                                class="w-100"
+                            >
+                                <template #loading>
+                                    Обновляем...
+                                </template>
+                                Обновить пароль
+                            </BaseButton>
                         </form>
 
                     </div>
                 </div>
-
-                <button class="btn btn-outline-secondary" @click="goBack">
-                    Назад
-                </button>
 
             </div>
 

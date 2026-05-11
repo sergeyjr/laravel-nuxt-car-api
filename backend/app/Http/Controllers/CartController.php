@@ -23,62 +23,56 @@ class CartController extends Controller
             return response()->json([]);
         }
 
-        return $cart->items->map(function ($item) {
-            return [
+        $items = $cart->items->map(function ($item) {
+            $mapped = [
                 'id' => $item->car_id,
                 'qty' => $item->qty,
                 'price' => $item->price,
                 'name' => $item->car->title ?? null,
                 'photo_url' => $item->car->photo_url ?? null,
             ];
+            return $mapped;
         });
+
+        return response()->json($items);
 
     }
 
     public function add(Request $request)
     {
 
-        $dd = $request->all();
-
         $user = $request->user();
 
-        $request->validate([
-            'id' => 'required|integer|exists:cars,id',
-            'qty' => 'nullable|integer|min:1'
+        $validated = $request->validate([
+            'id' => ['required', 'integer', 'exists:cars,id'],
+            'qty' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $car = Car::find($request->id);
+        $car = Car::find($validated['id']);
 
         if (!$car) {
-            return response()->json(
-                ['message' => 'Машина не найдена.'],
-                404
-            );
+            return response()->json([
+                'message' => 'Машина не найдена'
+            ], 404);
         }
 
         $cart = Cart::firstOrCreate([
             'user_id' => $user->id
         ]);
 
-        $item = CartItem::where('cart_id', $cart->id)
-            ->where('car_id', $request->id)
-            ->first();
+        $qty = max(1, (int)($validated['qty'] ?? 1));
 
-        if ($item) {
-            $item->qty += $request->qty ?? 1;
-            $item->price = $car->price;
-            $item->save();
-        } else {
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'car_id' => $request->id,
-                'qty' => $request->qty ?? 1,
-                'price' => $car->price
-            ]);
-        }
+        $item = CartItem::firstOrNew([
+            'cart_id' => $cart->id,
+            'car_id' => $car->id,
+        ]);
+
+        $item->qty = ($item->exists ? (int)$item->qty : 0) + $qty;
+        $item->price = $car->price;
+
+        $item->save();
 
         return $this->success();
-
     }
 
     public function update(Request $request)
@@ -86,37 +80,34 @@ class CartController extends Controller
 
         $user = $request->user();
 
-        $request->validate([
-            'id' => 'required|integer|exists:cars,id',
-            'qty' => 'required|integer|min:1'
+        $validated = $request->validate([
+            'id' => ['required', 'integer', 'exists:cars,id'],
+            'qty' => ['required', 'integer', 'min:1'],
         ]);
 
-        $car = Car::find($request->id);
+        $car = Car::find($validated['id']);
 
         if (!$car) {
-            return response()->json(['message' => 'Car not found'], 404);
+            return response()->json([
+                'message' => 'Машина не найдена.'
+            ], 404);
         }
 
         $cart = Cart::firstOrCreate([
             'user_id' => $user->id
         ]);
 
-        $item = CartItem::where('cart_id', $cart->id)
-            ->where('car_id', $car->id)
-            ->first();
+        $qty = max(1, (int)$validated['qty']);
 
-        if ($item) {
-            $item->qty = max(1, $request->qty);
-            $item->price = $car->price;
-            $item->save();
-        } else {
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'car_id' => $car->id,
-                'qty' => max(1, $request->qty),
-                'price' => $car->price
-            ]);
-        }
+        $item = CartItem::firstOrNew([
+            'cart_id' => $cart->id,
+            'car_id' => $car->id,
+        ]);
+
+        $item->qty = $qty;
+        $item->price = $car->price;
+
+        $item->save();
 
         return $this->success();
 

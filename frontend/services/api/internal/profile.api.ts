@@ -5,19 +5,26 @@ export const useProfileApi = () => {
     return {
 
         update(fd: FormData) {
-            return api.post('/api/profile/update', {
+            console.log('[ProfileAPI] update → request', {fd})
+            const res = api.post('/api/profile/update', {
                 fd
             })
+            console.log('[ProfileAPI] update → response', res)
+            return res
         },
 
         changePassword(payload: any) {
-            return api.post('/api/profile/password', {
-                payload
-            })
+            console.log('[ProfileAPI] changePassword → request', payload)
+            const res = api.post('/api/profile/password', payload)
+            console.log('[ProfileAPI] changePassword → response', res)
+            return res
         },
 
         delete() {
-            return api.delete('/api/profile')
+            console.log('[ProfileAPI] delete → request')
+            const res = api.delete('/api/profile')
+            console.log('[ProfileAPI] delete → response', res)
+            return res
         }
 
     }

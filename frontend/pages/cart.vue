@@ -4,18 +4,11 @@ import {computed, ref} from 'vue'
 
 import {useCartStore} from '~/stores/cart'
 
+import BaseInput from '~/components/BaseInput.vue'
+import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
 
 const cart = useCartStore()
-
-// Ждем пока все данные загрузятся
-// await callOnce(() => cart.fetch())
-
-// Более мягкий вариант
-// const {data} = await useAsyncData('cart', () => cart.fetch())
-
-// Не блокируем навигацию
-// onMounted(() => { cart.fetch() })
 
 const isSubmitting = ref(false)
 const comment = ref('')
@@ -50,7 +43,7 @@ function remove(id) {
     }
 }
 
-function clear() {
+function clearCart() {
     if (confirm('Очистить корзину?')) {
         cart.clear()
     }
@@ -75,177 +68,269 @@ const submitOrder = async () => {
     }
 }
 
+const goBack = () => {
+    if (import.meta.client && window.history.length > 1) {
+        window.history.back()
+    } else {
+        navigateTo('/dashboard')
+    }
+}
+
 </script>
 
 <template>
-    <div class="container mt-4">
+    <div class="container py-4">
 
         <!-- HEADER -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Корзина</h2>
+
+            <div>
+                <h2 class="mb-1">Корзина</h2>
+
+                <div class="text-muted">
+                    {{ Object.keys(items).length }} товаров
+                </div>
+            </div>
 
             <button
-                v-if="Object.keys(items).length"
-                class="btn btn-outline-danger"
-                @click="clear"
+                class="btn btn-outline-secondary"
+                @click="goBack"
             >
-                Очистить
+                ← Назад
             </button>
+
         </div>
 
         <!-- LOADING -->
-        <div v-if="cart.loading" class="alert alert-light">
+        <div
+            v-if="cart.loading"
+            class="alert alert-light border text-center py-4"
+        >
             Загрузка корзины...
         </div>
 
         <!-- EMPTY -->
         <div
             v-else-if="!Object.keys(items).length"
-            class="alert alert-light text-center py-5"
+            class="card border-0 shadow-sm"
         >
-            <h5 class="mb-2">Корзина пуста</h5>
-            <p class="text-muted mb-3">
-                Вы ещё не добавили товары
-            </p>
+            <div class="card-body text-center py-5">
 
-            <NuxtLink to="/cars" class="btn btn-primary">
-                Перейти в каталог
-            </NuxtLink>
+                <h4 class="mb-2">
+                    Корзина пуста
+                </h4>
+
+                <p class="text-muted mb-4">
+                    Вы ещё не добавили товары
+                </p>
+
+                <NuxtLink
+                    to="/cars"
+                    class="btn btn-primary px-4"
+                >
+                    Перейти в каталог
+                </NuxtLink>
+
+            </div>
         </div>
 
-        <!-- ITEMS -->
-        <div v-else class="row g-3">
+        <!-- CONTENT -->
+        <div v-else class="row g-4">
 
-            <div
-                v-for="(itemData, itemId) in items"
-                :key="itemId"
-                class="col-12"
-            >
-                <div class="card shadow-sm border-0">
-                    <div class="card-body cart-row">
+            <!-- ITEMS -->
+            <div class="col-12 col-lg-8">
 
-                        <!-- INFO -->
-                        <div class="d-flex align-items-center gap-3">
+                <div
+                    v-for="(itemData, itemId) in items"
+                    :key="itemId"
+                    class="card border-0 shadow-sm mb-3"
+                >
+                    <div class="card-body">
 
-                            <NuxtLink :to="`/cars/show/${itemData.id}`">
-                                <img
-                                    :src="itemData.photo_url || '/images/default_car.jpg'"
-                                    style="width:100px;height:70px;object-fit:contain;border-radius:6px;"
-                                    alt=""/>
-                            </NuxtLink>
+                        <div class="row align-items-center g-3">
 
-                            <div>
-                                <NuxtLink
-                                    :to="`/cars/show/${itemData.id}`"
-                                    class="text-decoration-none text-dark"
-                                >
-                                    <h5 class="mb-1">{{ itemData.name }}</h5>
-                                </NuxtLink>
+                            <!-- IMAGE + INFO -->
+                            <div class="col-12 col-md-5">
 
-                                <div class="text-muted">
-                                    {{ formatPrice(itemData.price) }} / шт
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <NuxtLink :to="`/cars/show/${itemData.id}`">
+
+                                        <img
+                                            :src="itemData.photo_url || '/images/default_car.jpg'"
+                                            alt=""
+                                            class="rounded border"
+                                            style="width:110px;height:80px;object-fit:contain;"
+                                        />
+
+                                    </NuxtLink>
+
+                                    <div>
+
+                                        <NuxtLink
+                                            :to="`/cars/show/${itemData.id}`"
+                                            class="text-decoration-none text-dark"
+                                        >
+                                            <h5 class="mb-1">
+                                                {{ itemData.name }}
+                                            </h5>
+                                        </NuxtLink>
+
+                                        <div class="text-muted small">
+                                            {{ formatPrice(itemData.price) }} / шт
+                                        </div>
+
+                                    </div>
+
                                 </div>
+
+                            </div>
+
+                            <!-- QTY -->
+                            <div class="col-12 col-md-3">
+
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+
+                                    <button
+                                        class="btn btn-outline-secondary btn-sm"
+                                        @click="updateQty(itemId, itemData.qty - 1)"
+                                    >
+                                        −
+                                    </button>
+
+                                    <input
+                                        type="text"
+                                        min="1"
+                                        class="form-control text-center"
+                                        style="width:90px;"
+                                        :value="itemData.qty"
+                                        @input="updateInput(itemId, $event)"
+                                    />
+
+                                    <button
+                                        class="btn btn-outline-secondary btn-sm"
+                                        @click="updateQty(itemId, itemData.qty + 1)"
+                                    >
+                                        +
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                            <!-- PRICE -->
+                            <div class="col-8 col-md-3 text-md-end">
+
+                                <div class="fw-bold fs-5">
+                                    {{ formatPrice(itemData.price * itemData.qty) }}
+                                </div>
+
+                            </div>
+
+                            <!-- REMOVE -->
+                            <div class="col-4 col-md-1 text-end">
+
+                                <button
+                                    class="btn btn-outline-danger btn-sm"
+                                    @click="remove(itemId)"
+                                >
+                                    ✕
+                                </button>
+
                             </div>
 
                         </div>
 
-                        <!-- QTY -->
-                        <div class="d-flex align-items-center gap-2 justify-content-center">
-                            <button
-                                class="btn btn-outline-secondary btn-sm"
-                                @click="updateQty(itemId, itemData.qty - 1)"
-                            >
-                                −
-                            </button>
-
-                            <input
-                                type="number"
-                                min="1"
-                                class="form-control form-control-sm text-center"
-                                style="width:80px;"
-                                :value="itemData.qty"
-                                @input="updateInput(itemId, $event)"
-                            />
-
-                            <button
-                                class="btn btn-outline-secondary btn-sm"
-                                @click="updateQty(itemId, itemData.qty + 1)"
-                            >
-                                +
-                            </button>
-                        </div>
-
-                        <!-- PRICE -->
-                        <div class="fw-bold text-end">
-                            {{ formatPrice(itemData.price * itemData.qty) }}
-                        </div>
-
-                        <!-- REMOVE -->
-                        <button
-                            class="btn btn-outline-danger btn-sm"
-                            @click="remove(itemId)"
-                        >
-                            X
-                        </button>
-
                     </div>
                 </div>
+
             </div>
 
-        </div>
+            <!-- SIDEBAR -->
+            <div class="col-12 col-lg-4">
 
-        <!-- TOTAL -->
-        <div v-if="Object.keys(items).length" class="mt-4">
+                <!-- TOTAL -->
+                <div class="card border-0 shadow-sm mb-3">
 
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body d-flex justify-content-between">
-                    <h4 class="mb-0">Итого:</h4>
-                    <h4 class="mb-0 text-success">
-                        {{ formatPrice(total) }}
-                    </h4>
-                </div>
-            </div>
+                    <div class="card-body">
 
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
 
-                    <label class="form-label">Комментарий</label>
+                            <span class="text-muted">
+                                Итого
+                            </span>
 
-                    <textarea
-                        v-model="comment"
-                        class="form-control"
-                        rows="3"
-                        :disabled="isSubmitting"
-                    />
+                            <span class="fs-4 fw-bold text-success">
+                                {{ formatPrice(total) }}
+                            </span>
+
+                        </div>
+
+                    </div>
 
                 </div>
+
+                <!-- COMMENT -->
+                <div class="card border-0 shadow-sm mb-3">
+
+                    <div class="card-body">
+
+                        <label class="form-label fw-semibold">
+                            Комментарий к заказу
+                        </label>
+
+                        <BaseTextarea
+                            v-model="comment"
+                            rows="5"
+                            placeholder="Например: позвонить перед доставкой"
+                            :disabled="isSubmitting"
+                        />
+
+                    </div>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body">
+
+                        <div class="d-grid gap-2">
+
+                            <!-- MAIN BUTTON -->
+                            <BaseButton
+                                variant="success"
+                                size="lg"
+                                class="w-100 py-3 fw-semibold"
+                                :loading="isSubmitting"
+                                @click="submitOrder"
+                            >
+                                Отправить заказ
+
+                                <template #loading>
+                                    Отправляем заказ...
+                                </template>
+                            </BaseButton>
+
+                            <!-- SECONDARY BUTTON -->
+                            <BaseButton
+                                variant="outline-danger"
+                                class="w-100"
+                                :disabled="isSubmitting || !Object.keys(items).length"
+                                @click="clearCart"
+                            >
+                                Очистить корзину
+                            </BaseButton>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
-
-            <BaseButton
-                variant="success"
-                class="w-100"
-                :loading="isSubmitting"
-                @click="submitOrder"
-            >
-                Отправить заказ
-
-                <template #loading>
-                    Отправляем...
-                </template>
-            </BaseButton>
 
         </div>
 
     </div>
 </template>
-
-<style scoped>
-
-.cart-row {
-    display: grid;
-    grid-template-columns: 1fr 160px 140px 40px;
-    align-items: center;
-    gap: 16px;
-}
-
-</style>

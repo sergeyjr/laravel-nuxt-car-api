@@ -1,23 +1,31 @@
 <script setup lang="ts">
 
-import {computed} from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
     variant: {
         type: String,
-        default: 'primary' // primary | secondary | success | danger | warning | info | light | dark
+        default: 'primary'
     },
+
     loading: {
         type: Boolean,
         default: false
     },
+
     disabled: {
         type: Boolean,
         default: false
     },
+
     type: {
         type: String,
         default: 'button'
+    },
+
+    size: {
+        type: String,
+        default: ''
     }
 })
 
@@ -25,22 +33,31 @@ const emit = defineEmits<{
     (e: 'click', event: MouseEvent): void
 }>()
 
-const isDisabled = computed(() => props.loading || props.disabled)
+const isDisabled = computed(() => {
+    return props.loading || props.disabled
+})
 
 const classes = computed(() => [
     'btn',
     `btn-${props.variant}`,
-    {disabled: isDisabled.value}
+    {
+        [`btn-${props.size}`]: props.size
+    }
 ])
 
 const handleClick = (e: MouseEvent) => {
-    if (isDisabled.value) return
+
+    if (isDisabled.value) {
+        return
+    }
+
     emit('click', e)
 }
 
 </script>
 
 <template>
+
     <button
         v-bind="$attrs"
         :type="type"
@@ -48,14 +65,25 @@ const handleClick = (e: MouseEvent) => {
         :class="classes"
         @click="handleClick"
     >
-        <!-- LOADING -->
-        <span v-if="loading" class="d-inline-flex align-items-center">
-            <slot name="loading">Loading...</slot>
+
+        <span
+            v-if="loading"
+            class="d-inline-flex align-items-center gap-2"
+        >
+            <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+            />
+
+            <slot name="loading">
+                Загрузка...
+            </slot>
         </span>
 
-        <!-- DEFAULT -->
         <span v-else>
-            <slot/>
+            <slot />
         </span>
+
     </button>
+
 </template>

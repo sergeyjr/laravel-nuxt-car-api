@@ -1,7 +1,7 @@
-
 # =========================
 # SYSTEM
 # =========================
+
 *.log
 .DS_Store
 Thumbs.db
@@ -9,6 +9,7 @@ Thumbs.db
 # =========================
 # ENV
 # =========================
+
 .env
 .env.*
 !.env.example
@@ -16,6 +17,7 @@ Thumbs.db
 # =========================
 # IDE / EDITORS
 # =========================
+
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -29,6 +31,7 @@ Thumbs.db
 # =========================
 # BACKEND (LARAVEL)
 # =========================
+
 /backend/vendor
 /backend/node_modules
 
@@ -47,6 +50,7 @@ Thumbs.db
 # =========================
 # FRONTEND (NUXT 4)
 # =========================
+
 /frontend/node_modules
 /frontend/.nuxt
 /frontend/.output
@@ -65,4 +69,6 @@ Thumbs.db
 # =========================
 # ROOT (fallback)
 # =========================
+
 node_modules
+/backend/public/storage

@@ -64,13 +64,13 @@ const formatDate = (date) => {
 
                             <h5>Мой профиль</h5>
 
-                            <p>Добро пожаловать, {{ user?.name || 'пользователь' }}</p>
+                            <p>Добро пожаловать, <span class="fw-bold">{{ user?.name || 'пользователь' }}</span></p>
 
-                            <p>Email: {{ user?.email || '—' }}</p>
+                            <p>Email: <span class="fw-bold">{{ user.email }}</span></p>
 
                             <NuxtLink
                                 to="/dashboard/profile"
-                                class="btn btn-outline-secondary w-100 mt-3"
+                                class="btn btn-outline-primary w-100 mt-3"
                             >
                                 Мой профиль
                             </NuxtLink>
@@ -98,7 +98,7 @@ const formatDate = (date) => {
                             <NuxtLink
                                 v-if="isApiUser"
                                 to="/dashboard/car/create"
-                                class="btn btn-primary w-100 mt-3"
+                                class="btn btn-outline-primary w-100 mt-3"
                             >
                                 Добавить авто
                             </NuxtLink>
@@ -142,7 +142,7 @@ const formatDate = (date) => {
 
                                 <NuxtLink
                                     to="/cart"
-                                    class="btn btn-outline-success w-100 mt-3"
+                                    class="btn btn-outline-primary w-100 mt-3"
                                 >
                                     Перейти в корзину
                                 </NuxtLink>
@@ -171,7 +171,7 @@ const formatDate = (date) => {
 
                     <div class="col-12 col-md-12">
                             <span class="text-muted">
-                                Всего заказов: {{ ordersCount }}
+                                Всего заказов: <span class="fw-bold">{{ ordersCount }}</span>
                             </span>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import {computed} from 'vue'
 
 interface Props {
@@ -11,6 +10,7 @@ interface Props {
     hint?: string
     error?: string
     disabled?: boolean
+    id?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -21,7 +21,8 @@ const props = withDefaults(defineProps<Props>(), {
     placeholder: '',
     hint: '',
     error: '',
-    disabled: false
+    disabled: false,
+    id: ''
 })
 
 const emit = defineEmits<{
@@ -33,17 +34,26 @@ const value = computed({
     set: (val) => emit('update:modelValue', val)
 })
 
+const inputId = computed(() =>
+    props.id || `input-${Math.random().toString(36).slice(2, 10)}`
+)
 </script>
 
 <template>
     <div class="mb-3">
 
-        <label v-if="label" class="form-label">
+        <label
+            v-if="label"
+            class="form-label"
+            :for="inputId"
+        >
             {{ label }}
             <span v-if="required" class="text-danger ms-1">*</span>
         </label>
 
         <input
+            v-bind="$attrs"
+            :id="inputId"
             :type="type"
             v-model="value"
             :placeholder="placeholder"

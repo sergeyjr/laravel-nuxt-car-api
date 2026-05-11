@@ -2,9 +2,21 @@ import {defineStore} from 'pinia'
 import {toRaw} from 'vue'
 import {useCartApi} from '~/services/api/internal/cart.api'
 
-function cleanItems(obj: any) {
+function cleanItems(items: any) {
+    if (!items) {
+        return {}
+    }
+    if (Array.isArray(items)) {
+        return items.reduce((acc: any, item: any) => {
+            if (!item?.id) {
+                return acc
+            }
+            acc[String(item.id)] = item
+            return acc
+        }, {})
+    }
     return Object.fromEntries(
-        Object.entries(obj || {}).filter(([_, item]) => item != null)
+        Object.entries(items).filter(([_, item]) => item != null)
     )
 }
 
@@ -13,183 +25,270 @@ export const useCartStore = defineStore('cart', {
     state: () => ({
         items: {} as Record<string, any>,
         initialized: false,
-        hydrated: false
+        hydrated: false,
+        loading: false,
+
+        updating: {} as Record<string, boolean>,
+        updateTimers: {} as Record<string, any>
     }),
 
     getters: {
+
         total: (state) =>
             Object.values(state.items).reduce((sum: number, item: any) => {
                 if (!item) return sum
+
                 return sum + Number(item.price) * Number(item.qty)
             }, 0)
+
     },
 
     actions: {
 
         hydrate() {
+
             if (!import.meta.client) return
 
-            const raw = JSON.parse(localStorage.getItem('cartItems') || '{}')
-            this.items = cleanItems(raw)
+            const raw = JSON.parse(
+                localStorage.getItem('cartItems') || '{}'
+            )
 
+            this.items = cleanItems(raw)
+            this.initialized = true
             this.hydrated = true
+
         },
 
         save() {
+
             if (!import.meta.client) return
-            localStorage.setItem('cartItems', JSON.stringify(this.items))
+
+            localStorage.setItem(
+                'cartItems',
+                JSON.stringify(toRaw(this.items))
+            )
         },
 
         async fetch(force = false) {
+
             const cartApi = useCartApi()
 
-            if (this.initialized && !force) return
-
-            if (!force && Object.keys(this.items).length > 0) {
-                this.initialized = true
+            if (this.initialized && !force) {
                 return
             }
 
-            try {
-                debugLog('[fetch] getCart')
-                const data = await cartApi.getCart()
-                const serverItems = cleanItems(data)
-                debugLog('getCart data', data)
+            this.loading = true
 
-                if (Object.keys(serverItems).length > 0) {
-                    this.items = serverItems
-                    this.save()
-                }
+            try {
+                const data = await cartApi.getCart()
+                this.items = cleanItems(data)
+                this.save()
             } catch (e) {
                 console.error('Ошибка загрузки корзины:', e)
             } finally {
+                this.loading = false
                 this.initialized = true
             }
+
         },
 
         async add(newItem: any) {
+
             const cartApi = useCartApi()
 
-            const id = Number(newItem?.id)
+            const id = String(newItem.id)
 
-            if (!id) {
-                console.error('Cart add aborted: invalid id', newItem)
-                return
-            }
+            if (!id) return
 
-            const backup = structuredClone(toRaw(this.items))
+            const backup = JSON.parse(
+                JSON.stringify(toRaw(this.items))
+            )
 
             const current = this.items[id]
 
-            const updatedItem = current
-                ? {
-                    ...current,
-                    qty: Number(current.qty) + Number(newItem.qty ?? 1)
-                }
-                : {
-                    id,
-                    name: newItem.name,
-                    price: newItem.price,
-                    qty: newItem.qty ?? 1,
-                    photo_url: newItem.photo_url || null
-                }
+            this.items = {
+                ...this.items,
+                [id]: current
+                    ? {
+                        ...current,
+                        qty: Number(current.qty) + Number(newItem.qty ?? 1)
+                    }
+                    : {
+                        id,
+                        name: newItem.name,
+                        price: newItem.price,
+                        qty: Number(newItem.qty ?? 1),
+                        photo_url: newItem.photo_url || null
+                    }
+            }
+
+            this.save()
+
+            try {
+
+                await cartApi.addItem({
+                    id: Number(id),
+                    qty: Number(newItem.qty ?? 1)
+                })
+
+            } catch (e) {
+
+                console.error(e)
+
+                this.items = backup
+
+                this.save()
+            }
+
+        },
+
+        updateLocal(id: string, qty: number) {
+
+            if (!this.items[id]) return
 
             this.items = {
                 ...this.items,
-                [id]: updatedItem
-            }
-
-            this.save()
-
-            try {
-                await cartApi.addItem({
-                    id,
-                    qty: newItem.qty ?? 1
-                })
-            } catch {
-                this.items = backup
-                this.save()
-            }
-        },
-
-        async update(id: number, qty: number) {
-            const cartApi = useCartApi()
-
-            if (!id || qty < 1) return
-
-            const backup = structuredClone(toRaw(this.items))
-
-            if (this.items[id]) {
-                this.items = {
-                    ...this.items,
-                    [id]: {
-                        ...this.items[id],
-                        qty
-                    }
+                [id]: {
+                    ...this.items[id],
+                    qty
                 }
             }
 
             this.save()
-
-            try {
-                await cartApi.updateItem({id, qty})
-            } catch (e) {
-                this.items = backup
-                this.save()
-            }
         },
 
-        async remove(id: number) {
+        async syncUpdate(id: string) {
+
             const cartApi = useCartApi()
 
-            const backup = structuredClone(toRaw(this.items))
+            if (!this.items[id]) return
+
+            if (this.updating[id]) return
+
+            this.updating[id] = true
+
+            try {
+
+                await cartApi.updateItem({
+                    id: Number(id),
+                    qty: Number(this.items[id].qty)
+                })
+
+            } catch (e) {
+
+                console.error(e)
+
+            } finally {
+
+                this.updating[id] = false
+            }
+
+        },
+
+        update(id: number | string, qty: number) {
+
+            id = String(id)
+
+            qty = Math.max(1, Number(qty))
+
+            this.updateLocal(id, qty)
+
+            if (this.updateTimers[id]) {
+                clearTimeout(this.updateTimers[id])
+            }
+
+            this.updateTimers[id] = setTimeout(() => {
+                this.syncUpdate(id)
+            }, 300)
+        },
+
+        async remove(id: number | string) {
+
+            const cartApi = useCartApi()
+
+            id = String(id)
+
+            const backup = JSON.parse(
+                JSON.stringify(toRaw(this.items))
+            )
 
             delete this.items[id]
+
             this.save()
 
             try {
-                await cartApi.removeItem(id)
+
+                await cartApi.removeItem(Number(id))
+
             } catch (e) {
+
+                console.error(e)
+
                 this.items = backup
+
                 this.save()
             }
+
         },
 
         async clear() {
+
             const cartApi = useCartApi()
 
-            const backup = structuredClone(toRaw(this.items))
+            const backup = JSON.parse(
+                JSON.stringify(toRaw(this.items))
+            )
 
             this.items = {}
+
             this.save()
 
             try {
+
                 await cartApi.clear()
+
             } catch (e) {
+
+                console.error(e)
+
                 this.items = backup
+
                 this.save()
             }
+
         },
 
         async checkout(payload: any = {}) {
+
             const cartApi = useCartApi()
 
-            const backup = structuredClone(toRaw(this.items))
+            const backup = JSON.parse(
+                JSON.stringify(toRaw(this.items))
+            )
 
             try {
+
                 const data = await cartApi.checkout({
                     comment: payload.comment || null
                 })
 
                 this.items = {}
+
                 this.save()
 
                 return data
+
             } catch (e) {
+
+                console.error(e)
+
                 this.items = backup
+
                 this.save()
+
                 throw e
             }
+
         }
 
     }
