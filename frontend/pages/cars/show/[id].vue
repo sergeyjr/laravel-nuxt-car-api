@@ -36,7 +36,7 @@ const formatPrice = (price?: number | null) =>
 
 const isInCart = (carId: number) => {
     return Object.values(cart.items || {}).some(
-        (item: any) => item?.id === carId
+        (item: any) => Number(item?.id) === Number(carId)
     )
 }
 

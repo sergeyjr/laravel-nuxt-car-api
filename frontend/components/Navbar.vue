@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {computed, ref} from 'vue'
+import {computed, ref, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 
 import {useAuthStore} from '~/stores/auth'
@@ -15,14 +15,25 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
-const cartCount = computed(() =>
-    Object.keys(cart.items || {}).length
-)
+const showLogoutModal = ref(false)
+
+const mounted = ref(false)
+
+onMounted(() => {
+    mounted.value = true
+})
+
+const cartCount = computed(() => {
+
+    if (!mounted.value || !auth.isAuth) {
+        return 0
+    }
+
+    return Object.keys(cart.items || {}).length
+})
 
 const isActive = (path: string) =>
     route.path === path || route.path.startsWith(path + '/')
-
-const showLogoutModal = ref(false)
 
 </script>
 
@@ -60,10 +71,14 @@ const showLogoutModal = ref(false)
                         Кабинет
                     </NuxtLink>
 
-                    <NuxtLink to="/cart" class="nav-link cart-link" :class="{ active: isActive('/cart') }">
+                    <NuxtLink
+                        to="/cart"
+                        class="nav-link cart-link"
+                        :class="{ active: isActive('/cart') }"
+                    >
                         Корзина
 
-                        <span v-if="cart.initialized" class="badge">
+                        <span class="badge">
                             {{ cartCount }}
                         </span>
                     </NuxtLink>

@@ -78,7 +78,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return $this->success();
+        return response()->noContent();
 
     }
 

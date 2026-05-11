@@ -46,17 +46,31 @@ export const useCartStore = defineStore('cart', {
     actions: {
 
         hydrate() {
+            if (!import.meta.client || this.hydrated) return
 
-            if (!import.meta.client) return
-
-            const raw = JSON.parse(
-                localStorage.getItem('cartItems') || '{}'
-            )
-
-            this.items = cleanItems(raw)
-            this.initialized = true
             this.hydrated = true
 
+            const raw = localStorage.getItem('cartItems')
+            if (!raw) return
+
+            let localItems: Record<string, any> = {}
+
+            try {
+                localItems = cleanItems(JSON.parse(raw))
+            } catch (e) {
+                console.error('Ошибка чтения cartItems из localStorage:', e)
+                return
+            }
+
+            const hasServerItems = Object.keys(this.items).length > 0
+            const hasLocalItems = Object.keys(localItems).length > 0
+
+            // SSR-данные важнее при первом рендере
+            if (!hasServerItems && hasLocalItems) {
+                this.items = localItems
+            }
+
+            this.initialized = true
         },
 
         save() {

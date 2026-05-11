@@ -1,6 +1,9 @@
 <script setup lang="ts">
 
-import { computed } from 'vue'
+import {computed} from 'vue'
+import type {PropType} from 'vue'
+
+type ButtonType = 'button' | 'submit' | 'reset'
 
 const props = defineProps({
     variant: {
@@ -19,7 +22,7 @@ const props = defineProps({
     },
 
     type: {
-        type: String,
+        type: String as PropType<ButtonType>,
         default: 'button'
     },
 
@@ -70,18 +73,13 @@ const handleClick = (e: MouseEvent) => {
             v-if="loading"
             class="d-inline-flex align-items-center gap-2"
         >
-            <span
-                class="spinner-border spinner-border-sm"
-                role="status"
-            />
-
             <slot name="loading">
                 Загрузка...
             </slot>
         </span>
 
         <span v-else>
-            <slot />
+            <slot/>
         </span>
 
     </button>
