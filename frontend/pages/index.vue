@@ -45,9 +45,13 @@ const swiperOptions = {
 // cars
 const carStore = useCarStore()
 
-useFetch(async () => {
-    await carStore.fetchLatest()
+// Client
+onMounted(() => {
+    carStore.fetchLatest()
 })
+
+// SSR
+// await useAsyncData('latest-cars', () => carStore.fetchLatest())
 
 // helpers
 const getImage = (car) => {

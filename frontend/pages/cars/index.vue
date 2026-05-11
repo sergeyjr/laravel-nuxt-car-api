@@ -96,7 +96,7 @@ const isInCart = (carId: number) => {
                 :key="car.id"
                 class="col-4 mb-3"
             >
-                <div class="card car-card">
+                <div class="card car-card text-center">
 
                     <NuxtLink
                         :to="`/cars/show/${car.id}`"
@@ -106,7 +106,7 @@ const isInCart = (carId: number) => {
                             :src="getImage(car)"
                             class="card-img-top"
                             style="height: 200px; object-fit: contain;"
-                        >
+                         alt="">
 
                         <div class="card-body">
                             <h5>{{ car.title }}</h5>

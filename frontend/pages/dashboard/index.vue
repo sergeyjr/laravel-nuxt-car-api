@@ -1,8 +1,13 @@
-<script setup>
+<script setup lang="ts">
 
 import {computed, onMounted} from 'vue'
+
 import {useAuthStore} from '~/stores/auth'
 import {useDashboardStore} from '~/stores/dashboard'
+
+import {useOrderStatus} from '~/composables/useOrderStatus'
+
+const {getBadge} = useOrderStatus()
 
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
@@ -20,10 +25,7 @@ const ordersCount = computed(() => dashboard.ordersCount)
 const recentOrders = computed(() => dashboard.orders || [])
 
 const cartCount = computed(() =>
-    Object.values(dashboard.cart || {}).reduce(
-        (sum, item) => sum + (item.qty || 0),
-        0
-    )
+    Object.keys(dashboard.cart || {}).length
 )
 
 const cartTotal = computed(() => dashboard.cartTotal || 0)
@@ -156,24 +158,9 @@ const formatDate = (date) => {
             <div class="mt-4">
 
                 <div class="row mb-3">
-                    <div class="col-12">
+                    <div class="col-12 d-flex justify-content-between align-items-center">
                         <h4>Заказы</h4>
-                    </div>
-                </div>
 
-                <div v-if="!recentOrders.length" class="alert alert-light">
-                    У вас пока нет заказов
-                </div>
-
-                <div v-else class="row g-3">
-
-                    <div class="col-12 col-md-12">
-                            <span class="text-muted">
-                                Всего заказов: {{ ordersCount }}
-                            </span>
-                    </div>
-
-                    <div class="col-12 col-md-12 mt-2">
                         <NuxtLink
                             to="/orders"
                             class="btn btn-outline-primary btn-sm"
@@ -182,58 +169,65 @@ const formatDate = (date) => {
                         </NuxtLink>
                     </div>
 
-                    <div
-                        v-for="order in recentOrders"
-                        :key="order.id"
-                        class="col-12 col-md-6 col-lg-4"
-                    >
-                        <div class="card h-100 shadow-sm border-0">
-
-                            <div class="card-body d-flex flex-column justify-content-between">
-
-                                <div>
-                                    <h6 class="mb-1 text-truncate">
-                                        Заказ #{{ order.id }}
-                                    </h6>
-
-                                    <div class="text-muted small">
-                                        Создан: {{ formatDate(order?.created_at) }}
-                                    </div>
-
-                                    <div class="mt-2">
-                                        <span
-                                            class="badge"
-                                            :class="{
-                                                'bg-warning': order.status === 'pending',
-                                                'bg-success': order.status === 'paid',
-                                                'bg-danger': order.status === 'cancelled',
-                                                'bg-secondary': order.status === 'completed'
-                                            }"
-                                        >
-                                            {{ order.status }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-3 d-flex justify-content-between align-items-center">
-
-                                    <div class="fw-bold text-success">
-                                        {{ formatPrice(order.total) }}
-                                    </div>
-
-                                    <NuxtLink
-                                        :to="`/orders/${order.id}`"
-                                        class="btn btn-sm btn-outline-primary"
-                                    >
-                                        Открыть
-                                    </NuxtLink>
-
-                                </div>
-
-                            </div>
-
-                        </div>
+                    <div class="col-12 col-md-12">
+                            <span class="text-muted">
+                                Всего заказов: {{ ordersCount }}
+                            </span>
                     </div>
+                </div>
+
+                <div v-if="!recentOrders.length" class="alert alert-light">
+                    У вас пока нет заказов
+                </div>
+
+                <div v-else class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th class="text-end">Сумма</th>
+                            <th class="text-end">Действие</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+
+                        <tr v-for="order in recentOrders" :key="order.id">
+
+                            <td class="fw-semibold">
+                                #{{ order.id }}
+                            </td>
+
+                            <td class="text-muted">
+                                {{ formatDate(order?.created_at) }}
+                            </td>
+
+                            <td>
+                                <span class="badge" :class="getBadge(order.status).class">
+                                    {{ getBadge(order.status).label }}
+                                </span>
+                            </td>
+
+                            <td class="text-end fw-bold text-success">
+                                {{ formatPrice(order.total) }}
+                            </td>
+
+                            <td class="text-end">
+                                <NuxtLink
+                                    :to="`/orders/${order.id}`"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Открыть
+                                </NuxtLink>
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+                    </table>
 
                 </div>
 

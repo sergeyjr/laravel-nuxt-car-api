@@ -22,8 +22,7 @@ const page = computed(() => store.current)
 const loading = computed(() => store.loading)
 
 const title = computed(() => {
-    // if (loading.value) return 'Загрузка страницы...'
-    return page.value?.title || 'Страница'
+    return page.value?.title
 })
 
 const formattedContent = computed(() => {

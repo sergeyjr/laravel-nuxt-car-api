@@ -22,13 +22,13 @@ const statusLabels: Record<OrderStatus, string> = {
 }
 
 const statusClasses: Record<OrderStatus, string> = {
-    pending_payment: 'pending_payment',
-    processing: 'processing',
-    packed: 'packed',
-    shipped: 'shipped',
-    completed: 'completed',
-    cancelled: 'cancelled',
-    refunded: 'refunded'
+    pending_payment: 'bg-warning text-dark',
+    processing: 'bg-info text-dark',
+    packed: 'bg-primary',
+    shipped: 'bg-primary',
+    completed: 'bg-success',
+    cancelled: 'bg-danger',
+    refunded: 'bg-secondary'
 }
 
 const isOrderStatus = (status: string): status is OrderStatus => {
@@ -53,9 +53,15 @@ export const useOrderStatus = () => {
             : 'bg-secondary'
     }
 
+    const getBadge = (status: string) => ({
+        label: getLabel(status),
+        class: getClass(status)
+    })
+
     return {
         ORDER_STATUS,
         getLabel,
-        getClass
+        getClass,
+        getBadge
     }
 }

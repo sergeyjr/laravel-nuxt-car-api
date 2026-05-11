@@ -19,6 +19,11 @@ const ui = useUiStore()
 
 const showAuth = ref(false)
 const addingToCart = ref<number | null>(null)
+const showImage = ref(false)
+
+const openAuthModal = () => {
+    showAuth.value = true
+}
 
 const car = computed(() => store.car)
 
@@ -56,6 +61,14 @@ const addToCart = async (car: any) => {
     }
 }
 
+const openImage = () => {
+    showImage.value = true
+}
+
+const closeImage = () => {
+    showImage.value = false
+}
+
 watch(
     () => route.params.id,
     async (id) => {
@@ -91,57 +104,81 @@ watch(
                     </div>
 
                     <div class="col-md-5">
-                        <img
-                            :src="carImage"
-                            class="img-fluid rounded"
-                            style="max-height:400px;object-fit:contain;"
-                            alt=""
+                        <div class="car-image-wrapper">
+                            <img
+                                :src="carImage"
+                                class="img-fluid rounded car-image"
+                                style="max-height:400px;object-fit:contain;"
+                                alt=""
+                                @click="openImage"
+                            >
+                        </div>
+                        <!-- IMAGE MODAL -->
+                        <div
+                            v-if="showImage"
+                            class="image-modal"
+                            @click="closeImage"
                         >
+                            <img
+                                :src="carImage"
+                                class="image-full"
+                                @click.stop
+                                alt=""
+                            >
+                        </div>
                     </div>
 
                     <div class="col-md-7">
 
-                        <p>
-                            <span class="fw-bold">Описание:</span>
-                            {{ car.description }}
-                        </p>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm align-middle mb-0 description-table">
+                                <tbody>
+                                <tr v-if="car.description">
+                                    <td class="text-muted fw-semibold w-25">Описание</td>
+                                    <td>{{ car.description }}</td>
+                                </tr>
 
-                        <div v-if="car.options">
-                            <p>
-                                <span class="fw-bold">Бренд:</span>
-                                {{ car.options.brand }}
-                            </p>
+                                <tr v-if="car.options?.brand">
+                                    <td class="text-muted fw-semibold">Бренд</td>
+                                    <td>{{ car.options.brand }}</td>
+                                </tr>
 
-                            <p>
-                                <span class="fw-bold">Модель:</span>
-                                {{ car.options.model }}
-                            </p>
+                                <tr v-if="car.options?.model">
+                                    <td class="text-muted fw-semibold">Модель</td>
+                                    <td>{{ car.options.model }}</td>
+                                </tr>
 
-                            <p>
-                                <span class="fw-bold">Год:</span>
-                                {{ car.options.year }}
-                            </p>
+                                <tr v-if="car.options?.year">
+                                    <td class="text-muted fw-semibold">Год</td>
+                                    <td>{{ car.options.year }}</td>
+                                </tr>
 
-                            <p>
-                                <span class="fw-bold">Пробег:</span>
-                                {{ car.options.mileage }}
-                            </p>
+                                <tr v-if="car.options?.mileage">
+                                    <td class="text-muted fw-semibold">Пробег</td>
+                                    <td>{{ car.options.mileage }}</td>
+                                </tr>
 
-                            <p v-if="auth.user">
-                                <span class="fw-bold">Цена:</span>
-                                {{ formatPrice(car.price) }}
-                            </p>
+                                <tr v-if="auth.user && car.price">
+                                    <td class="text-muted fw-semibold">Цена</td>
+                                    <td>{{ formatPrice(car.price) }}</td>
+                                </tr>
 
-                            <p v-else class="text-muted">
-                                <button
-                                    class="btn btn-light"
-                                    @click="showAuth = true"
-                                >
-                                    Авторизуйтесь, чтобы увидеть цену
-                                </button>
+                                <tr v-else>
+                                    <td class="text-muted fw-semibold">Цена</td>
+                                    <td>
+                                        <button
+                                            class="btn btn-light"
+                                            @click="openAuthModal"
+                                        >
+                                            Авторизуйтесь, чтобы увидеть цену
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
 
-                                <AuthModal v-model="showAuth"/>
-                            </p>
+                            <AuthModal v-model="showAuth"/>
+
                         </div>
 
                         <div v-if="auth.user">
@@ -189,3 +226,53 @@ watch(
 
     </div>
 </template>
+
+<style scoped>
+
+.car-image-wrapper {
+    display: inline-block;
+    overflow: hidden;
+}
+
+.car-image {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.car-image:hover {
+    transform: scale(1.05);
+}
+
+.image-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.image-full {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    cursor: zoom-out;
+}
+
+.description-table tr {
+    border-bottom: 1px solid #e9ecef;
+}
+
+.description-table tr:last-child {
+    border-bottom: none;
+    border-color: transparent;
+}
+
+.description-table td {
+    padding: 10px 12px;
+}
+
+</style>

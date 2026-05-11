@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {computed} from 'vue'
+import {computed, onMounted, watch} from 'vue'
 
 import {useAuthActions} from '~/composables/useAuthActions'
 
@@ -9,6 +9,7 @@ import {useCartStore} from '~/stores/cart'
 
 const auth = useAuthStore()
 const cart = useCartStore()
+
 const route = useRoute()
 
 const {handleLogout} = useAuthActions()
@@ -24,6 +25,28 @@ const isActive = (path: string) => {
     return route.path.startsWith(path)
 }
 
+onMounted(async () => {
+    cart.hydrate()
+
+    if (auth.isAuth) {
+        await cart.fetch()
+    } else {
+        cart.initialized = true
+    }
+
+    watch(
+        () => auth.isAuth,
+        async (isAuth) => {
+            if (isAuth) {
+                await cart.fetch(true)
+            } else {
+                cart.items = {}
+                cart.initialized = true
+                cart.save()
+            }
+        }
+    )
+})
 </script>
 
 <template>
@@ -87,12 +110,8 @@ const isActive = (path: string) => {
                     >
                         Корзина
 
-                        <span
-                            v-if="cart.initialized && cartCount > 0"
-                            class="badge bg-danger ms-1"
-                            style="font-size: 11px;"
-                        >
-                            {{ cartCount }}
+                        <span class="badge bg-danger ms-1 cart-badge">
+                            {{ cart.initialized ? cartCount : 0 }}
                         </span>
                     </NuxtLink>
 
