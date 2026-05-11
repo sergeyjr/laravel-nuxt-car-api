@@ -62,10 +62,11 @@ const formatDate = (date) => {
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <h5>Мой профиль</h5>
+                            <NuxtLink to="/dashboard/profile" class="text-decoration-none text-dark">
+                                <h5>Мой профиль</h5>
+                            </NuxtLink>
 
                             <p>Добро пожаловать, <span class="fw-bold">{{ user?.name || 'пользователь' }}</span></p>
-
                             <p>Email: <span class="fw-bold">{{ user.email }}</span></p>
 
                             <NuxtLink
@@ -83,7 +84,9 @@ const formatDate = (date) => {
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <h5>Каталог</h5>
+                            <NuxtLink to="/cars" class="text-decoration-none text-dark">
+                                <h5>Каталог</h5>
+                            </NuxtLink>
 
                             <p class="mb-0">
                                 Машины всего:
@@ -103,9 +106,10 @@ const formatDate = (date) => {
                                 Добавить авто
                             </NuxtLink>
 
-                            <NuxtLink v-else
-                                      to="/cars"
-                                      class="btn btn-outline-primary w-100 mt-3"
+                            <NuxtLink
+                                v-else
+                                to="/cars"
+                                class="btn btn-outline-primary w-100 mt-3"
                             >
                                 Перейти в каталог
                             </NuxtLink>
@@ -118,14 +122,14 @@ const formatDate = (date) => {
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <h5>Корзина</h5>
+                            <NuxtLink to="/cart" class="text-decoration-none text-dark">
+                                <h5>Корзина</h5>
+                            </NuxtLink>
 
                             <div v-if="cartTotal === 0">
-
                                 <div class="btn btn-outline-secondary w-100 mt-3">
                                     Корзина пустая
                                 </div>
-
                             </div>
 
                             <div v-else>
@@ -158,8 +162,12 @@ const formatDate = (date) => {
             <div class="mt-4">
 
                 <div class="row mb-3">
+
                     <div class="col-12 d-flex justify-content-between align-items-center">
-                        <h4>Заказы</h4>
+
+                        <NuxtLink to="/orders" class="text-decoration-none text-dark">
+                            <h4 class="mb-0">Заказы</h4>
+                        </NuxtLink>
 
                         <NuxtLink
                             to="/orders"
@@ -167,13 +175,16 @@ const formatDate = (date) => {
                         >
                             Посмотреть все
                         </NuxtLink>
+
                     </div>
 
-                    <div class="col-12 col-md-12">
-                            <span class="text-muted">
-                                Всего заказов: <span class="fw-bold">{{ ordersCount }}</span>
-                            </span>
+                    <div class="col-12">
+                        <span class="text-muted">
+                            Всего заказов:
+                            <span class="fw-bold">{{ ordersCount }}</span>
+                        </span>
                     </div>
+
                 </div>
 
                 <div v-if="!recentOrders.length" class="alert alert-light">
@@ -186,7 +197,7 @@ const formatDate = (date) => {
                         <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>Дата</th>
+                            <th>Дата и время</th>
                             <th>Статус</th>
                             <th class="text-end">Сумма</th>
                             <th class="text-end">Действие</th>
@@ -197,9 +208,7 @@ const formatDate = (date) => {
 
                         <tr v-for="order in recentOrders" :key="order.id">
 
-                            <td class="fw-semibold">
-                                #{{ order.id }}
-                            </td>
+                            <td class="fw-semibold">#{{ order.id }}</td>
 
                             <td class="text-muted">
                                 {{ formatDate(order?.created_at) }}

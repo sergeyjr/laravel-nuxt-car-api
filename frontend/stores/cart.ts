@@ -27,9 +27,9 @@ export const useCartStore = defineStore('cart', {
         initialized: false,
         hydrated: false,
         loading: false,
-
+        updateQueue: {} as Record<string, number>,
+        syncVersion: {} as Record<string, number>,
         updating: {} as Record<string, boolean>,
-        updateTimers: {} as Record<string, any>
     }),
 
     getters: {
@@ -157,49 +157,31 @@ export const useCartStore = defineStore('cart', {
             this.save()
         },
 
-        async syncUpdate(id: string) {
+        async update(id: number | string, qty: number) {
 
             const cartApi = useCartApi()
 
-            if (!this.items[id]) return
+            id = String(id)
+            qty = Math.max(1, Number(qty))
 
-            if (this.updating[id]) return
-
-            this.updating[id] = true
+            // 1. сразу обновляем UI
+            this.updateLocal(id, qty)
 
             try {
 
+                // 2. сразу отправляем на сервер
                 await cartApi.updateItem({
                     id: Number(id),
-                    qty: Number(this.items[id].qty)
+                    qty
                 })
 
             } catch (e) {
 
                 console.error(e)
 
-            } finally {
-
-                this.updating[id] = false
+                // (опционально) можно откатить — если нужно строго
+                // await this.fetch(true)
             }
-
-        },
-
-        update(id: number | string, qty: number) {
-
-            id = String(id)
-
-            qty = Math.max(1, Number(qty))
-
-            this.updateLocal(id, qty)
-
-            if (this.updateTimers[id]) {
-                clearTimeout(this.updateTimers[id])
-            }
-
-            this.updateTimers[id] = setTimeout(() => {
-                this.syncUpdate(id)
-            }, 300)
         },
 
         async remove(id: number | string) {
@@ -244,15 +226,10 @@ export const useCartStore = defineStore('cart', {
             this.save()
 
             try {
-
                 await cartApi.clear()
-
             } catch (e) {
-
                 console.error(e)
-
                 this.items = backup
-
                 this.save()
             }
 
@@ -267,25 +244,16 @@ export const useCartStore = defineStore('cart', {
             )
 
             try {
-
                 const data = await cartApi.checkout({
                     comment: payload.comment || null
                 })
-
                 this.items = {}
-
                 this.save()
-
                 return data
-
             } catch (e) {
-
                 console.error(e)
-
                 this.items = backup
-
                 this.save()
-
                 throw e
             }
 

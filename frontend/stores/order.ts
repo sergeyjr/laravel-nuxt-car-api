@@ -6,63 +6,68 @@ export const useOrderStore = defineStore('order', {
     state: () => ({
         currentOrder: null as any,
         orders: [] as any[],
-
         loading: false,
         error: null as any,
-
         initialized: false,
-        orderCache: new Map<string, any>()
+        orderCache: {} as Record<string, any>
     }),
 
     actions: {
 
-        async fetchOrder(id: number) {
-            if (!id) return
-
-            const key = String(id)
+        async fetchOrder(id: string | number) {
+            const key = String(id).trim()
+            const orderId = Number(id)
             const orderApi = useOrderApi()
+
+            if (!key || Number.isNaN(orderId)) {
+                this.currentOrder = null
+                return null
+            }
 
             this.loading = true
             this.error = null
 
-            this.currentOrder = null
-
             try {
-                if (this.orderCache.has(key)) {
-                    this.currentOrder = this.orderCache.get(key)
-                    return
+                if (this.orderCache[key]) {
+                    this.currentOrder = this.orderCache[key]
+                    return this.currentOrder
                 }
 
-                const data = await orderApi.getOrder(id)
+                const data = await orderApi.getOrder(orderId)
+
+                if (!data) {
+                    this.currentOrder = null
+                    return null
+                }
 
                 this.currentOrder = data
+                this.orderCache[key] = data
 
-                this.orderCache.set(key, data)
-
+                return data
             } catch (e) {
                 this.error = e
+                this.currentOrder = null
                 console.error('Order fetch error:', e)
-
+                return null
             } finally {
                 this.loading = false
             }
         },
 
         async fetchOrders() {
+            const orderApi = useOrderApi()
+
             this.loading = true
             this.error = null
 
-            const orderApi = useOrderApi()
-
             try {
                 const data = await orderApi.getOrders()
-
                 this.orders = Array.isArray(data) ? data : (data ?? [])
-
+                return this.orders
             } catch (e) {
                 this.error = e
                 console.error('Orders fetch error:', e)
-
+                return []
             } finally {
                 this.loading = false
                 this.initialized = true

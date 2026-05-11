@@ -4,7 +4,6 @@ import {computed, ref} from 'vue'
 
 import {useCartStore} from '~/stores/cart'
 
-import BaseInput from '~/components/BaseInput.vue'
 import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
 
@@ -28,13 +27,13 @@ function sanitizeQty(value) {
     return qty
 }
 
-function updateQty(id, qty) {
-    cart.update(id, sanitizeQty(qty))
-}
-
-function updateInput(id, event) {
-    const qty = sanitizeQty(event.target.value)
-    cart.update(id, qty)
+function qtyModel(id) {
+    return computed({
+        get: () => cart.items[id]?.qty ?? 1,
+        set: (val) => {
+            cart.update(id, sanitizeQty(val))
+        }
+    })
 }
 
 function remove(id) {
@@ -84,13 +83,7 @@ const goBack = () => {
         <!-- HEADER -->
         <div class="d-flex justify-content-between align-items-center mb-4">
 
-            <div>
-                <h2 class="mb-1">Корзина</h2>
-
-                <div class="text-muted">
-                    {{ Object.keys(items).length }} товаров
-                </div>
-            </div>
+             <h2 class="mb-1">Корзина</h2>
 
             <button
                 class="btn btn-outline-secondary"
@@ -193,23 +186,22 @@ const goBack = () => {
 
                                     <button
                                         class="btn btn-outline-secondary btn-sm"
-                                        @click="updateQty(itemId, itemData.qty - 1)"
+                                        @click="cart.update(itemId, itemData.qty - 1)"
                                     >
                                         −
                                     </button>
 
                                     <input
                                         type="text"
-                                        min="1"
                                         class="form-control text-center"
                                         style="width:90px;"
                                         :value="itemData.qty"
-                                        @input="updateInput(itemId, $event)"
+                                        @input="cart.update(itemId, sanitizeQty($event.target.value))"
                                     />
 
                                     <button
                                         class="btn btn-outline-secondary btn-sm"
-                                        @click="updateQty(itemId, itemData.qty + 1)"
+                                        @click="cart.update(itemId, itemData.qty + 1)"
                                     >
                                         +
                                     </button>
@@ -257,7 +249,10 @@ const goBack = () => {
                         <div class="d-flex justify-content-between align-items-center mb-2">
 
                             <span class="text-muted">
-                                Итого
+                                Итого:
+                                            <div class="text-muted">
+                    {{ Object.keys(items).length }} товаров
+                </div>
                             </span>
 
                             <span class="fs-4 fw-bold text-success">
@@ -281,7 +276,7 @@ const goBack = () => {
 
                         <BaseTextarea
                             v-model="comment"
-                            rows="5"
+                            :rows="5"
                             placeholder="Например: позвонить перед доставкой"
                             :disabled="isSubmitting"
                         />

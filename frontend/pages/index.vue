@@ -1,21 +1,22 @@
 <script setup>
 
-import {computed} from 'vue'
-
-import {useAuthActions} from '~/composables/useAuthActions'
+import {computed, ref, onMounted} from 'vue'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
 
 import BaseButton from '~/components/BaseButton.vue'
+import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
 
 // router
 const router = useRouter()
 
 // auth
 const auth = useAuthStore()
-const {handleLogout} = useAuthActions()
 const user = computed(() => auth.user)
+
+// logout modal
+const showLogoutModal = ref(false)
 
 // swiper
 import {Navigation, Pagination} from 'swiper/modules'
@@ -45,17 +46,16 @@ const swiperOptions = {
 // cars
 const carStore = useCarStore()
 
-// Client
 onMounted(() => {
     carStore.fetchLatest()
 })
 
-// SSR
-// await useAsyncData('latest-cars', () => carStore.fetchLatest())
-
 // helpers
 const getImage = (car) => {
-    if (!car.photo_url) return '/images/default_car.jpg'
+    if (!car.photo_url) {
+        return '/images/default_car.jpg'
+    }
+
     return car.photo_url
 }
 
@@ -67,45 +67,81 @@ const openCar = (id) => {
     router.push(`/cars/show/${id}`)
 }
 
+const onImgError = (e) => {
+    e.target.src = '/images/default_car.jpg'
+}
+
 </script>
 
 <template>
     <div class="container my-4">
+
         <div class="text-center mb-5">
-            <h1 class="display-5 fw-bold">Главная страница</h1>
-            <p class="text-muted">Nuxt 4 + Pinia 3</p>
+            <h1 class="display-5 fw-bold">
+                Главная страница
+            </h1>
+
+            <p class="text-muted">
+                Nuxt 4 + Pinia 3
+            </p>
         </div>
 
         <div class="row g-4">
 
             <!-- USER STATUS -->
             <div class="col-md-6">
+
                 <div class="card shadow-sm h-100">
+
                     <div class="card-body">
-                        <h4>Статус пользователя</h4>
+
+                        <h4>
+                            Статус пользователя
+                        </h4>
 
                         <div v-if="auth.isAuth">
-                            <p class="text-muted">Добро пожаловать, {{ user?.name }}</p>
-                            <p class="text-success mb-0">Вы авторизованы</p>
+
+                            <p class="text-muted">
+                                Добро пожаловать, {{ user?.name }}
+                            </p>
+
+                            <p class="text-success mb-0">
+                                Вы авторизованы
+                            </p>
+
                         </div>
 
                         <div v-else>
-                            <p class="text-warning mb-0">Вы гость</p>
+
+                            <p class="text-warning mb-0">
+                                Вы гость
+                            </p>
+
                             <small class="text-muted">
                                 Войдите или зарегистрируйтесь
                             </small>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
 
             <!-- ACTIONS -->
             <div class="col-md-6">
+
                 <div class="card shadow-sm h-100">
+
                     <div class="card-body">
-                        <h4>Быстрые действия</h4>
+
+                        <h4>
+                            Быстрые действия
+                        </h4>
 
                         <template v-if="auth.isAuth">
+
                             <BaseButton
                                 class="w-100 mb-2"
                                 @click="router.push('/dashboard/profile')"
@@ -117,34 +153,57 @@ const openCar = (id) => {
                                 variant="danger"
                                 class="w-100"
                                 :loading="auth.loading"
-                                @click="handleLogout"
+                                @click="showLogoutModal = true"
                             >
-                                <template #loading>Выход...</template>
+                                <template #loading>
+                                    Выход...
+                                </template>
+
                                 Выйти
                             </BaseButton>
+
                         </template>
 
                         <template v-else>
-                            <BaseButton class="w-100 mb-2" @click="router.push('/login')">
+
+                            <BaseButton
+                                class="w-100 mb-2"
+                                @click="router.push('/login')"
+                            >
                                 Войти
                             </BaseButton>
 
-                            <BaseButton variant="secondary" class="w-100" @click="router.push('/register')">
+                            <BaseButton
+                                variant="secondary"
+                                class="w-100"
+                                @click="router.push('/register')"
+                            >
                                 Регистрация
                             </BaseButton>
+
                         </template>
+
                     </div>
+
                 </div>
+
             </div>
 
             <!-- CARS -->
             <div class="col-12 mt-5">
-                <h2 class="mb-4">Новинки</h2>
+
+                <h2 class="mb-4">
+                    Новинки
+                </h2>
 
                 <ClientOnly>
 
                     <template v-if="carStore.latestLoading">
-                        <div>Загрузка...</div>
+
+                        <div>
+                            Загрузка...
+                        </div>
+
                     </template>
 
                     <template v-else>
@@ -155,16 +214,30 @@ const openCar = (id) => {
                             v-bind="swiperOptions"
                             class="swiper-custom"
                         >
-                            <SwiperSlide v-for="car in carStore.latest" :key="car.id">
-                                <div class="card h-100" style="cursor:pointer" @click="openCar(car.id)">
+
+                            <SwiperSlide
+                                v-for="car in carStore.latest"
+                                :key="car.id"
+                            >
+
+                                <div
+                                    class="card h-100"
+                                    style="cursor:pointer"
+                                    @click="openCar(car.id)"
+                                >
+
                                     <img
                                         :src="getImage(car)"
                                         class="card-img-top"
                                         alt=""
+                                        @error="onImgError"
                                     />
 
                                     <div class="card-body">
-                                        <h5>{{ car.title }}</h5>
+
+                                        <h5>
+                                            {{ car.title }}
+                                        </h5>
 
                                         <p v-if="auth.user">
                                             {{ formatPrice(car.price) }}
@@ -173,9 +246,13 @@ const openCar = (id) => {
                                         <p v-else class="text-muted">
                                             Авторизуйтесь, чтобы увидеть цену
                                         </p>
+
                                     </div>
+
                                 </div>
+
                             </SwiperSlide>
+
                         </Swiper>
 
                     </template>
@@ -185,6 +262,13 @@ const openCar = (id) => {
             </div>
 
         </div>
+
+        <!-- LOGOUT MODAL -->
+        <LogoutModal
+            :show="showLogoutModal"
+            @close="showLogoutModal = false"
+        />
+
     </div>
 </template>
 
@@ -203,12 +287,12 @@ const openCar = (id) => {
 }
 
 .swiper-custom :deep(.swiper-slide) .card {
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform .25s ease, box-shadow .25s ease;
     will-change: transform;
 }
 
 .swiper-custom :deep(.swiper-slide):hover .card {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 0 8px rgba(0,0,0,.18);
     z-index: 10;
 }
 

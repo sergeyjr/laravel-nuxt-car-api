@@ -1,110 +1,74 @@
 <script setup lang="ts">
 
-import {computed} from 'vue'
-
-import {useAuthActions} from '~/composables/useAuthActions'
+import {computed, ref} from 'vue'
+import {useRoute} from 'vue-router'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
+import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
+
 const auth = useAuthStore()
 const cart = useCartStore()
-
 const route = useRoute()
-
-const {handleLogout} = useAuthActions()
 
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
-// Кол-ва позиций
-const cartCount = computed(() => {
-    return Object.keys(cart.items || {}).length
-})
+const cartCount = computed(() =>
+    Object.keys(cart.items || {}).length
+)
 
-// Кол-ва товаров
-// const cartCount = computed(() => {
-//     return Object.values(cart.items || {}).reduce((sum: number, item: any) => {
-//         return sum + Number(item.qty || 0)
-//     }, 0)
-// })
+const isActive = (path: string) =>
+    route.path === path || route.path.startsWith(path + '/')
 
-const isActive = (path: string) => {
-    return route.path.startsWith(path)
-}
+const showLogoutModal = ref(false)
 
 </script>
 
 <template>
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container d-flex justify-content-between align-items-center">
+    <nav class="nav-bar">
+        <div class="container nav-inner">
 
-            <!-- логотип -->
-            <NuxtLink class="navbar-brand text-white" to="/">
+            <!-- logo -->
+            <NuxtLink to="/" class="logo">
                 {{ appName }}
             </NuxtLink>
 
-            <!-- меню -->
-            <div class="d-flex flex-wrap gap-2">
+            <!-- links -->
+            <div class="nav-links">
 
-                <NuxtLink
-                    to="/cars"
-                    class="btn btn-sm"
-                    :class="isActive('/cars') ? 'btn-primary' : 'btn-outline-light'"
-                >
+                <NuxtLink to="/cars" class="nav-link" :class="{ active: isActive('/cars') }">
                     Каталог
                 </NuxtLink>
 
-                <NuxtLink
-                    to="/contact"
-                    class="btn btn-sm"
-                    :class="isActive('/contact') ? 'btn-primary' : 'btn-outline-light'"
-                >
+                <NuxtLink to="/contact" class="nav-link" :class="{ active: isActive('/contact') }">
                     Контакты
                 </NuxtLink>
 
-                <NuxtLink
-                    to="/page/about"
-                    class="btn btn-sm"
-                    :class="isActive('/page/about') ? 'btn-primary' : 'btn-outline-light'"
-                >
+                <NuxtLink to="/page/about" class="nav-link" :class="{ active: isActive('/page/about') }">
                     О проекте
                 </NuxtLink>
 
-                <NuxtLink
-                    to="/page/info"
-                    class="btn btn-sm"
-                    :class="isActive('/page/info') ? 'btn-primary' : 'btn-outline-light'"
-                >
+                <NuxtLink to="/page/info" class="nav-link" :class="{ active: isActive('/page/info') }">
                     Инфо
                 </NuxtLink>
 
                 <template v-if="auth.isAuth">
 
-                    <NuxtLink
-                        to="/dashboard"
-                        class="btn btn-sm"
-                        :class="isActive('/dashboard') ? 'btn-primary' : 'btn-outline-light'"
-                    >
+                    <NuxtLink to="/dashboard" class="nav-link" :class="{ active: isActive('/dashboard') }">
                         Кабинет
                     </NuxtLink>
 
-                    <NuxtLink
-                        to="/cart"
-                        class="btn btn-sm position-relative"
-                        :class="isActive('/cart') ? 'btn-primary' : 'btn-outline-light'"
-                    >
+                    <NuxtLink to="/cart" class="nav-link cart-link" :class="{ active: isActive('/cart') }">
                         Корзина
 
-                        <span class="badge bg-danger ms-1 cart-badge">
-                            {{ cart.initialized ? cartCount : 0 }}
+                        <span v-if="cart.initialized" class="badge">
+                            {{ cartCount }}
                         </span>
                     </NuxtLink>
 
-                    <button
-                        class="btn btn-sm btn-outline-light"
-                        @click="handleLogout"
-                    >
+                    <button class="nav-link logout" @click="showLogoutModal = true">
                         Выход
                     </button>
 
@@ -112,41 +76,114 @@ const isActive = (path: string) => {
 
                 <template v-else>
 
-                    <NuxtLink
-                        to="/login"
-                        class="btn btn-sm"
-                        :class="isActive('/login') ? 'btn-primary' : 'btn-outline-light'"
-                    >
+                    <NuxtLink to="/login" class="nav-link" :class="{ active: isActive('/login') }">
                         Вход
                     </NuxtLink>
 
                 </template>
 
             </div>
+
         </div>
+
+        <LogoutModal
+            :show="showLogoutModal"
+            @close="showLogoutModal = false"
+        />
+
     </nav>
 </template>
 
 <style scoped>
 
-.navbar {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+.nav-bar {
+    background: #111827;
+    color: white;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+    position: sticky;
+    top: 0;
+    z-index: 50;
 }
 
-.btn {
-    transition: all 0.2s ease;
+.nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
 }
 
-.btn-outline-light {
+.logo {
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    letter-spacing: .5px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    position: relative;
+    padding: 6px 2px;
+    transition: color .2s ease;
+    cursor: pointer;
+    background: none;
     border: none;
 }
 
-.btn-outline-light:hover {
-    border-color: #fff;
+.nav-link:hover {
+    color: white;
 }
 
-.btn-primary {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 0;
+    background: #3b82f6;
+    transition: width .2s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+.nav-link.active {
+    color: white;
+}
+
+.cart-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge {
+    background: #ef4444;
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    line-height: 1;
+}
+
+.logout {
+    color: #fca5a5;
+}
+
+.logout:hover {
+    color: #ef4444;
 }
 
 </style>
