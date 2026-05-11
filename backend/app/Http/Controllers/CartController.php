@@ -50,7 +50,10 @@ class CartController extends Controller
         $car = Car::find($request->id);
 
         if (!$car) {
-            return response()->json(['message' => 'Car not found'], 404);
+            return response()->json(
+                ['message' => 'Машина не найдена.'],
+                404
+            );
         }
 
         $cart = Cart::firstOrCreate([
@@ -74,7 +77,7 @@ class CartController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'added']);
+        return $this->success();
 
     }
 
@@ -115,7 +118,7 @@ class CartController extends Controller
             ]);
         }
 
-        return response()->json(['ok' => true]);
+        return $this->success();
 
     }
 
@@ -132,7 +135,7 @@ class CartController extends Controller
             ->where('car_id', $request->id)
             ->delete();
 
-        return response()->json(['ok' => true]);
+        return $this->success();
 
     }
 
@@ -145,7 +148,7 @@ class CartController extends Controller
             CartItem::where('cart_id', $cart->id)->delete();
         }
 
-        return response()->json([]);
+        return $this->success();
 
     }
 

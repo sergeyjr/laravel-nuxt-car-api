@@ -1,4 +1,4 @@
-import type {User} from '~/types/auth'
+import type {AuthResponse, User} from '~/types/auth'
 
 export const useAuthApi = () => {
 
@@ -18,7 +18,7 @@ export const useAuthApi = () => {
             email: string,
             password: string
         ) {
-            return api.post('/api/login', {
+            return api.post<AuthResponse>('/api/login', {
                 email,
                 password
             })
@@ -30,7 +30,7 @@ export const useAuthApi = () => {
             password: string
             password_confirmation: string
         }) {
-            return api.post('/api/register', payload)
+            return api.post<AuthResponse>('/api/register', payload)
         },
 
         logout() {

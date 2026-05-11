@@ -11,13 +11,12 @@ export const useOrderStore = defineStore('order', {
         error: null as any,
 
         initialized: false,
-
         orderCache: new Map<string, any>()
     }),
 
     actions: {
 
-        async fetchOrder(id: number | string) {
+        async fetchOrder(id: number) {
             if (!id) return
 
             const key = String(id)
@@ -26,7 +25,6 @@ export const useOrderStore = defineStore('order', {
             this.loading = true
             this.error = null
 
-            // важно: сбрасываем старое значение
             this.currentOrder = null
 
             try {

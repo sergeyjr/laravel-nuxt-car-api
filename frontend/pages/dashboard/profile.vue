@@ -63,6 +63,7 @@ const goBack = () => {
                             alt=""/>
 
                         <h4>{{ user?.name }}</h4>
+
                         <p class="text-muted">{{ user?.email }}</p>
 
                         <small class="text-muted">

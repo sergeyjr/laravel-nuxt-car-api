@@ -46,7 +46,7 @@ class CarRepository implements CarRepositoryInterface
     {
         return DB::transaction(function () use ($id, $data) {
 
-            $car = CarModel::with('option')->find($id); // hasOne
+            $car = CarModel::with('options')->find($id); // hasOne
 
             if (!$car) {
                 return null;
@@ -75,7 +75,7 @@ class CarRepository implements CarRepositoryInterface
     {
         return DB::transaction(function () use ($id, $data) {
 
-            $car = CarModel::with('option')->find($id); // hasOne
+            $car = CarModel::with('options')->find($id); // hasOne
 
             if (!$car) {
                 return null;
@@ -109,7 +109,7 @@ class CarRepository implements CarRepositoryInterface
     {
         return DB::transaction(function () use ($id) {
 
-            $car = CarModel::with('option')->find($id);
+            $car = CarModel::with('options')->find($id);
 
             if (!$car) {
                 return false;
@@ -124,13 +124,13 @@ class CarRepository implements CarRepositoryInterface
 
     public function findById(int $id): ?array
     {
-        $car = CarModel::with('option')->find($id);
+        $car = CarModel::with('options')->find($id);
         return $car?->toArray();
     }
 
     public function getQuery(): Builder
     {
-        return CarModel::with('option');
+        return CarModel::with('options');
     }
 
 }

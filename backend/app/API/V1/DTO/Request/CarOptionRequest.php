@@ -2,8 +2,6 @@
 
 namespace App\API\V1\DTO\Request;
 
-use Illuminate\Support\Facades\Validator;
-
 class CarOptionRequest
 {
 

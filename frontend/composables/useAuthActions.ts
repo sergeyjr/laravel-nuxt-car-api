@@ -1,5 +1,4 @@
 import {useAuthStore} from '~/stores/auth'
-import {useRouter, useRoute} from 'vue-router'
 
 export function useAuthActions() {
 

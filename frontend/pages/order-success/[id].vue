@@ -1,8 +1,9 @@
 <script setup>
 
 import {computed} from 'vue'
-import {useRoute, navigateTo, createError} from '#app'
+
 import {useOrderStore} from '~/stores/order'
+
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
 const route = useRoute()

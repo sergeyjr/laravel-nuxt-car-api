@@ -7,6 +7,8 @@ import AppLoader from "~/components/AppLoader.vue";
 <template>
     <NuxtLayout>
         <NuxtPage/>
-        <AppLoader />
+        <ClientOnly>
+            <AppLoader />
+        </ClientOnly>
     </NuxtLayout>
 </template>

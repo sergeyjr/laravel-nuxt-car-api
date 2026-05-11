@@ -22,9 +22,7 @@ export const useCartApi = () => {
             return api.post('/api/cart/update', payload)
         },
 
-        removeItem(
-            id: number
-        ) {
+        removeItem(id: number) {
             return api.post('/api/cart/remove', {
                 id
             })

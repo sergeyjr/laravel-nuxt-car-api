@@ -6,13 +6,13 @@ export const useProfileApi = () => {
 
         update(fd: FormData) {
             return api.post('/api/profile/update', {
-                body: fd
+                fd
             })
         },
 
         changePassword(payload: any) {
             return api.post('/api/profile/password', {
-                body: payload
+                payload
             })
         },
 

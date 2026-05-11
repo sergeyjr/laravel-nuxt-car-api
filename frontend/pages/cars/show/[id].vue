@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
-import { useRoute, navigateTo } from '#app'
+import {computed, ref, watch} from 'vue'
 
-import { useCarStore } from '~/stores/car'
-import { useAuthStore } from '~/stores/auth'
-import { useCartStore } from '~/stores/cart'
+import {useCarStore} from '~/stores/car'
+import {useAuthStore} from '~/stores/auth'
+import {useCartStore} from '~/stores/cart'
+import {useUiStore} from '~/stores/ui'
 
 import AuthModal from '~/components/modals/AuthModal.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -15,6 +15,7 @@ const route = useRoute()
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
+const ui = useUiStore()
 
 const showAuth = ref(false)
 const addingToCart = ref<number | null>(null)
@@ -36,6 +37,7 @@ const isInCart = (carId: number) => {
 
 const addToCart = async (car: any) => {
     const id = Number(car?.id)
+
     if (!id) return
 
     try {
@@ -58,9 +60,15 @@ watch(
     () => route.params.id,
     async (id) => {
         if (!id || Array.isArray(id)) return
-        await store.fetchCar(Number(id))
+
+        try {
+            ui.showLoader('Загрузка автомобиля...')
+            await store.fetchCar(Number(id))
+        } finally {
+            ui.hideLoader()
+        }
     },
-    { immediate: true }
+    {immediate: true}
 )
 
 </script>
@@ -68,27 +76,18 @@ watch(
 <template>
     <div class="container mt-4">
 
-        <div v-if="store.carPending && !car" class="alert alert-light d-flex align-items-center gap-2">
-            <span>Загружаем автомобиль...</span>
-        </div>
-
-        <div v-else-if="!store.carPending && !car">
+        <div v-if="!store.carLoading && !car">
             Автомобиль не найден
         </div>
 
-        <template v-else>
+        <template v-else-if="car">
 
             <div class="position-relative">
-
-                <div v-if="store.carLoading" class="alert alert-light mb-3 d-flex align-items-center gap-2">
-                    <span class="spinner-border spinner-border-sm"></span>
-                    <span>Загрузка...</span>
-                </div>
 
                 <div class="row">
 
                     <div class="col-12">
-                        <h1 class="mb-4">{{ car?.title }}</h1>
+                        <h1 class="mb-4">{{ car.title }}</h1>
                     </div>
 
                     <div class="col-md-5">
@@ -104,14 +103,29 @@ watch(
 
                         <p>
                             <span class="fw-bold">Описание:</span>
-                            {{ car?.description }}
+                            {{ car.description }}
                         </p>
 
-                        <div v-if="car?.option">
-                            <p><span class="fw-bold">Бренд:</span> {{ car.option.brand }}</p>
-                            <p><span class="fw-bold">Модель:</span> {{ car.option.model }}</p>
-                            <p><span class="fw-bold">Год:</span> {{ car.option.year }}</p>
-                            <p><span class="fw-bold">Пробег:</span> {{ car.option.mileage }}</p>
+                        <div v-if="car.options">
+                            <p>
+                                <span class="fw-bold">Бренд:</span>
+                                {{ car.options.brand }}
+                            </p>
+
+                            <p>
+                                <span class="fw-bold">Модель:</span>
+                                {{ car.options.model }}
+                            </p>
+
+                            <p>
+                                <span class="fw-bold">Год:</span>
+                                {{ car.options.year }}
+                            </p>
+
+                            <p>
+                                <span class="fw-bold">Пробег:</span>
+                                {{ car.options.mileage }}
+                            </p>
 
                             <p v-if="auth.user">
                                 <span class="fw-bold">Цена:</span>
@@ -119,21 +133,24 @@ watch(
                             </p>
 
                             <p v-else class="text-muted">
-                                <button class="btn btn-light" @click="showAuth = true">
+                                <button
+                                    class="btn btn-light"
+                                    @click="showAuth = true"
+                                >
                                     Авторизуйтесь, чтобы увидеть цену
                                 </button>
 
-                                <AuthModal v-model="showAuth" />
+                                <AuthModal v-model="showAuth"/>
                             </p>
                         </div>
 
                         <div v-if="auth.user">
 
                             <BaseButton
-                                v-if="car && isInCart(car.id)"
+                                v-if="isInCart(car.id)"
                                 variant="light"
                                 class="w-100"
-                                @click="navigateTo('/cart')"
+                                disabled
                             >
                                 Товар в корзине
                             </BaseButton>
@@ -142,12 +159,13 @@ watch(
                                 v-else
                                 variant="success"
                                 class="w-100"
-                                :disabled="addingToCart === car?.id"
-                                @click="car && addToCart(car)"
+                                :disabled="addingToCart === car.id"
+                                @click="addToCart(car)"
                             >
-                                <span v-if="addingToCart === car?.id">
+                                <span v-if="addingToCart === car.id">
                                     Добавляется...
                                 </span>
+
                                 <span v-else>
                                     В корзину
                                 </span>

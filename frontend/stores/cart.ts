@@ -12,7 +12,8 @@ export const useCartStore = defineStore('cart', {
 
     state: () => ({
         items: {} as Record<string, any>,
-        initialized: false
+        initialized: false,
+        hydrated: false
     }),
 
     getters: {
@@ -30,6 +31,8 @@ export const useCartStore = defineStore('cart', {
 
             const raw = JSON.parse(localStorage.getItem('cartItems') || '{}')
             this.items = cleanItems(raw)
+
+            this.hydrated = true
         },
 
         save() {
@@ -68,6 +71,7 @@ export const useCartStore = defineStore('cart', {
             const cartApi = useCartApi()
 
             const id = Number(newItem?.id)
+
             if (!id) {
                 console.error('Cart add aborted: invalid id', newItem)
                 return
@@ -75,16 +79,24 @@ export const useCartStore = defineStore('cart', {
 
             const backup = structuredClone(toRaw(this.items))
 
-            if (this.items[id]) {
-                this.items[id].qty += newItem.qty ?? 1
-            } else {
-                this.items[id] = {
+            const current = this.items[id]
+
+            const updatedItem = current
+                ? {
+                    ...current,
+                    qty: Number(current.qty) + Number(newItem.qty ?? 1)
+                }
+                : {
                     id,
                     name: newItem.name,
                     price: newItem.price,
                     qty: newItem.qty ?? 1,
                     photo_url: newItem.photo_url || null
                 }
+
+            this.items = {
+                ...this.items,
+                [id]: updatedItem
             }
 
             this.save()
@@ -108,7 +120,13 @@ export const useCartStore = defineStore('cart', {
             const backup = structuredClone(toRaw(this.items))
 
             if (this.items[id]) {
-                this.items[id].qty = qty
+                this.items = {
+                    ...this.items,
+                    [id]: {
+                        ...this.items[id],
+                        qty
+                    }
+                }
             }
 
             this.save()

@@ -6,18 +6,20 @@ export const useCarApi = () => {
 
     return {
 
-        fetchCar(id: number): Promise<Car> {
-            return api.get(`/api/cars/${id}`)
+        fetchCar(id: number) {
+            return api.get<Car>(`/api/cars/${id}`)
         },
 
-        fetchCars(page = 1): Promise<CarsResponse> {
-            return api.get('/api/cars', {
-                query: {page}
+        fetchCars(page = 1) {
+            return api.get<CarsResponse>('/api/cars', {
+                query: {
+                    page
+                }
             })
         },
 
-        fetchLatest(): Promise<CarsResponse> {
-            return api.get('/api/cars/latest')
+        fetchLatest() {
+            return api.get<CarsResponse>('/api/cars/latest')
         }
 
     }

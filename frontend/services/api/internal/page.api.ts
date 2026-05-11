@@ -1,9 +1,4 @@
-export interface PageResponse {
-    id: number
-    code: string
-    title: string
-    content: string
-}
+import type {PageResponse} from "~/types/page";
 
 export const usePageApi = () => {
 
@@ -11,8 +6,8 @@ export const usePageApi = () => {
 
     return {
 
-        fetchPage(code: string): Promise<PageResponse> {
-            return api.get(`/api/page/${code}`)
+        fetchPage(code: string) {
+            return api.get<PageResponse>(`/api/page/${code}`)
         }
 
     }

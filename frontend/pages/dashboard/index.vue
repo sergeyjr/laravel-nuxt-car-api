@@ -61,7 +61,9 @@ const formatDate = (date) => {
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <h5>Мой профиль</h5>
+
                             <p>Добро пожаловать, {{ user?.name || 'пользователь' }}</p>
+
                             <p>Email: {{ user?.email || '—' }}</p>
 
                             <NuxtLink

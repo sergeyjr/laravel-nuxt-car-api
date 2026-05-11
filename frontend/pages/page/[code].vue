@@ -1,7 +1,7 @@
 <script setup>
 
 import {computed, watch} from 'vue'
-import {useRoute} from '#app'
+
 import {usePageStore} from '~/stores/page'
 
 const route = useRoute()

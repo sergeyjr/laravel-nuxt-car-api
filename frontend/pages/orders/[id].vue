@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import {computed, watch} from 'vue'
-import {useRoute, createError} from '#app'
+import {computed} from 'vue'
+
 import {useOrderStore} from '~/stores/order'
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
@@ -11,22 +11,39 @@ const {getLabel} = useOrderStatus()
 
 const orderId = computed(() => route.params.id)
 
-async function load(id: string | number) {
-    if (!id) throw createError({statusCode: 404})
+const load = async (id: string | number) => {
+    if (!id) {
+        throw createError({
+            statusCode: 404,
+            statusMessage: 'ID заказа отсутствует.'
+        })
+    }
 
     try {
-        await store.fetchOrder(id)
+        const res = await store.fetchOrder(id)
+
+        // если API вернул null/undefined → показываем 404 Nuxt way
+        if (!res || !store.currentOrder) {
+            throw createError({
+                statusCode: 404,
+                statusMessage: 'Заказ не найден.'
+            })
+        }
+
     } catch (e) {
-        throw createError({statusCode: 404})
+        showError({
+            statusCode: 404,
+            statusMessage: 'Заказ не найден.'
+        })
     }
 }
 
-watch(
-    orderId,
-    async (id) => {
-        await load(id)
-    },
-    {immediate: true}
+await useAsyncData(
+    () => `order-${orderId.value}`,
+    () => load(orderId.value),
+    {
+        watch: [orderId]
+    }
 )
 
 const order = computed(() => store.currentOrder)

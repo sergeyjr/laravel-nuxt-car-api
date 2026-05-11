@@ -7,11 +7,11 @@ declare module '#app' {
     }
 }
 
-// declare module 'vue' {
-//     interface ComponentCustomProperties {
-//         $api: $Fetch
-//         $apiToken: $Fetch
-//     }
-// }
+declare module 'vue' {
+    interface ComponentCustomProperties {
+        $api: $Fetch
+        $apiToken: $Fetch
+    }
+}
 
 export {}

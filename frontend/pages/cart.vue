@@ -1,7 +1,9 @@
 <script setup>
 
 import {computed, ref} from 'vue'
+
 import {useCartStore} from '~/stores/cart'
+
 import BaseButton from '~/components/BaseButton.vue'
 
 const cart = useCartStore()
@@ -10,12 +12,10 @@ const cart = useCartStore()
 // await callOnce(() => cart.fetch())
 
 // Более мягкий вариант
-// const { data } = await useAsyncData('cart', () => cart.fetch())
+// const {data} = await useAsyncData('cart', () => cart.fetch())
 
 // Не блокируем навигацию
-onMounted(() => {
-    cart.fetch()
-})
+// onMounted(() => { cart.fetch() })
 
 const isSubmitting = ref(false)
 const comment = ref('')

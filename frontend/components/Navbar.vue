@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
-import {computed, watch} from 'vue'
-import {useRoute} from 'vue-router'
+import {computed} from 'vue'
+
 import {useAuthActions} from '~/composables/useAuthActions'
+
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
@@ -15,19 +16,8 @@ const {handleLogout} = useAuthActions()
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
-watch(
-    () => auth.isAuth,
-    async (isAuth) => {
-        if (isAuth && !cart.initialized) {
-            await cart.fetch()
-        }
-    }
-)
-
 const cartCount = computed(() => {
-    return Object.values(cart.items || {}).reduce((sum, item: any) => {
-        return item ? sum + Number(item.qty || 0) : sum
-    }, 0)
+    return Object.keys(cart.items || {}).length
 })
 
 const isActive = (path: string) => {

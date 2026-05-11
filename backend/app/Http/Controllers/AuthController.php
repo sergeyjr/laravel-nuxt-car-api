@@ -65,7 +65,7 @@ class AuthController extends Controller
 
         return $this->success([
             'user' => $user,
-            'message' => 'Авторизация успешна.'
+            'message' => 'Авторизация прошла успешна.'
         ]);
 
     }
@@ -78,16 +78,13 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return $this->success([
-            'message' => 'Выход из системы.'
-        ]);
+        return $this->success();
 
     }
 
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user();
-        return response()->json($user);
+        return response()->json($request->user());
     }
 
 }

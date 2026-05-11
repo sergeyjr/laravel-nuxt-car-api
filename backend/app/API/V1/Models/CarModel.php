@@ -24,7 +24,7 @@ class CarModel extends Model
         'created_at' => 'datetime',
     ];
 
-    public function option(): HasOne
+    public function options(): HasOne
     {
         return $this->hasOne(CarOptionModel::class, 'car_id', 'id');
     }

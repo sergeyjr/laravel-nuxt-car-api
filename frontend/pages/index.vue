@@ -1,12 +1,13 @@
 <script setup>
 
-import BaseButton from '~/components/BaseButton.vue'
 import {computed} from 'vue'
+
 import {useAuthActions} from '~/composables/useAuthActions'
+
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
-import {useContactStore} from '~/stores/contact'
-import {useRouter} from '#app'
+
+import BaseButton from '~/components/BaseButton.vue'
 
 // router
 const router = useRouter()
@@ -61,9 +62,6 @@ const formatPrice = (price) => {
 const openCar = (id) => {
     router.push(`/cars/show/${id}`)
 }
-
-// contact
-const contactStore = useContactStore()
 
 </script>
 
@@ -182,62 +180,6 @@ const contactStore = useContactStore()
 
             </div>
 
-            <!-- CONTACT -->
-            <div class="col-6 offset-3 mt-5">
-                <h4>Связаться с нами</h4>
-
-                <div v-if="contactStore.contexts.home.successMessage" class="alert alert-success">
-                    {{ contactStore.contexts.home.successMessage }}
-                </div>
-
-                <div v-if="contactStore.contexts.home.errorMessage" class="alert alert-danger">
-                    {{ contactStore.contexts.home.errorMessage }}
-                </div>
-
-                <div v-if="contactStore.retryAfter" class="alert alert-warning">
-                    Подождите {{ contactStore.retryAfter }} сек
-                </div>
-
-                <form @submit.prevent="contactStore.submit">
-
-                    <input
-                        v-model="contactStore.form.name"
-                        class="form-control mb-2"
-                        placeholder="Имя"
-                    />
-
-                    <input
-                        v-model="contactStore.form.email"
-                        class="form-control mb-2"
-                        placeholder="Email"
-                    />
-
-                    <input
-                        v-model="contactStore.form.subject"
-                        class="form-control mb-2"
-                        placeholder="Тема"
-                    />
-
-                    <textarea
-                        v-model="contactStore.form.body"
-                        class="form-control mb-3"
-                        rows="5"
-                        placeholder="Сообщение"
-                    />
-
-                    <BaseButton
-                        type="submit"
-                        class="w-100"
-                        :loading="contactStore.loading"
-                        :disabled="contactStore.retryAfter > 0"
-                    >
-                        <template #loading>Отправляем...</template>
-                        Отправить
-                    </BaseButton>
-
-                </form>
-
-            </div>
         </div>
     </div>
 </template>

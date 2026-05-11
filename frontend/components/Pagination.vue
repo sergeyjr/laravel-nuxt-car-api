@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import BaseButton from '~/components/BaseButton.vue'
 
 type Meta = {
@@ -17,7 +18,7 @@ const emit = defineEmits<{
 
 const pages = computed(() => {
     if (!props.meta) return []
-    return Array.from({ length: props.meta.last_page }, (_, i) => i + 1)
+    return Array.from({length: props.meta.last_page}, (_, i) => i + 1)
 })
 
 const isFirstPage = computed(() => {
@@ -31,6 +32,7 @@ const isLastPage = computed(() => {
 function change(page: number) {
     emit('change', page)
 }
+
 </script>
 
 <template>

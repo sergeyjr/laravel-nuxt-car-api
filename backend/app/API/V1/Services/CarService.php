@@ -5,7 +5,6 @@ namespace App\API\V1\Services;
 use App\API\V1\DTO\Request\CarOptionRequest;
 use App\API\V1\DTO\Request\PaginationRequest;
 use App\API\V1\Repositories\Interfaces\CarRepositoryInterface;
-use App\Models\Car;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 
@@ -24,6 +23,7 @@ class CarService
     public function getCar(int $id): ?array
     {
         $cacheKey = "car:$id";
+        return $this->repository->findById($id);
 
         try {
             return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($id) {

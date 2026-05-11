@@ -1,10 +1,4 @@
-export interface Order {
-    id: number
-    created_at: string
-    status: string
-    total: number
-    items?: any[]
-}
+import type {OrderResponse} from '~/types/order'
 
 export const useOrderApi = () => {
 
@@ -12,12 +6,12 @@ export const useOrderApi = () => {
 
     return {
 
-        getOrder(id: number | string): Promise<Order> {
-            return api.get(`/api/orders/${id}`)
+        getOrder(id: number) {
+            return api.get<OrderResponse>(`/api/orders/${id}`)
         },
 
-        getOrders(): Promise<Order[]> {
-            return api.get('/api/orders')
+        getOrders() {
+            return api.get<OrderResponse[]>('/api/orders')
         }
 
     }

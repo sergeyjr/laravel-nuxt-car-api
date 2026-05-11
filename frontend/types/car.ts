@@ -8,7 +8,7 @@ export interface CarOption {
     mileage?: number | null
 }
 
-export type CarOptionValue = CarOption | null | []
+export type CarOptionValue = CarOption | null
 
 export interface Car {
     id: number
