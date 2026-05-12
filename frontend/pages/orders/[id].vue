@@ -1,14 +1,11 @@
 <script setup lang="ts">
-
-import {computed} from 'vue'
-
-import {useOrderStore} from '~/stores/order'
-
-import {useOrderStatus} from '~/composables/useOrderStatus'
+import { computed } from 'vue'
+import { useOrderStore } from '~/stores/order'
+import { useOrderStatus } from '~/composables/useOrderStatus'
 
 const route = useRoute()
 const store = useOrderStore()
-const {getLabel, getBadge} = useOrderStatus()
+const { getLabel, getBadge } = useOrderStatus()
 
 const orderId = computed(() => {
     const id = route.params.id
@@ -39,10 +36,10 @@ const load = async () => {
     return res
 }
 
-const {pending} = await useAsyncData(
+const { pending } = await useAsyncData(
     () => `order-${orderId.value}`,
     load,
-    {watch: [orderId]}
+    { watch: [orderId] }
 )
 
 const order = computed(() => store.currentOrder)
@@ -59,6 +56,14 @@ const formatDate = (date: string) => {
     }).format(new Date(date))
 }
 
+const getItemName = (item: any) => {
+    return item?.name || item?.car?.title || `Машина #${item?.car_id ?? ''}`
+}
+
+const getItemPhoto = (item: any) => {
+    return item?.photo_url || item?.car?.photo_url || '/images/default_car.jpg'
+}
+
 const goBack = () => {
     if (import.meta.client && window.history.length > 1) {
         window.history.back()
@@ -72,7 +77,6 @@ const goBack = () => {
     <div class="container py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-
             <h2 class="mb-3">Заказ #{{ order?.id }}</h2>
 
             <button class="btn btn-outline-secondary" @click="goBack">
@@ -101,7 +105,7 @@ const goBack = () => {
                                 <div class="d-flex align-items-center gap-3">
                                     <NuxtLink :to="`/cars/show/${item.car_id}`">
                                         <img
-                                            :src="item.photo_url || '/images/default_car.jpg'"
+                                            :src="getItemPhoto(item)"
                                             alt=""
                                             class="rounded border"
                                             style="width:110px;height:80px;object-fit:contain;"
@@ -114,13 +118,9 @@ const goBack = () => {
                                             class="text-decoration-none text-dark"
                                         >
                                             <h5 class="mb-1">
-                                                {{ item.name || ('Машина #' + item.car_id) }}
+                                                {{ getItemName(item) }}
                                             </h5>
                                         </NuxtLink>
-
-                                        <div class="text-muted small">
-                                            {{ formatPrice(item.price) }} / шт
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -166,16 +166,15 @@ const goBack = () => {
                         <hr>
 
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Позиций</span>
+                            <span class="text-muted">Позиций:</span>
                             <span class="fw-semibold">{{ order.items?.length || 0 }}</span>
                         </div>
-
                     </div>
                 </div>
 
                 <div class="card border-0 shadow-sm mb-3">
                     <div class="card-body">
-                        <div class="text-muted small mb-1">Дата оформления</div>
+                        <div class="text-muted small mb-1">Дата оформления:</div>
                         <div class="fw-semibold">
                             {{ formatDate(order.created_at) }}
                         </div>
@@ -184,7 +183,7 @@ const goBack = () => {
 
                 <div class="card border-0 shadow-sm mb-3">
                     <div class="card-body">
-                        <div class="text-muted small mb-1">Статус</div>
+                        <div class="text-muted small mb-1">Статус:</div>
                         <span class="badge" :class="getBadge(order.status).class">
                             {{ getLabel(order.status) }}
                         </span>
@@ -196,7 +195,6 @@ const goBack = () => {
                         <NuxtLink to="/orders" class="btn btn-outline-primary w-100 mb-2">
                             Все заказы
                         </NuxtLink>
-
                     </div>
                 </div>
 

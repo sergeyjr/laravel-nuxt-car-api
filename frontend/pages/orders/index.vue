@@ -82,7 +82,7 @@ const goBack = () => {
                 <thead class="table-light">
                 <tr>
                     <th>#</th>
-                    <th>Дата</th>
+                    <th>Дата и время</th>
                     <th>Статус</th>
                     <th>Товаров</th>
                     <th class="text-end">Сумма</th>
@@ -108,7 +108,7 @@ const goBack = () => {
                         {{ order.items?.length || 0 }}
                     </td>
 
-                    <td class="text-end fw-bold text-success">
+                    <td class="text-end fw-bold">
                         {{ formatPrice(order.total) }}
                     </td>
 

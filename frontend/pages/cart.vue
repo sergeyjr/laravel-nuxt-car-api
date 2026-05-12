@@ -243,26 +243,21 @@ const goBack = () => {
 
                 <!-- TOTAL -->
                 <div class="card border-0 shadow-sm mb-3">
-
                     <div class="card-body">
-
                         <div class="d-flex justify-content-between align-items-center mb-2">
-
-                            <span class="text-muted">
-                                Итого:
-                                            <div class="text-muted">
-                    {{ Object.keys(items).length }} товаров
-                </div>
-                            </span>
-
+                            <span class="text-muted">Итого:</span>
                             <span class="fs-4 fw-bold text-success">
                                 {{ formatPrice(total) }}
                             </span>
-
                         </div>
 
-                    </div>
+                        <hr>
 
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Позиций:</span>
+                            <span class="fw-semibold">{{ Object.keys(items).length }}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- COMMENT -->
@@ -271,7 +266,7 @@ const goBack = () => {
                     <div class="card-body">
 
                         <label class="form-label fw-semibold">
-                            Комментарий к заказу
+                            Комментарий к заказу:
                         </label>
 
                         <BaseTextarea

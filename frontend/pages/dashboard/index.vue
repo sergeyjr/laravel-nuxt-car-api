@@ -48,13 +48,13 @@ const formatDate = (date: any) => {
 <template>
     <div class="container mt-4">
 
+        <h1 class="mb-4">Панель управления</h1>
+
         <div v-if="dashboard.loading" class="alert alert-light">
             Идёт загрузка страницы...
         </div>
 
         <template v-else>
-
-            <h1 class="mb-4">Панель управления</h1>
 
             <div class="row">
 

@@ -21,7 +21,6 @@ class OrderController extends Controller
 
         return DB::transaction(function () use ($request, $user) {
 
-            // 1. получаем корзину
             $cart = Cart::where('user_id', $user->id)
                 ->with('items')
                 ->first();
@@ -32,7 +31,6 @@ class OrderController extends Controller
                 ], 422);
             }
 
-            // 2. создаём заказ
             $order = Order::create([
                 'user_id' => $user->id,
                 'total' => $cart->items->sum(fn($item) => $item->price * $item->qty),
@@ -40,7 +38,6 @@ class OrderController extends Controller
                 'comment' => $request->input('comment'),
             ]);
 
-            // 3. переносим товары в order_items
             foreach ($cart->items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -50,12 +47,11 @@ class OrderController extends Controller
                 ]);
             }
 
-            // 4. очищаем корзину
             $cart->items()->delete();
 
             return response()->json([
                 'message' => 'Заказ успешно создан',
-                'order' => $order->load('items')
+                'order' => $order->load(['items.car'])
             ]);
         });
     }
@@ -63,7 +59,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $orders = Order::where('user_id', $request->user()->id)
-            ->with('items')
+            ->with(['items.car'])
             ->latest()
             ->get();
 
@@ -74,7 +70,7 @@ class OrderController extends Controller
     {
         $order = Order::where('id', $id)
             ->where('user_id', $request->user()->id)
-            ->with('items')
+            ->with(['items.car'])
             ->firstOrFail();
 
         return response()->json($order);

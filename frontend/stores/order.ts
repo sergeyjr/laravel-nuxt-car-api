@@ -54,8 +54,12 @@ export const useOrderStore = defineStore('order', {
             }
         },
 
-        async fetchOrders() {
+        async fetchOrders(force = false) {
             const orderApi = useOrderApi()
+
+            if (this.initialized && !force) {
+                return this.orders
+            }
 
             this.loading = true
             this.error = null
@@ -63,6 +67,8 @@ export const useOrderStore = defineStore('order', {
             try {
                 const data = await orderApi.getOrders()
                 this.orders = Array.isArray(data) ? data : (data ?? [])
+                this.initialized = true
+
                 return this.orders
             } catch (e) {
                 this.error = e
@@ -70,7 +76,6 @@ export const useOrderStore = defineStore('order', {
                 return []
             } finally {
                 this.loading = false
-                this.initialized = true
             }
         }
 

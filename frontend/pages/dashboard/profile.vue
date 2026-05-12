@@ -39,11 +39,7 @@ const formatDate = (date) => {
 }
 
 const goBack = () => {
-    if (import.meta.client && window.history.length > 1) {
-        window.history.back()
-    } else {
-        navigateTo('/dashboard')
-    }
+    navigateTo('/dashboard')
 }
 
 /// PROFILE FORM (JSON)
@@ -147,7 +143,7 @@ const submitPassword = async () => {
                 <h2 class="mb-0">Мой профиль</h2>
 
                 <button class="btn btn-outline-secondary" @click="goBack">
-                    ← Назад
+                    ← В панель управления
                 </button>
             </div>
 
