@@ -20,7 +20,8 @@ export default defineNuxtConfig({
     // Глобальные стили проекта
     css: [
         'bootstrap/dist/css/bootstrap.min.css',
-        '@/assets/css/app.css'
+        'github-markdown-css/github-markdown.css',
+        '@/assets/css/app.css',
     ],
 
     // Pinia (state management)
@@ -80,7 +81,7 @@ export default defineNuxtConfig({
                 usePolling: true,
             }
         }
-        
+
     }
 
 })

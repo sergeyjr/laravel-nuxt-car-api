@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed} from 'vue'
+import {computed, useId} from 'vue'
 
 interface Props {
     modelValue: string | number
@@ -34,9 +34,11 @@ const value = computed({
     set: (val) => emit('update:modelValue', val)
 })
 
-const inputId = computed(() =>
-    props.id || `input-${Math.random().toString(36).slice(2, 10)}`
-)
+const generatedId = useId()
+
+const inputId = computed(() => {
+    return props.id || generatedId
+})
 </script>
 
 <template>
@@ -48,7 +50,12 @@ const inputId = computed(() =>
             :for="inputId"
         >
             {{ label }}
-            <span v-if="required" class="text-danger ms-1">*</span>
+            <span
+                v-if="required"
+                class="text-danger ms-1"
+            >
+                *
+            </span>
         </label>
 
         <input
@@ -63,7 +70,17 @@ const inputId = computed(() =>
             :class="{ 'is-invalid': error }"
         />
 
-        <div v-if="error" class="invalid-feedback">
+        <div
+            v-if="hint && !error"
+            class="form-text"
+        >
+            {{ hint }}
+        </div>
+
+        <div
+            v-if="error"
+            class="invalid-feedback"
+        >
             {{ error }}
         </div>
 

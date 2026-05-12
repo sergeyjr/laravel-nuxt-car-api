@@ -77,8 +77,7 @@ const isActive = (path: string) =>
                         :class="{ active: isActive('/cart') }"
                     >
                         Корзина
-
-                        <span class="badge">
+                        <span class="badge rounded-pill bg-danger">
                             {{ cartCount }}
                         </span>
                     </NuxtLink>
@@ -182,15 +181,6 @@ const isActive = (path: string) =>
     display: flex;
     align-items: center;
     gap: 6px;
-}
-
-.badge {
-    background: #ef4444;
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 999px;
-    line-height: 1;
 }
 
 .logout {
