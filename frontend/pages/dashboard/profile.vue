@@ -252,11 +252,16 @@ const submitPassword = async () => {
 
                             <div class="form-check mb-3">
                                 <input
+                                    id="remove-avatar"
                                     type="checkbox"
                                     class="form-check-input"
                                     v-model="remove_avatar"
                                 >
-                                <label class="form-check-label">
+
+                                <label
+                                    for="remove-avatar"
+                                    class="form-check-label"
+                                >
                                     Удалить аватар
                                 </label>
                             </div>
