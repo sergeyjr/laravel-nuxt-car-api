@@ -57,14 +57,6 @@ const confirmDelete = async () => {
                 <div class="modal-footer">
 
                     <BaseButton
-                        variant="secondary"
-                        :disabled="isProcessing"
-                        @click="close"
-                    >
-                        Отмена
-                    </BaseButton>
-
-                    <BaseButton
                         variant="danger"
                         :disabled="isProcessing"
                         @click="confirmDelete"
@@ -75,6 +67,14 @@ const confirmDelete = async () => {
                         <span v-else>
                             Удалить
                         </span>
+                    </BaseButton>
+
+                    <BaseButton
+                        variant="secondary"
+                        :disabled="isProcessing"
+                        @click="close"
+                    >
+                        Отмена
                     </BaseButton>
 
                 </div>

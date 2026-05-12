@@ -71,7 +71,7 @@ export default defineNuxtConfig({
         server: {
             hmr: {
                 // домен, через который идёт websocket hot reload
-                host: 'laravel',
+                host: 'laravel.local',
                 protocol: 'ws',
                 clientPort: 80
             },

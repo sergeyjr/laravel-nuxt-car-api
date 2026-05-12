@@ -4,11 +4,9 @@ export const useContactApi = () => {
 
     return {
 
-        async submit(payload: any) {
-            console.log('[ContactAPI] submit → request', payload)
-            const res = await api.post('/api/contact', payload)
-            console.log('[ContactAPI] submit → response', res)
-            return res
+        submit(payload: any) {
+            console.log('[ContactAPI] submit → request')
+            return api.post('/api/contact', payload)
         }
 
     }

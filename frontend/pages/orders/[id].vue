@@ -121,6 +121,10 @@ const goBack = () => {
                                                 {{ getItemName(item) }}
                                             </h5>
                                         </NuxtLink>
+
+                                        <div class="text-muted small">
+                                            {{ formatPrice(item.price) }} / шт
+                                        </div>
                                     </div>
                                 </div>
                             </div>

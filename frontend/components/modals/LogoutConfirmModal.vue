@@ -46,19 +46,19 @@ const confirmLogout = async () => {
                 <div class="modal-footer">
 
                     <BaseButton
-                        variant="secondary"
-                        :disabled="isProcessing"
-                        @click="close"
-                    >
-                        Отмена
-                    </BaseButton>
-
-                    <BaseButton
                         variant="danger"
                         :disabled="isProcessing"
                         @click="confirmLogout"
                     >
                         Выйти
+                    </BaseButton>
+
+                    <BaseButton
+                        variant="secondary"
+                        :disabled="isProcessing"
+                        @click="close"
+                    >
+                        Отмена
                     </BaseButton>
 
                 </div>

@@ -6,27 +6,21 @@ export const useCarApi = () => {
 
     return {
 
-        async fetchCar(id: number) {
-            console.log('[CarAPI] fetchCar → request', id)
-            const res = await api.get<Car>(`/api/cars/${id}`)
-            console.log('[CarAPI] fetchCar → response', res)
-            return res
+        fetchCar(id: number) {
+            console.log('[CarAPI] fetchCar → request')
+            return api.get<Car>(`/api/cars/${id}`)
         },
 
-        async fetchCars(page = 1) {
-            console.log('[CarAPI] fetchCars → request', page)
-            const res = await api.get<CarsResponse>('/api/cars', {
+        fetchCars(page = 1) {
+            console.log('[CarAPI] fetchCars → request')
+            return api.get<CarsResponse>('/api/cars', {
                 query: {page}
             })
-            console.log('[CarAPI] fetchCars → response', res)
-            return res
         },
 
-        async fetchLatest() {
+        fetchLatest() {
             console.log('[CarAPI] fetchLatest → request')
-            const res = await api.get<CarsResponse>('/api/cars/latest')
-            console.log('[CarAPI] fetchLatest → response', res)
-            return res
+            return api.get<CarsResponse>('/api/cars/latest')
         }
 
     }

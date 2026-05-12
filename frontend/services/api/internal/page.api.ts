@@ -7,10 +7,8 @@ export const usePageApi = () => {
     return {
 
         fetchPage(code: string) {
-            console.log('[PageAPI] fetchPage → request', code)
-            const res = api.get<PageResponse>(`/api/page/${code}`)
-            console.log('[PageAPI] fetchPage → response', res)
-            return res
+            console.log('[PageAPI] fetchPage → request')
+            return api.get<PageResponse>(`/api/page/${code}`)
         }
 
     }

@@ -26,7 +26,18 @@ export const useCartStore = defineStore('cart', {
         items: {} as Record<string, any>,
         initialized: false,
         hydrated: false,
+
+        // общий
         loading: false,
+
+        // отдельные состояния
+        loadingFetch: false,
+        loadingAdd: false,
+        loadingUpdate: false,
+        loadingRemove: false,
+        loadingClear: false,
+        loadingCheckout: false,
+
         updateQueue: {} as Record<string, number>,
         syncVersion: {} as Record<string, number>,
         updating: {} as Record<string, boolean>,
@@ -65,7 +76,6 @@ export const useCartStore = defineStore('cart', {
             const hasServerItems = Object.keys(this.items).length > 0
             const hasLocalItems = Object.keys(localItems).length > 0
 
-            // SSR-данные важнее при первом рендере
             if (!hasServerItems && hasLocalItems) {
                 this.items = localItems
             }
@@ -74,7 +84,6 @@ export const useCartStore = defineStore('cart', {
         },
 
         save() {
-
             if (!import.meta.client) return
 
             localStorage.setItem(
@@ -92,6 +101,7 @@ export const useCartStore = defineStore('cart', {
             }
 
             this.loading = true
+            this.loadingFetch = true
 
             try {
                 const data = await cartApi.getCart()
@@ -101,6 +111,7 @@ export const useCartStore = defineStore('cart', {
                 console.error('Ошибка загрузки корзины:', e)
             } finally {
                 this.loading = false
+                this.loadingFetch = false
                 this.initialized = true
             }
 
@@ -113,6 +124,9 @@ export const useCartStore = defineStore('cart', {
             const id = String(newItem.id)
 
             if (!id) return
+
+            this.loading = true
+            this.loadingAdd = true
 
             const backup = JSON.parse(
                 JSON.stringify(toRaw(this.items))
@@ -152,6 +166,9 @@ export const useCartStore = defineStore('cart', {
                 this.items = backup
 
                 this.save()
+            } finally {
+                this.loading = false
+                this.loadingAdd = false
             }
 
         },
@@ -178,12 +195,12 @@ export const useCartStore = defineStore('cart', {
             id = String(id)
             qty = Math.max(1, Number(qty))
 
-            // 1. сразу обновляем UI
+            this.loadingUpdate = true
+
             this.updateLocal(id, qty)
 
             try {
 
-                // 2. сразу отправляем на сервер
                 await cartApi.updateItem({
                     id: Number(id),
                     qty
@@ -193,8 +210,8 @@ export const useCartStore = defineStore('cart', {
 
                 console.error(e)
 
-                // (опционально) можно откатить — если нужно строго
-                // await this.fetch(true)
+            } finally {
+                this.loadingUpdate = false
             }
         },
 
@@ -203,6 +220,8 @@ export const useCartStore = defineStore('cart', {
             const cartApi = useCartApi()
 
             id = String(id)
+
+            this.loadingRemove = true
 
             const backup = JSON.parse(
                 JSON.stringify(toRaw(this.items))
@@ -223,6 +242,8 @@ export const useCartStore = defineStore('cart', {
                 this.items = backup
 
                 this.save()
+            } finally {
+                this.loadingRemove = false
             }
 
         },
@@ -230,6 +251,8 @@ export const useCartStore = defineStore('cart', {
         async clear() {
 
             const cartApi = useCartApi()
+
+            this.loadingClear = true
 
             const backup = JSON.parse(
                 JSON.stringify(toRaw(this.items))
@@ -245,6 +268,8 @@ export const useCartStore = defineStore('cart', {
                 console.error(e)
                 this.items = backup
                 this.save()
+            } finally {
+                this.loadingClear = false
             }
 
         },
@@ -252,6 +277,8 @@ export const useCartStore = defineStore('cart', {
         async checkout(payload: any = {}) {
 
             const cartApi = useCartApi()
+
+            this.loadingCheckout = true
 
             const backup = JSON.parse(
                 JSON.stringify(toRaw(this.items))
@@ -269,6 +296,8 @@ export const useCartStore = defineStore('cart', {
                 this.items = backup
                 this.save()
                 throw e
+            } finally {
+                this.loadingCheckout = false
             }
 
         }
