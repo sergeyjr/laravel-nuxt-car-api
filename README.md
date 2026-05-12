@@ -6,33 +6,104 @@
 
 ---
 
-# Основные возможности
+# Главная страница
+
+![Главная](screenshots/laravel-index.png)
+
+---
+
+# Каталог автомобилей
+
+Полноценный каталог автомобилей с карточками, изображениями, характеристиками и переходом к детальной странице автомобиля.
 
 ![Каталог](screenshots/laravel-catalog.png)
 
+---
+
+# Dashboard
+
+Защищенная dashboard-зона с навигацией по пользовательским разделам.
+
+![Dashboard](screenshots/laravel-dashboard.png)
+
+---
+
+# Профиль пользователя
+
+Личный кабинет пользователя:
+
+* редактирование профиля;
+* загрузка аватара;
+* смена пароля;
+* управление аккаунтом.
+
+![Профиль](screenshots/laravel-profile.png)
+
+---
+
+# Заказы
+
+История оформленных заказов пользователя.
+
+![Заказы](screenshots/laravel-orders.png)
+
+---
+
+# Детальная информация о заказе
+
+Страница просмотра конкретного заказа с товарами и общей информацией.
+
+![Информация о заказе](screenshots/laravel-order-info.png)
+
+---
+
+# Контакты
+
+Контактная форма для обратной связи.
+
+![Контакты](screenshots/laravel-contacts.png)
+
+---
+
+# Корзина
+
+Поддерживается:
+
+* добавление товаров;
+* изменение количества;
+* удаление товаров;
+* оформление заказа;
+* модальные окна подтверждения действий.
+
+![Корзина](screenshots/laravel-cart.png)
+
+---
+
+# Основные возможности
+
 ## Пользовательская часть
 
-- каталог автомобилей;
-- просмотр детальной информации об автомобилях;
-- поддержка характеристик и опций;
-- корзина и оформление заказов;
-- история заказов;
-- регистрация и авторизация;
-- личный кабинет пользователя;
-- загрузка аватара;
-- контактная форма;
-- динамические контентные страницы.
+* каталог автомобилей;
+* просмотр детальной информации об автомобилях;
+* поддержка характеристик и опций;
+* корзина и оформление заказов;
+* история заказов;
+* регистрация и авторизация;
+* личный кабинет пользователя;
+* загрузка аватара;
+* контактная форма;
+* динамические контентные страницы.
 
 ---
 
 ## Административная часть
 
-- управление автомобилями;
-- создание и редактирование каталога;
-- управление заказами;
-- управление профилем;
-- разграничение ролей пользователей;
-- защищенные разделы dashboard.
+* управление автомобилями;
+* создание и редактирование каталога;
+* управление заказами;
+* управление профилем;
+* разграничение ролей пользователей;
+* защищенные разделы dashboard.
 
 ---
 
@@ -40,34 +111,34 @@
 
 ## Backend
 
-Backend построен на :contentReference[oaicite:0]{index=0}.
+Backend построен на Laravel.
 
 Используемые подходы:
 
-- REST API;
-- API versioning (`API/V1`);
-- DTO pattern;
-- Repository pattern;
-- Service layer;
-- middleware architecture;
-- role-based access control;
-- Laravel Sanctum authentication.
+* REST API;
+* API versioning (`API/V1`);
+* DTO pattern;
+* Repository pattern;
+* Service layer;
+* middleware architecture;
+* role-based access control;
+* Laravel Sanctum authentication.
 
 ---
 
 ## Frontend
 
-Frontend реализован на :contentReference[oaicite:1]{index=1} + :contentReference[oaicite:2]{index=2} с использованием TypeScript.
+Frontend реализован на Nuxt + Vue с использованием TypeScript.
 
 Основные особенности:
 
-- SPA architecture;
-- Composition API;
-- state management;
-- middleware protection;
-- reusable UI components;
-- API service layer;
-- SSR-ready структура.
+* SPA architecture;
+* Composition API;
+* state management;
+* middleware protection;
+* reusable UI components;
+* API service layer;
+* SSR-ready структура.
 
 ---
 
@@ -80,22 +151,22 @@ frontend/  -> Nuxt frontend
 
 Проект использует API-first подход, что позволяет:
 
-- подключать мобильные приложения;
-- масштабировать frontend независимо от backend;
-- интегрировать внешние сервисы;
-- развивать публичное API.
+* подключать мобильные приложения;
+* масштабировать frontend независимо от backend;
+* интегрировать внешние сервисы;
+* развивать публичное API.
 
 ---
 
 # Основные сущности системы
 
-- Users
-- Cars
-- Car Options
-- Cart
-- Orders
-- Pages
-- Contacts
+* Users
+* Cars
+* Car Options
+* Cart
+* Orders
+* Pages
+* Contacts
 
 ---
 
@@ -103,21 +174,21 @@ frontend/  -> Nuxt frontend
 
 Реализовано:
 
-- token authentication;
-- middleware authorization;
-- role-based access;
-- protected routes;
-- API validation.
+* token authentication;
+* middleware authorization;
+* role-based access;
+* protected routes;
+* API validation.
 
 ---
 
 # Дополнительно
 
-- мультиязычность (`ru`, `en`);
-- feature tests;
-- seeders и factories;
-- готовность к production deployment;
-- масштабируемая структура проекта.
+* мультиязычность (`ru`, `en`);
+* feature tests;
+* seeders и factories;
+* готовность к production deployment;
+* масштабируемая структура проекта.
 
 ---
 
@@ -125,16 +196,18 @@ frontend/  -> Nuxt frontend
 
 ## Backend
 
-- PHP
-- Laravel
-- Sanctum
-- SQLite/MySQL
+* PHP
+* Laravel
+* Sanctum
+* SQLite / MySQL
 
 ## Frontend
 
-- Nuxt 3
-- Vue 3
-- TypeScript
+* Nuxt 4
+* Vue 3
+* Pinia
+* TypeScript
+* Bootstrap 5
 
 ---
 
@@ -142,9 +215,8 @@ frontend/  -> Nuxt frontend
 
 Проект может использоваться как:
 
-- онлайн-автосалон;
-- e-commerce платформа;
-- automotive marketplace;
-- MVP для startup;
-- корпоративная система управления автомобилями.
-
+* онлайн-автосалон;
+* e-commerce платформа;
+* automotive marketplace;
+* MVP для startup;
+* корпоративная система управления автомобилями.
