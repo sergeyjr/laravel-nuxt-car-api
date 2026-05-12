@@ -74,7 +74,7 @@ const isInCart = (carId: number) => {
 <template>
     <div class="container mt-4">
 
-        <h1 class="mb-3">Каталог</h1>
+        <h1 class="mb-4">Каталог</h1>
 
         <!-- pagination top -->
         <div

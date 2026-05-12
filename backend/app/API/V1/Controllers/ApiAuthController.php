@@ -51,7 +51,9 @@ class ApiAuthController extends Controller
             $request->user()->currentAccessToken()->delete();
         }
 
-        return $this->success(['message' => 'Logged out successfully']);
+        return $this->success(
+            ['message' => 'Logged out successfully']
+        );
     }
 
     public function tokens(Request $request)

@@ -21,7 +21,7 @@ export const useAuthApi = () => {
         },
 
         async login(email: string, password: string) {
-            console.log('[AuthAPI] login → request', {email})
+            console.log('[AuthAPI] login → request', email)
             const res = await api.post<AuthResponse>('/api/login', {
                 email,
                 password

@@ -35,24 +35,16 @@ export const useAuthStore = defineStore('auth', {
             const api = useAuthApi()
 
             try {
-
                 const user = await api.me()
-
                 if (!user) {
                     this.user = null
                     return false
                 }
-
                 this.user = user
-
                 return true
-
             } catch {
-
                 this.user = null
-
                 return false
-
             }
 
         },
@@ -70,14 +62,10 @@ export const useAuthStore = defineStore('auth', {
             this.initializing = true
 
             try {
-
                 return await this.fetchUser()
-
             } finally {
-
                 this.initialized = true
                 this.initializing = false
-
             }
 
         },
@@ -91,40 +79,24 @@ export const useAuthStore = defineStore('auth', {
             const alert = useAlertStore()
 
             try {
-
                 await api.csrf()
-
                 const data: any = await api.login(email, password)
-
                 if (data?.user) {
                     this.user = data.user
                 } else {
                     await this.fetchUser()
                 }
-
                 this.initialized = true
-
-                if (data?.message) {
-                    alert.add('success', data.message)
-                }
-
                 return true
-
             } catch (e: any) {
-
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
                     return false
                 }
-
                 const message = e?.data?.message || 'Ошибка входа'
-
                 alert.add('error', message)
-
             } finally {
-
                 this.loading = false
-
             }
 
         },
@@ -143,35 +115,22 @@ export const useAuthStore = defineStore('auth', {
             const alert = useAlertStore()
 
             try {
-
                 await api.csrf()
-
                 const data: any = await api.register(payload)
-
-                alert.add('success', data?.message || 'Регистрация успешно завершена')
-
+                alert.add('success', data?.message || 'Регистрация успешно завершена.')
                 this.user = null
                 this.initialized = true
-
                 return true
-
             } catch (e: any) {
-
                 if (e?.status === 422) {
                     this.errors = e.data?.errors || {}
                     return false
                 }
-
-                const message = e?.data?.message || 'Регистрация не удалась'
-
+                const message = e?.data?.message || 'Регистрация не удалась.'
                 alert.add('error', message)
-
                 return false
-
             } finally {
-
                 this.loading = false
-
             }
 
         },
@@ -184,34 +143,23 @@ export const useAuthStore = defineStore('auth', {
             const alert = useAlertStore()
 
             try {
-
-                await api.logout()
-
-            } catch (e: any) {
-
-                if (e?.status === 422) {
-                    this.errors = e.data?.errors || {}
-                    return false
-                }
-
-                const message = e?.data?.message || 'Ошибка выхода'
-
-                alert.add('error', message)
-
-            } finally {
-
+                const data: any = await api.logout()
+                alert.add('success', data?.message || 'Вы вышли из аккаунта.')
                 this.logoutLocal()
+                return true
+            } catch (e: any) {
+                const message = e?.data?.message || 'Ошибка выхода.'
+                alert.add('error', message)
+                return false
+            } finally {
                 this.loggingOut = false
-
             }
 
         },
 
         logoutLocal() {
-
             this.user = null
             this.initialized = true
-
         }
 
     }

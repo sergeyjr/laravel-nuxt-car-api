@@ -26,7 +26,7 @@ export const useCartApi = () => {
         },
 
         async removeItem(id: number) {
-            console.log('[CartAPI] removeItem → request', {id})
+            console.log('[CartAPI] removeItem → request', id)
             const res = await api.post('/api/cart/remove', {id})
             console.log('[CartAPI] removeItem → response', res)
             return res

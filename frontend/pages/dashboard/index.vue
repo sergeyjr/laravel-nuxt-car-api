@@ -30,10 +30,10 @@ const cartCount = computed(() =>
 
 const cartTotal = computed(() => dashboard.cartTotal || 0)
 
-const formatPrice = (v) =>
+const formatPrice = (v: any) =>
     new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
 
-const formatDate = (date) => {
+const formatDate = (date: any) => {
     if (!date) return ''
 
     return new Intl.DateTimeFormat('ru-RU', {
@@ -48,13 +48,13 @@ const formatDate = (date) => {
 <template>
     <div class="container mt-4">
 
-        <h1 class="mb-3">Панель управления</h1>
-
         <div v-if="dashboard.loading" class="alert alert-light">
             Идёт загрузка страницы...
         </div>
 
         <template v-else>
+
+            <h1 class="mb-4">Панель управления</h1>
 
             <div class="row">
 
@@ -63,11 +63,11 @@ const formatDate = (date) => {
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <NuxtLink to="/dashboard/profile" class="text-decoration-none text-dark">
-                                <h5>Мой профиль</h5>
+                                <h5 class="mb-3">Мой профиль</h5>
                             </NuxtLink>
 
                             <p>Добро пожаловать, <span class="fw-bold">{{ user?.name || 'пользователь' }}</span></p>
-                            <p>Email: <span class="fw-bold">{{ user.email }}</span></p>
+                            <p>Email: <span class="fw-bold">{{ user?.email }}</span></p>
 
                             <NuxtLink
                                 to="/dashboard/profile"
@@ -85,7 +85,7 @@ const formatDate = (date) => {
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <NuxtLink to="/cars" class="text-decoration-none text-dark">
-                                <h5>Каталог</h5>
+                                <h5 class="mb-3">Каталог</h5>
                             </NuxtLink>
 
                             <p class="mb-0">
@@ -123,7 +123,7 @@ const formatDate = (date) => {
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <NuxtLink to="/cart" class="text-decoration-none text-dark">
-                                <h5>Корзина</h5>
+                                <h5 class="mb-3">Корзина</h5>
                             </NuxtLink>
 
                             <div v-if="cartTotal === 0">
@@ -166,7 +166,7 @@ const formatDate = (date) => {
                     <div class="col-12 d-flex justify-content-between align-items-center">
 
                         <NuxtLink to="/orders" class="text-decoration-none text-dark">
-                            <h4 class="mb-0">Заказы</h4>
+                            <h4 class="mb-3">Заказы</h4>
                         </NuxtLink>
 
                         <NuxtLink

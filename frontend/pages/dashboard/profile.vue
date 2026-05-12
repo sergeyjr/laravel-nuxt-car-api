@@ -1,12 +1,12 @@
 <script setup>
 
-import {computed} from 'vue'
-
+import {ref, computed, watch} from 'vue'
 import {useAuthStore} from '~/stores/auth'
 import {useProfileStore} from '~/stores/profile'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
+import DeleteAccountModal from '~/components/modals/DeleteAccountModal.vue'
 
 const auth = useAuthStore()
 const profile = useProfileStore()
@@ -21,10 +21,12 @@ const user = computed(() => auth.user)
 
 const avatarUrl = computed(() => {
     if (user.value?.avatar) {
-        return `/storage/${user.value.avatar}?t=${Date.now()}`
+        return `/storage/${user.value.avatar}`
     }
     return '/images/default-avatar.png'
 })
+
+const showDeleteModal = ref(false)
 
 const formatDate = (date) => {
     if (!date) return ''
@@ -41,6 +43,97 @@ const goBack = () => {
         window.history.back()
     } else {
         navigateTo('/dashboard')
+    }
+}
+
+/// PROFILE FORM (JSON)
+const name = ref('')
+const email = ref('')
+const remove_avatar = ref(false)
+
+watch(
+    () => auth.user,
+    (user) => {
+        if (!user) return
+
+        profile.load(user)
+
+        name.value = user.name ?? ''
+        email.value = user.email ?? ''
+        remove_avatar.value = false
+    },
+    {immediate: true}
+)
+
+const validateUpdateProfile = () => {
+    profile.resetErrors()
+
+    let hasError = false
+
+    if (!name.value) {
+        profile.errors.name = 'Введите имя'
+        hasError = true
+    }
+
+    return !hasError
+}
+
+const submitUpdateProfile = async () => {
+    if (!validateUpdateProfile()) return
+
+    await profile.updateProfile({
+        name: name.value,
+        // email: email.value,
+        remove_avatar: remove_avatar.value
+    })
+}
+
+/// PASSWORD
+const current_password = ref('')
+const password = ref('')
+const password_confirmation = ref('')
+
+const validatePassword = () => {
+    profile.resetErrors()
+
+    let hasError = false
+
+    if (!current_password.value) {
+        profile.errors.current_password = 'Введите текущий пароль'
+        hasError = true
+    }
+
+    if (!password.value) {
+        profile.errors.password = 'Введите новый пароль'
+        hasError = true
+    }
+
+    if (password.value && password.value.length < 6) {
+        profile.errors.password = 'Минимум 6 символов'
+        hasError = true
+    }
+
+    if (password.value !== password_confirmation.value) {
+        profile.errors.password_confirmation = 'Пароли не совпадают'
+        hasError = true
+    }
+
+    return !hasError
+}
+
+const submitPassword = async () => {
+    if (!validatePassword()) return
+
+    const ok = await profile.changePassword({
+        current_password: current_password.value,
+        password: password.value,
+        password_confirmation: password_confirmation.value
+    })
+
+    if (ok) {
+        current_password.value = ''
+        password.value = ''
+        password_confirmation.value = ''
     }
 }
 
@@ -100,8 +193,8 @@ const goBack = () => {
                 <BaseButton
                     variant="danger"
                     class="w-100"
-                    :loading="profile.loading"
-                    @click="profile.deleteAccount(auth)"
+                    :disabled="profile.loadingAll"
+                    @click="showDeleteModal = true"
                 >
                     Удалить аккаунт
                 </BaseButton>
@@ -124,10 +217,10 @@ const goBack = () => {
                             {{ profile.errors.general }}
                         </div>
 
-                        <form @submit.prevent="profile.updateProfile">
+                        <form @submit.prevent="submitUpdateProfile">
 
                             <BaseInput
-                                v-model="profile.form.name"
+                                v-model="name"
                                 label="Имя"
                                 type="text"
                                 required
@@ -135,10 +228,10 @@ const goBack = () => {
                             />
 
                             <BaseInput
-                                v-model="profile.form.email"
+                                v-model="email"
                                 label="Email"
                                 type="email"
-                                :disabled="true"
+                                disabled
                                 :error="profile.errors.email?.[0]"
                             />
 
@@ -165,7 +258,7 @@ const goBack = () => {
                                 <input
                                     type="checkbox"
                                     class="form-check-input"
-                                    v-model="profile.form.remove_avatar"
+                                    v-model="remove_avatar"
                                 >
                                 <label class="form-check-label">
                                     Удалить аватар
@@ -175,7 +268,8 @@ const goBack = () => {
                             <BaseButton
                                 type="submit"
                                 class="w-100"
-                                :loading="profile.loading"
+                                :loading="profile.loadingProfile"
+                                :disabled="profile.loadingAll"
                             >
                                 <template #loading>
                                     Сохраняем...
@@ -193,40 +287,49 @@ const goBack = () => {
 
                     <div class="card-body">
 
-                        <form @submit.prevent="profile.changePassword">
+                        <form @submit.prevent="submitPassword">
 
-                            <div v-if="profile.passwordSuccess" class="alert alert-success mb-3">
-                                Пароль обновлён
+                            <div v-if="profile.errors.general" class="alert alert-danger mb-3">
+                                {{ profile.errors.general }}
                             </div>
 
                             <BaseInput
-                                v-model="profile.passwordForm.current_password"
+                                v-model="current_password"
                                 label="Текущий пароль"
                                 type="password"
+                                required
+                                :error="profile.errors.current_password?.[0]"
                             />
 
                             <BaseInput
-                                v-model="profile.passwordForm.password"
+                                v-model="password"
                                 label="Новый пароль"
                                 type="password"
+                                required
+                                :error="profile.errors.password?.[0]"
                             />
 
                             <BaseInput
-                                v-model="profile.passwordForm.password_confirmation"
+                                v-model="password_confirmation"
                                 label="Подтверждение"
                                 type="password"
+                                required
+                                :error="profile.errors.password_confirmation?.[0]"
                             />
 
                             <BaseButton
                                 type="submit"
                                 variant="warning"
                                 class="w-100"
+                                :loading="profile.loadingPassword"
+                                :disabled="profile.loadingAll"
                             >
                                 <template #loading>
                                     Обновляем...
                                 </template>
                                 Обновить пароль
                             </BaseButton>
+
                         </form>
 
                     </div>
@@ -236,6 +339,70 @@ const goBack = () => {
 
         </div>
     </div>
+
+    <!-- DELETE ACCOUNT MODAL -->
+    <div
+        class="modal fade show d-block"
+        tabindex="-1"
+        v-if="showDeleteModal"
+        style="background: rgba(0,0,0,.6)"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        Удаление аккаунта
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        @click="showDeleteModal = false"
+                    ></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-0">
+                        Вы уверены, что хотите удалить аккаунт?
+                        <br>
+                        Это действие <strong>нельзя отменить</strong>.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        class="btn btn-secondary"
+                        @click="showDeleteModal = false"
+                    >
+                        Отмена
+                    </button>
+
+                    <button
+                        class="btn btn-danger"
+                        :disabled="profile.loadingDelete"
+                        @click="confirmDeleteAccount"
+                    >
+                    <span v-if="profile.loadingDelete">
+                        Удаляем...
+                    </span>
+                        <span v-else>
+                        Да, удалить
+                    </span>
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <DeleteAccountModal
+        :show="showDeleteModal"
+        @close="showDeleteModal = false"
+    />
+
 </template>
 
 <style scoped>

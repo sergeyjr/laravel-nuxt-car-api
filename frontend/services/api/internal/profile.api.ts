@@ -4,11 +4,9 @@ export const useProfileApi = () => {
 
     return {
 
-        update(fd: FormData) {
-            console.log('[ProfileAPI] update → request', {fd})
-            const res = api.post('/api/profile/update', {
-                fd
-            })
+        updateProfile(payload: any) {
+            console.log('[ProfileAPI] update → request', payload)
+            const res = api.post('/api/profile/update', payload)
             console.log('[ProfileAPI] update → response', res)
             return res
         },

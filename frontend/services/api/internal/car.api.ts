@@ -7,14 +7,14 @@ export const useCarApi = () => {
     return {
 
         async fetchCar(id: number) {
-            console.log('[CarAPI] fetchCar → request', {id})
+            console.log('[CarAPI] fetchCar → request', id)
             const res = await api.get<Car>(`/api/cars/${id}`)
             console.log('[CarAPI] fetchCar → response', res)
             return res
         },
 
         async fetchCars(page = 1) {
-            console.log('[CarAPI] fetchCars → request', {page})
+            console.log('[CarAPI] fetchCars → request', page)
             const res = await api.get<CarsResponse>('/api/cars', {
                 query: {page}
             })

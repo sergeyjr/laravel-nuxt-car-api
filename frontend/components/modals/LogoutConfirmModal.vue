@@ -1,21 +1,24 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
-import {useAuthStore} from '~/stores/auth'
+import {useAuthActions} from '~/composables/useAuthActions'
 
 const props = defineProps<{ show: boolean }>()
 const emit = defineEmits(['close'])
 
-const authStore = useAuthStore()
-const isProcessing = computed(() => authStore.loggingOut)
+const {handleLogout} = useAuthActions()
+
+const isProcessing = computed(() => false)
 
 const close = () => {
-    if (!isProcessing.value) emit('close')
+    emit('close')
 }
 
 const confirmLogout = async () => {
-    await authStore.logout()
-    close()
+    const ok = await handleLogout()
+    if (ok) {
+        close()
+    }
 }
 
 </script>
@@ -42,21 +45,21 @@ const confirmLogout = async () => {
 
                 <div class="modal-footer">
 
-                    <button
-                        class="btn btn-secondary"
+                    <BaseButton
+                        variant="secondary"
                         :disabled="isProcessing"
                         @click="close"
                     >
                         Отмена
-                    </button>
+                    </BaseButton>
 
-                    <button
-                        class="btn btn-danger"
+                    <BaseButton
+                        variant="danger"
                         :disabled="isProcessing"
                         @click="confirmLogout"
                     >
                         Выйти
-                    </button>
+                    </BaseButton>
 
                 </div>
 

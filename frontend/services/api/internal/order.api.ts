@@ -7,7 +7,7 @@ export const useOrderApi = () => {
     return {
 
         async getOrder(id: number) {
-            console.log('[OrderAPI] getOrder → request', {id})
+            console.log('[OrderAPI] getOrder → request', id)
             const res = await api.get<OrderResponse>(`/api/orders/${id}`)
             console.log('[OrderAPI] getOrder → response', res)
             return res

@@ -23,12 +23,12 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users')->ignore($user->id),
-            ],
+//            'email' => [
+//                'required',
+//                'email',
+//                'max:255',
+//                Rule::unique('users')->ignore($user->id),
+//            ],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:65536'],
             'remove_avatar' => ['nullable', 'boolean'],
         ]);
@@ -43,7 +43,7 @@ class ProfileController extends Controller
         }
 
         $user->name = $validated['name'];
-        $user->email = $validated['email'];
+//        $user->email = $validated['email'];
 
         if (!empty($validated['remove_avatar']) && $user->avatar) {
             Storage::disk('public')->delete($user->avatar);
@@ -59,9 +59,9 @@ class ProfileController extends Controller
 
         $user->save();
 
-        return response()->json([
-            'message' => 'Профиль обновлён',
-            'user' => $user,
+        return $this->success([
+            'message' => 'Профиль успешно обновлён.',
+            'user' => $user
         ]);
 
     }
@@ -100,8 +100,8 @@ class ProfileController extends Controller
         $user->password = Hash::make($validated['password']);
         $user->save();
 
-        return response()->json([
-            'message' => 'Пароль успешно изменён',
+        return $this->success([
+            'message' => 'Пароль успешно изменён.'
         ]);
 
     }
@@ -125,8 +125,8 @@ class ProfileController extends Controller
 //        $request->session()->invalidate();
 //        $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Аккаунт успешно удалён',
+        return $this->success([
+            'message' => 'Аккаунт успешно удалён.',
 //            'redirect' => '/'
         ]);
 
