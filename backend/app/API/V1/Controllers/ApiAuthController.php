@@ -22,11 +22,17 @@ class ApiAuthController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
-            return $this->error('Неверные учетные данные.', 401);
+            return $this->error(
+                'Неверные учетные данные.',
+                401
+            );
         }
 
         if (!$user->isAdmin() && !$user->isApiUser()) {
-            return $this->error('Запрещено: нет доступа к API.', 403);
+            return $this->error(
+                'Запрещено: нет доступа к API.',
+                403
+            );
         }
 
         // удаляем старые токены (по желанию)
@@ -51,14 +57,14 @@ class ApiAuthController extends Controller
             $request->user()->currentAccessToken()->delete();
         }
 
-        return $this->success(
-            ['message' => 'Logged out successfully']
-        );
+        return $this->success([
+            'message' => 'Успешный выход.'
+        ]);
     }
 
     public function tokens(Request $request)
     {
-        return response()->json($request->user()->tokens);
+        return $this->success($request->user()->tokens);
     }
 
 }

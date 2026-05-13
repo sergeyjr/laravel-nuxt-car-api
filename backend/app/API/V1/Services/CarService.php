@@ -13,7 +13,7 @@ class CarService
 
     private CarRepositoryInterface $repository;
 
-    private const CACHE_TTL = 600;
+    private const CACHE_TTL = 60;
 
     public function __construct(CarRepositoryInterface $repository)
     {
@@ -23,7 +23,6 @@ class CarService
     public function getCar(int $id): ?array
     {
         $cacheKey = "car:$id";
-        return $this->repository->findById($id);
 
         try {
             return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($id) {

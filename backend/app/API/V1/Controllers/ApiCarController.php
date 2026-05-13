@@ -19,11 +19,11 @@ class ApiCarController extends Controller
     private CarService $service;
     private CarMapper $mapper;
 
-    public const CAR_NOT_FOUND = 'Машина не найдена';
-    public const DELETE_SUCCESS = 'Машина с ID :id удалена';
-    public const ID_IS_REQUIRED = 'Требуется ID';
-    public const VALIDATION_FAILED = 'Проверка не удалась';
-    public const ACCESS_DENIDED = 'Доступ запрещён';
+    public const CAR_NOT_FOUND = 'Машина не найдена.';
+    public const DELETE_SUCCESS = 'Машина с ID :id удалена.';
+    public const ID_IS_REQUIRED = 'Требуется ID.';
+    public const VALIDATION_FAILED = 'Проверка не удалась.';
+    public const ACCESS_DENIDED = 'Доступ запрещён.';
 
     public function __construct(CarService $service, CarMapper $mapper)
     {
@@ -64,10 +64,11 @@ class ApiCarController extends Controller
         $dto = CarCreateRequest::fromRequest($request);
 
         if (!$dto->validate()) {
-            return $this->error([
+            return $this->error(
                 self::VALIDATION_FAILED,
+                422,
                 $dto->errors
-            ], 422);
+            );
         }
 
         $car = $this->service->createCar($dto->toArray());
@@ -87,10 +88,11 @@ class ApiCarController extends Controller
         $dto = CarUpdateRequest::fromRequest($request);
 
         if (!$dto->validate()) {
-            return $this->error([
+            return $this->error(
                 self::VALIDATION_FAILED,
+                422,
                 $dto->errors
-            ], 422);
+            );
         }
 
         $car = $this->service->updateCar($id, $dto->toArray());
@@ -117,10 +119,11 @@ class ApiCarController extends Controller
         $dto = CarPatchRequest::fromRequest($request);
 
         if (!$dto->validate()) {
-            return $this->error([
+            return $this->error(
                 self::VALIDATION_FAILED,
+                422,
                 $dto->errors
-            ], 422);
+            );
         }
 
         $result = $this->service->patchCar($id, $dto->toArray());
@@ -154,8 +157,10 @@ class ApiCarController extends Controller
             return $this->error(self::ACCESS_DENIDED, 403);
         }
 
+        $message = str_replace(':id', $id, self::DELETE_SUCCESS);
+
         return $this->success([
-            'message' => str_replace(':id', $id, self::DELETE_SUCCESS)
+            'message' => $message
         ]);
     }
 

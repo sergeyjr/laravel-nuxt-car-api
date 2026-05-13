@@ -11,18 +11,28 @@ use App\Models\Car;
 class DashboardController extends Controller
 {
 
-    public function api(Request $request): JsonResponse
+    /**
+     * Данные dashboard пользователя
+     */
+    public function index(Request $request): JsonResponse
     {
-
         $user = $request->user();
 
+        // Проверка авторизации
         if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return $this->error(
+                'Требуется авторизация.',
+                401
+            );
         }
 
+        // Общее количество машин
         $carsCount = Car::count();
+
+        // Количество машин пользователя
         $myCarsCount = Car::where('user_id', $user->id)->count();
 
+        // Последние заказы пользователя
         $orders = Order::where('user_id', $user->id)
             ->latest()
             ->take(3)
@@ -34,8 +44,10 @@ class DashboardController extends Controller
                 'created_at' => $o->created_at,
             ]);
 
+        // Количество заказов пользователя
         $ordersCount = Order::where('user_id', $user->id)->count();
 
+        // Корзина пользователя
         $cart = Cart::where('user_id', $user->id)
             ->with('items.car')
             ->first();
@@ -43,6 +55,7 @@ class DashboardController extends Controller
         $cartItems = [];
         $cartTotal = 0;
 
+        // Формирование данных корзины
         if ($cart) {
             foreach ($cart->items as $item) {
                 $cartItems[$item->car_id] = [
@@ -56,7 +69,8 @@ class DashboardController extends Controller
             }
         }
 
-        return response()->json([
+        // Ответ dashboard
+        return $this->success([
             'carsCount' => $carsCount,
             'myCarsCount' => $myCarsCount,
             'ordersCount' => $ordersCount,

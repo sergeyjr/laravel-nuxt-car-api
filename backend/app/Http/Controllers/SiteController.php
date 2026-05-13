@@ -11,32 +11,39 @@ use Illuminate\Support\Str;
 class SiteController extends Controller
 {
 
+    /**
+     * Главная страница сайта
+     */
     public function home(): JsonResponse
     {
-        return response()->json([
+        return $this->success([
             'message' => 'Главная страница'
         ]);
     }
 
+    /**
+     * Получение страницы сайта
+     */
     public function page(string $code): JsonResponse
     {
         /**
-         * README.md page
+         * Страница README.md
          */
         if ($code === 'about') {
 
             $projectRoot = dirname(base_path());
             $readmePath = $projectRoot . '/README.md';
 
+            // Проверка существования README.md
             if (!file_exists($readmePath)) {
-                abort(404, 'README.md not found');
+                abort(404, 'Файл README.md не найден');
             }
 
             $markdown = file_get_contents($readmePath);
 
-            return response()->json([
+            return $this->success([
                 'code' => 'about',
-                'title' => 'About',
+                'title' => 'О проекте',
                 'content' => $this->renderContent($markdown, 'markdown'),
                 'format' => 'markdown',
                 'is_active' => true,
@@ -44,15 +51,16 @@ class SiteController extends Controller
         }
 
         /**
-         * DB page
+         * Страница из базы данных
          */
         $page = Page::where('code', $code)
             ->where('is_active', true)
             ->firstOrFail();
 
+        // Определение формата контента
         $format = $page->format ?? $this->detectFormat($page->content);
 
-        return response()->json([
+        return $this->success([
             ...$page->toArray(),
             'format' => $format,
             'content' => $this->renderContent($page->content, $format),
@@ -60,12 +68,12 @@ class SiteController extends Controller
     }
 
     /**
-     * Detect content format
+     * Определение формата контента
      */
     protected function detectFormat(string $content): string
     {
         /**
-         * Explicit markdown markers
+         * Явные markdown-маркеры
          */
         if (
             str_contains($content, '[md]') ||
@@ -76,7 +84,7 @@ class SiteController extends Controller
         }
 
         /**
-         * HTML
+         * HTML-контент
          */
         if ($content !== strip_tags($content)) {
             return 'html';
@@ -86,33 +94,22 @@ class SiteController extends Controller
     }
 
     /**
-     * Render content
+     * Рендеринг контента
      */
     protected function renderContent(string $content, string $format): string
     {
-        /**
-         * Remove markdown markers
-         */
-        $content = str_replace(
-            ['[md]', '[/md]'],
-            '',
-            $content
-        );
+        $content = str_replace(['[md]', '[/md]'], '', $content);
 
         return match ($format) {
-
-            'markdown' => '
-                <article class="markdown-body">
-                    ' . Str::markdown($content) . '
-                </article>
-            ',
-
+            'markdown' => '<article class="markdown-body">' . Str::markdown($content) . '</article>',
             'html' => $content,
-
             default => nl2br(e($content)),
         };
     }
 
+    /**
+     * Отправка формы обратной связи
+     */
     public function sendContact(Request $request): JsonResponse
     {
         $validated = $request->validate([

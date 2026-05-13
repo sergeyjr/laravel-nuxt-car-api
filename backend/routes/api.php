@@ -61,7 +61,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dashboard
     Route::prefix('dashboard')->group(function () {
-        Route::get('/', [DashboardController::class, 'api']);
+        Route::get('/', [DashboardController::class, 'index']);
     });
 
     // Profile

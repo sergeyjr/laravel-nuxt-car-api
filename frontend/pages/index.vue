@@ -95,9 +95,7 @@ const onImgError = (e) => {
 
                     <div class="card-body">
 
-                        <h4>
-                            Статус пользователя
-                        </h4>
+                        <h4 class="mb-4">Статус пользователя</h4>
 
                         <div v-if="auth.isAuth">
 
@@ -136,9 +134,7 @@ const onImgError = (e) => {
 
                     <div class="card-body">
 
-                        <h4>
-                            Быстрые действия
-                        </h4>
+                        <h4 class="mb-4">Быстрые действия</h4>
 
                         <template v-if="auth.isAuth">
 
@@ -192,18 +188,12 @@ const onImgError = (e) => {
             <!-- CARS -->
             <div class="col-12 mt-5">
 
-                <h2 class="mb-4">
-                    Новинки
-                </h2>
+                <h2 class="mb-4">Новинки</h2>
 
                 <ClientOnly>
 
                     <template v-if="carStore.latestLoading">
-
-                        <div>
-                            Загрузка...
-                        </div>
-
+                        <div>Загрузка...</div>
                     </template>
 
                     <template v-else>
@@ -235,9 +225,7 @@ const onImgError = (e) => {
 
                                     <div class="card-body">
 
-                                        <h5>
-                                            {{ car.title }}
-                                        </h5>
+                                        <h5>{{ car.title }}</h5>
 
                                         <p v-if="auth.user">
                                             {{ formatPrice(car.price) }}

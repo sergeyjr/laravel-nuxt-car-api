@@ -5,25 +5,39 @@ namespace App\Enums;
 enum OrderStatus: string
 {
 
-    // Ожидает оплаты
+    /**
+     * Ожидает оплаты
+     */
     case PendingPayment = 'pending_payment';
 
-    // В обработке
+    /**
+     * В обработке
+     */
     case Processing = 'processing';
 
-    // Собран
+    /**
+     * Заказ собран
+     */
     case Packed = 'packed';
 
-    // Отправлен
+    /**
+     * Заказ отправлен
+     */
     case Shipped = 'shipped';
 
-    // Завершён
+    /**
+     * Заказ завершён
+     */
     case Completed = 'completed';
 
-    // Отменён
+    /**
+     * Заказ отменён
+     */
     case Cancelled = 'cancelled';
 
-    // Возврат
+    /**
+     * Возврат средств
+     */
     case Refunded = 'refunded';
 
 }

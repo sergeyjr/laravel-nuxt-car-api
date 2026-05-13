@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,23 +15,28 @@ class OrderController extends Controller
 
     /**
      * Оформление заказа из корзины
+     * @throws \Throwable
      */
-    public function checkout(Request $request)
+    public function checkout(Request $request): JsonResponse
     {
         $user = $request->user();
 
         return DB::transaction(function () use ($request, $user) {
 
+            // Получение корзины пользователя
             $cart = Cart::where('user_id', $user->id)
                 ->with('items')
                 ->first();
 
+            // Проверка пустой корзины
             if (!$cart || $cart->items->isEmpty()) {
-                return response()->json([
-                    'message' => 'Корзина пуста'
-                ], 422);
+                return $this->error(
+                    'Корзина пуста.',
+                    422
+                );
             }
 
+            // Создание заказа
             $order = Order::create([
                 'user_id' => $user->id,
                 'total' => $cart->items->sum(fn($item) => $item->price * $item->qty),
@@ -38,6 +44,7 @@ class OrderController extends Controller
                 'comment' => $request->input('comment'),
             ]);
 
+            // Создание товаров заказа
             foreach ($cart->items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -47,33 +54,41 @@ class OrderController extends Controller
                 ]);
             }
 
+            // Очистка корзины
             $cart->items()->delete();
 
-            return response()->json([
-                'message' => 'Заказ успешно создан',
+            return $this->success([
+                'message' => 'Заказ успешно создан.',
                 'order' => $order->load(['items.car'])
             ]);
+
         });
     }
 
-    public function index(Request $request)
+    /**
+     * Получение списка заказов пользователя
+     */
+    public function index(Request $request): JsonResponse
     {
         $orders = Order::where('user_id', $request->user()->id)
             ->with(['items.car'])
             ->latest()
             ->get();
 
-        return response()->json($orders);
+        return $this->success($orders);
     }
 
-    public function show(Request $request, $id)
+    /**
+     * Получение одного заказа
+     */
+    public function show(Request $request, int $id): JsonResponse
     {
         $order = Order::where('id', $id)
             ->where('user_id', $request->user()->id)
             ->with(['items.car'])
             ->firstOrFail();
 
-        return response()->json($order);
+        return $this->success($order);
     }
 
 }

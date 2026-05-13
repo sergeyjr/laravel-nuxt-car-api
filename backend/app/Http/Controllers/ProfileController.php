@@ -36,10 +36,10 @@ class ProfileController extends Controller
         // EMAIL ЗАБЛОКИРОВАН (заглушка)
         // Только через админку / ручной процесс
         if ($request->has('email')) {
-            return response()->json([
-                'message' => 'Изменение email запрещено. Обратитесь в администрацию.',
-                'admin_email' => 'admin@laravel.local',
-            ], 403);
+            return $this->error(
+                'Изменение email запрещено. Обратитесь в администрацию.',
+                403
+            );
         }
 
         $user->name = $validated['name'];
@@ -80,21 +80,17 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if (!Hash::check($validated['current_password'], $user->password)) {
-            return response()->json([
-                'message' => 'Текущий пароль неверный',
-                'errors' => [
-                    'current_password' => ['Текущий пароль неверный']
-                ],
-            ], 422);
+            return $this->error(
+                'Текущий пароль неверный.',
+                422
+            );
         }
 
         if (Hash::check($validated['password'], $user->password)) {
-            return response()->json([
-                'message' => 'Новый пароль не может совпадать со старым.',
-                'errors' => [
-                    'password' => ['Новый пароль не может совпадать со старым.']
-                ],
-            ], 422);
+            return $this->error(
+                'Новый пароль не может совпадать со старым.',
+                422
+            );
         }
 
         $user->password = Hash::make($validated['password']);
@@ -114,20 +110,20 @@ class ProfileController extends Controller
 
         $user = Auth::user();
 
-//        Auth::logout();
-//
-//        if ($user->avatar) {
-//            Storage::disk('public')->delete($user->avatar);
-//        }
-//
-//        $user->delete();
-//
-//        $request->session()->invalidate();
-//        $request->session()->regenerateToken();
+        Auth::logout();
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return $this->success([
             'message' => 'Аккаунт успешно удалён.',
-//            'redirect' => '/'
+            'redirect' => '/'
         ]);
 
     }

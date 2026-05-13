@@ -12,9 +12,11 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
 
+    /**
+     * Регистрация пользователя
+     */
     public function register(Request $request): JsonResponse
     {
-
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
@@ -36,57 +38,58 @@ class AuthController extends Controller
             'message' => 'Регистрация успешно завершена! Теперь вы можете войти.',
             // 'redirect' => '/dashboard',
         ]);
-
     }
 
+    /**
+     * Авторизация пользователя
+     */
     public function login(Request $request): JsonResponse
     {
-
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
+        // Проверка email/password
         if (!Auth::attempt($credentials)) {
-            return response()->json(
-                ['message' => 'Имя пользователя и пароль не совпадают.'],
+            return $this->error(
+                'Имя пользователя и пароль не совпадают.',
                 422
             );
         }
 
         $user = Auth::user(); // или auth()->user()
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json([
-                'success' => false
-            ], 401);
-        }
-
+        // Обновление сессии
         $request->session()->regenerate();
 
         return $this->success([
+            'message' => 'Авторизация прошла успешна.',
             'user' => $user,
-            'message' => 'Авторизация прошла успешна.'
         ]);
-
     }
 
+    /**
+     * Выход пользователя из системы
+     */
     public function logout(Request $request): Response
     {
-
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return response()->noContent();
-
     }
 
+    /**
+     * Получение текущего пользователя
+     */
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-        return response()->json($user);
+
+        return $this->success($user);
     }
 
 }

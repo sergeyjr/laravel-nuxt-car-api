@@ -15,19 +15,26 @@ class AppServiceProvider extends ServiceProvider
 {
 
     /**
-     * Register any application services.
+     * Регистрация сервисов приложения
      */
     public function register(): void
     {
+        // Привязка репозитория автомобилей к интерфейсу
         $this->app->bind(CarRepositoryInterface::class, CarRepository::class);
+
+        // Привязка репозитория опций автомобилей к интерфейсу
         $this->app->bind(CarOptionRepositoryInterface::class, CarOptionRepository::class);
     }
 
     /**
-     * Bootstrap any application services.
+     * Инициализация сервисов приложения
      */
     public function boot(): void
     {
+        /**
+         * Ограничение частоты отправки формы обратной связи
+         * 1 запрос в 10 минут с одного IP
+         */
         RateLimiter::for('contact_form', function (Request $request) {
             return Limit::perMinutes(10, 1)->by($request->ip());
         });

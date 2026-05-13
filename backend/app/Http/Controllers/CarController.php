@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 class CarController extends Controller
 {
 
+    /**
+     * Внедрение сервиса машин
+     */
     public function __construct(
         private readonly CarService $service
     )
@@ -17,7 +20,7 @@ class CarController extends Controller
     }
 
     /**
-     * Возвращает список машин
+     * Получение списка машин
      */
     public function list(Request $request): JsonResponse
     {
@@ -29,27 +32,28 @@ class CarController extends Controller
 
         $cars = $this->service->getCars($pagination);
 
-        return response()->json($cars);
+        return $this->success($cars);
     }
 
     /**
      * Получение одной машины
      */
-    public function show($id): JsonResponse
+    public function show(int $id): JsonResponse
     {
         $car = $this->service->getCar((int)$id);
 
         if (!$car) {
-            return response()->json([
-                'message' => 'Машина не найдена.'
-            ], 404);
+            return $this->error(
+                'Машина не найдена.',
+                404
+            );
         }
 
         return $this->success($car);
     }
 
     /**
-     * Новинки
+     * Получение последних добавленных машин
      */
     public function latest(): JsonResponse
     {
@@ -61,7 +65,7 @@ class CarController extends Controller
 
         $cars = $this->service->getCars($pagination);
 
-        return response()->json($cars);
+        return $this->success($cars);
     }
 
 }
