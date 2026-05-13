@@ -5,7 +5,6 @@ import {computed, ref, watch} from 'vue'
 import {useCarStore} from '~/stores/car'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
-import {useUiStore} from '~/stores/ui'
 
 import AuthModal from '~/components/modals/AuthModal.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -15,7 +14,6 @@ const route = useRoute()
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
-const ui = useUiStore()
 
 const showAuth = ref(false)
 const addingToCart = ref<number | null>(null)
@@ -42,12 +40,9 @@ const isInCart = (carId: number) => {
 
 const addToCart = async (car: any) => {
     const id = Number(car?.id)
-
     if (!id) return
-
     try {
         addingToCart.value = id
-
         await cart.add({
             id,
             name: car.title ?? '',
@@ -55,7 +50,6 @@ const addToCart = async (car: any) => {
             qty: 1,
             photo_url: car.photo_url ?? null,
         })
-
     } finally {
         addingToCart.value = null
     }
@@ -74,12 +68,7 @@ watch(
     async (id) => {
         if (!id || Array.isArray(id)) return
 
-        try {
-            ui.showLoader('Загрузка автомобиля...')
-            await store.fetchCar(Number(id))
-        } finally {
-            ui.hideLoader()
-        }
+        await store.fetchCar(Number(id))
     },
     {immediate: true}
 )
@@ -88,6 +77,10 @@ watch(
 
 <template>
     <div class="container mt-4">
+
+        <div v-if="store.carLoading" class="alert alert-light mb-3">
+            Загрузка автомобиля...
+        </div>
 
         <div v-if="!store.carLoading && !car">
             Автомобиль не найден

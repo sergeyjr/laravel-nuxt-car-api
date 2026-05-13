@@ -2,45 +2,26 @@
 
 import {watch} from 'vue'
 
-import AppLoader from '~/components/AppLoader.vue'
-
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
 const auth = useAuthStore()
 const cart = useCartStore()
 
-/**
- * CLIENT HYDRATE
- * localStorage доступен только на клиенте
- */
 if (import.meta.client) {
     cart.hydrate()
 }
 
-/**
- * GLOBAL CART INIT
- * выполнится 1 раз на приложение
- */
 await callOnce(async () => {
-
     if (!auth.isAuth) {
-
         cart.initialized = true
-
         return
     }
-
     try {
-
         await cart.fetch()
-
     } catch (e) {
-
         console.error('Ошибка загрузки корзины', e)
-
     }
-
 })
 
 /**
@@ -50,32 +31,22 @@ watch(
     () => auth.isAuth,
     async (isAuth, oldValue) => {
 
-        // пропускаем первый вызов
+        // Пропускаем первый вызов
         if (isAuth === oldValue) {
             return
         }
 
-        /**
-         * LOGIN
-         */
+        // LOGIN
         if (isAuth) {
-
             try {
-
                 await cart.fetch(true)
-
             } catch (e) {
-
                 console.error(e)
-
             }
-
             return
         }
 
-        /**
-         * LOGOUT
-         */
+        // LOGOUT
         cart.items = {}
         cart.initialized = true
 
@@ -90,12 +61,6 @@ watch(
 
 <template>
     <NuxtLayout>
-
         <NuxtPage/>
-
-        <ClientOnly>
-            <AppLoader/>
-        </ClientOnly>
-
     </NuxtLayout>
 </template>

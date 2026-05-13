@@ -77,13 +77,11 @@ const onImgError = (e) => {
     <div class="container my-4">
 
         <div class="text-center mb-5">
-            <h1 class="display-5 fw-bold">
-                Главная страница
-            </h1>
 
-            <p class="text-muted">
-                Nuxt 4 + Pinia 3
-            </p>
+            <h1 class="display-5 fw-bold">Главная страница</h1>
+
+            <p class="text-muted">Nuxt 4 + Pinia 3</p>
+
         </div>
 
         <div class="row g-4">
@@ -99,25 +97,17 @@ const onImgError = (e) => {
 
                         <div v-if="auth.isAuth">
 
-                            <p class="text-muted">
-                                Добро пожаловать, {{ user?.name }}
-                            </p>
+                            <p class="text-muted">Добро пожаловать, {{ user?.name }}</p>
 
-                            <p class="text-success mb-0">
-                                Вы авторизованы
-                            </p>
+                            <p class="text-success mb-0">Вы авторизованы</p>
 
                         </div>
 
                         <div v-else>
 
-                            <p class="text-warning mb-0">
-                                Вы гость
-                            </p>
+                            <p class="text-warning mb-0">Вы гость</p>
 
-                            <small class="text-muted">
-                                Войдите или зарегистрируйтесь
-                            </small>
+                            <small class="text-muted">Войдите или зарегистрируйтесь</small>
 
                         </div>
 
@@ -193,7 +183,7 @@ const onImgError = (e) => {
                 <ClientOnly>
 
                     <template v-if="carStore.latestLoading">
-                        <div>Загрузка...</div>
+                        <div class="alert alert-light mb-3">Загрузка новинок...</div>
                     </template>
 
                     <template v-else>
@@ -280,7 +270,7 @@ const onImgError = (e) => {
 }
 
 .swiper-custom :deep(.swiper-slide):hover .card {
-    box-shadow: 0 0 8px rgba(0,0,0,.18);
+    box-shadow: 0 0 8px rgba(0, 0, 0, .18);
     z-index: 10;
 }
 

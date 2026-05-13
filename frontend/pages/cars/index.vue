@@ -5,7 +5,6 @@ import {computed, onMounted, ref} from 'vue'
 import {useCarStore} from '~/stores/car'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
-import {useUiStore} from '~/stores/ui'
 
 import BaseButton from '~/components/BaseButton.vue'
 import Pagination from '~/components/Pagination.vue'
@@ -13,7 +12,6 @@ import Pagination from '~/components/Pagination.vue'
 const store = useCarStore()
 const auth = useAuthStore()
 const cart = useCartStore()
-const ui = useUiStore()
 
 const route = useRoute()
 
@@ -25,20 +23,12 @@ onMounted(() => {
 
 const page = computed(() => Number(route.query.page || 1))
 
-await useAsyncData(
-    () => `cars-${page.value}`,
-    async () => {
-        ui.showLoader('Загрузка...')
-
-        try {
-            return await store.fetch(page.value)
-        } finally {
-            ui.hideLoader()
-        }
+watch(
+    page,
+    async (newPage) => {
+        await store.fetch(newPage)
     },
-    {
-        watch: [page]
-    }
+    { immediate: true }
 )
 
 const changePage = (page: number) => {
@@ -86,6 +76,10 @@ const isInCart = (carId: number) => {
                 :loading="store.listLoading"
                 @change="changePage"
             />
+        </div>
+
+        <div v-if="store.listLoading" class="alert alert-light mb-3">
+            Загрузка каталога...
         </div>
 
         <!-- cars -->

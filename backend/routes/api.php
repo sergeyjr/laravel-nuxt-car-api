@@ -49,7 +49,8 @@ Route::get('/cars/latest', [CarController::class, 'latest']);
 
 Route::get('/page/{code}', [SiteController::class, 'page']);
 
-Route::post('/contact', [SiteController::class, 'sendContact'])->middleware('throttle:contact_form');
+Route::post('/contact', [SiteController::class, 'sendContact'])
+    ->middleware('throttle:contact_form');
 
 /*
 |--------------------------------------------------------------------------

@@ -38,7 +38,6 @@ export const useContactStore = defineStore('contact', {
     }),
 
     actions: {
-
         resetErrors() {
             this.errors = {}
         },
@@ -67,30 +66,12 @@ export const useContactStore = defineStore('contact', {
                 } else {
                     if (this.timer) clearInterval(this.timer)
                     this.timer = null
-                }
-            }, 1000)
-        },
-
-        startSuccessCountdown() {
-            if (!this.retryAfter) return
-
-            this.successCountdown = this.retryAfter
-
-            if (this.timer) clearInterval(this.timer)
-
-            this.timer = setInterval(() => {
-                if (this.successCountdown && this.successCountdown > 0) {
-                    this.successCountdown--
-                } else {
-                    if (this.timer) clearInterval(this.timer)
-                    this.timer = null
-                    this.successCountdown = null
+                    this.retryAfter = null
                 }
             }, 1000)
         },
 
         async submit(context: ContactContext = 'home') {
-
             const contactApi = useContactApi()
             const alert = useAlertStore()
 
@@ -99,20 +80,22 @@ export const useContactStore = defineStore('contact', {
             this.resetMessages(context)
 
             try {
-
                 const data: any = await contactApi.submit(this.form)
 
                 this.resetForm()
 
                 this.contexts[context].successMessage =
-                    data?.message || 'Сообщение отправлено'
+                    data?.message || 'Сообщение отправлено.'
 
                 alert.add('success', this.contexts[context].successMessage)
 
-                this.startSuccessCountdown()
+                console.log('data', data)
+
+                // запускаем таймер после успешной отправки
+                this.retryAfter = data?.retry_after ?? 60
+                this.startCountdown()
 
             } catch (e: any) {
-
                 const status = e?.status
                 const data = e?.data
 
@@ -127,24 +110,23 @@ export const useContactStore = defineStore('contact', {
 
                     alert.add(
                         'warning',
-                        `Подождите ${this.retryAfter ?? ''} сек перед следующим сообщением`
+                        `Подождите ${this.retryAfter ?? ''} сек. перед следующим сообщением.`
                     )
 
                     return
                 }
 
                 this.contexts[context].errorMessage =
-                    data?.message || 'Ошибка отправки формы'
+                    data?.message || 'Ошибка отправки формы.'
 
                 alert.add('error', this.contexts[context].errorMessage)
 
                 console.error('Contact error:', e)
-
             } finally {
                 this.loading = false
             }
         }
-
     }
+
 
 })

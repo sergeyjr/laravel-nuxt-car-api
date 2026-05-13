@@ -38,17 +38,12 @@ export const usePageStore = defineStore('pages', {
 
             try {
                 const data = await pageApi.fetchPage(code)
-
                 this.pages[code] = data
-
                 return data
-
             } catch (e: any) {
                 this.error = e
                 console.error('[page store] fetch error:', e)
-
                 return null
-
             } finally {
                 this.loading = false
             }

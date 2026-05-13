@@ -1,110 +1,47 @@
 <script setup lang="ts">
 
 import {computed, watch} from 'vue'
+
 import {usePageStore} from '~/stores/page'
 
 const route = useRoute()
 const store = usePageStore()
 
-const code = computed(() => route.params.code)
+const code = computed(() => String(route.params.code || ''))
 
 watch(
     code,
     async (newCode) => {
-        if (!newCode) {
-            return
-        }
-        await store.fetch(String(newCode))
+        if (!newCode) return
+        await store.fetch(newCode)
     },
-    {
-        immediate: true
-    }
+    {immediate: true}
 )
 
 const page = computed(() => store.current)
-const loading = computed(() => store.loading)
-
-const title = computed(() => {
-    return page.value?.title || ''
-})
-
-const content = computed(() => {
-    return page.value?.content || ''
-})
 
 </script>
 
 <template>
-
     <div class="container mt-4">
 
-        <div class="row">
+        <h1 class="mb-4">{{ page?.title || '' }}</h1>
 
-            <div class="col-12">
-
-                <h1 class="mb-4">
-                    {{ title }}
-                </h1>
-
-                <div
-                    v-if="loading"
-                    class="alert alert-light mb-4"
-                >
-                    Идёт загрузка страницы...
-                </div>
-
-                <div
-                    v-if="page"
-                    :class="{ 'content-loading': loading }"
-                >
-
-                    <div
-                        class="page-content"
-                        v-html="content"
-                    />
-
-                </div>
-
-                <div v-else-if="!loading">
-
-                    <h3>
-                        Страница не найдена
-                    </h3>
-
-                </div>
-
+        <template v-if="store.loading">
+            <div class="alert alert-light mb-4">
+                Идёт загрузка страницы...
             </div>
+        </template>
 
-        </div>
+        <template v-if="page">
+            <div :class="{ 'content-loading': store.loading }">
+                <div class="page-content" v-html="page.content" />
+            </div>
+        </template>
+
+        <template v-else-if="!store.loading">
+            <h3>Страница не найдена</h3>
+        </template>
 
     </div>
-
 </template>
-
-<style scoped>
-
-.content-loading {
-    opacity: 0.6;
-    filter: grayscale(0.2);
-    transition: 0.2s ease;
-}
-
-.page-content {
-    line-height: 1.7;
-}
-
-.page-content :deep(p) {
-    margin-bottom: 1rem;
-}
-
-.page-content :deep(table) {
-    width: 100%;
-    margin-bottom: 1rem;
-}
-
-.page-content :deep(pre) {
-    border-radius: 8px;
-    overflow-x: auto;
-}
-
-</style>

@@ -19,11 +19,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+
         // Привязка репозитория автомобилей к интерфейсу
         $this->app->bind(CarRepositoryInterface::class, CarRepository::class);
 
         // Привязка репозитория опций автомобилей к интерфейсу
         $this->app->bind(CarOptionRepositoryInterface::class, CarOptionRepository::class);
+
     }
 
     /**
@@ -31,13 +33,25 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        /**
-         * Ограничение частоты отправки формы обратной связи
-         * 1 запрос в 10 минут с одного IP
-         */
+
         RateLimiter::for('contact_form', function (Request $request) {
-            return Limit::perMinutes(10, 1)->by($request->ip());
+            $config = config('rate_limits.contact_form');
+
+            return Limit::perMinutes(
+                $config['decay_minutes'],
+                $config['attempts']
+            )->by($this->contactRateLimitKey($request));
         });
+
+    }
+
+    /**
+     * Возвращает ключ ограничения частоты отправки формы контакта.
+     * Используется Laravel RateLimiter и IP пользователя.
+     */
+    protected function contactRateLimitKey(Request $request): string
+    {
+        return $request->ip();
     }
 
 }

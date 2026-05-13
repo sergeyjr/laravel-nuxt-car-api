@@ -6,20 +6,11 @@ use App\Models\Contact;
 use App\Models\Page;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class SiteController extends Controller
 {
-
-    /**
-     * Главная страница сайта
-     */
-    public function home(): JsonResponse
-    {
-        return $this->success([
-            'message' => 'Главная страница'
-        ]);
-    }
 
     /**
      * Получение страницы сайта
@@ -36,7 +27,7 @@ class SiteController extends Controller
 
             // Проверка существования README.md
             if (!file_exists($readmePath)) {
-                abort(404, 'Файл README.md не найден');
+                abort(404, 'Файл README.md не найден.');
             }
 
             $markdown = file_get_contents($readmePath);
@@ -108,6 +99,15 @@ class SiteController extends Controller
     }
 
     /**
+     * Возвращает ключ ограничения частоты отправки формы контакта.
+     * Используется Laravel RateLimiter и IP пользователя.
+     */
+    protected function contactRetryAfter(Request $request): int
+    {
+        return RateLimiter::availableIn($request->ip());
+    }
+
+    /**
      * Отправка формы обратной связи
      */
     public function sendContact(Request $request): JsonResponse
@@ -123,6 +123,7 @@ class SiteController extends Controller
 
         return $this->success([
             'message' => 'Ваше сообщение успешно отправлено.',
+            'retry_after' => $this->contactRetryAfter($request),
         ]);
     }
 
