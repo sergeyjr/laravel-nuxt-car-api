@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
 
     /**
+     * frontend/composables/useOrderStatus.ts
      * Статусы заказов:
      * pending_payment     → создан, ждёт оплаты
      * processing          → оплачен, в обработке
@@ -17,6 +18,8 @@ return new class extends Migration {
      * refunded            → возвращён
      */
 
+    private $defaultStatus = 'pending_payment';
+
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
@@ -25,7 +28,7 @@ return new class extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
             $table->decimal('total', 12, 2)->default(0);
-            $table->string('status')->default('pending_payment');
+            $table->string('status')->default($this->defaultStatus);
             $table->string('payment_status')->nullable();
             $table->string('shipping_status')->nullable();
             $table->text('comment')->nullable();

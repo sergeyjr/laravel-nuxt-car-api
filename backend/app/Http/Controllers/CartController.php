@@ -26,7 +26,9 @@ class CartController extends Controller
             ->first();
 
         if (!$cart) {
-            return $this->success();
+            return $this->success([
+                'items' => [],
+            ]);
         }
 
         $items = $cart->items->map(function ($item) {
@@ -37,9 +39,11 @@ class CartController extends Controller
                 'name' => $item->car->title ?? null,
                 'photo_url' => $item->car->photo_url ?? null,
             ];
-        });
+        })->values();
 
-        return $this->success($items);
+        return $this->success([
+            'items' => $items,
+        ]);
     }
 
     /**
@@ -79,7 +83,12 @@ class CartController extends Controller
 
         $item->save();
 
-        return $this->success();
+        return $this->success([
+            'added' => [
+                'id' => $car->id,
+                'qty' => $qty,
+            ],
+        ]);
     }
 
     /**
@@ -117,7 +126,12 @@ class CartController extends Controller
 
         $item->save();
 
-        return $this->success();
+        return $this->success([
+            'updated' => [
+                'id' => $car->id,
+                'qty' => (int)$validated['qty'],
+            ],
+        ]);
     }
 
     /**
@@ -132,14 +146,18 @@ class CartController extends Controller
         $cart = Cart::where('user_id', $request->user()->id)->first();
 
         if (!$cart) {
-            return $this->success();
+            return $this->success([
+                'removed_id' => $validated['id'],
+            ]);
         }
 
         CartItem::where('cart_id', $cart->id)
             ->where('car_id', $validated['id'])
             ->delete();
 
-        return $this->success();
+        return $this->success([
+            'removed_id' => $validated['id'],
+        ]);
     }
 
     /**
@@ -153,6 +171,9 @@ class CartController extends Controller
             CartItem::where('cart_id', $cart->id)->delete();
         }
 
-        return $this->success();
+        return $this->success([
+            'cleared' => true,
+        ]);
     }
+
 }

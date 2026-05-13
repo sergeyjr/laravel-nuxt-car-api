@@ -42,8 +42,10 @@ export const useAuthStore = defineStore('auth', {
                 }
                 this.user = user
                 return true
-            } catch {
-                this.user = null
+            } catch (e: any) {
+                if (e?.status === 401) {
+                    this.user = null
+                }
                 return false
             }
 
@@ -51,20 +53,21 @@ export const useAuthStore = defineStore('auth', {
 
         async initAuth() {
 
-            if (this.initialized) {
-                return this.isAuth
-            }
-
-            if (this.initializing) {
+            if (this.initialized || this.initializing) {
                 return this.isAuth
             }
 
             this.initializing = true
 
             try {
-                return await this.fetchUser()
-            } finally {
+
+                const ok = await this.fetchUser()
+
                 this.initialized = true
+
+                return ok
+
+            } finally {
                 this.initializing = false
             }
 

@@ -53,10 +53,8 @@ const addToCart = (car: any) => {
     })
 }
 
-const isInCart = (carId: number) => {
-    return Object.values(cart.items || {}).some(
-        (item: any) => item?.id === carId
-    )
+const isInCart = (carId: number | string) => {
+    return !!cart.items[String(carId)]
 }
 
 </script>

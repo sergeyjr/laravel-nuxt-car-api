@@ -69,16 +69,16 @@ export default defineNuxtConfig({
 
         // Dev server (HMR + watch)
         server: {
-            hmr: {
-                // домен, через который идёт websocket hot reload
-                host: 'laravel.local',
-                protocol: 'ws',
-                clientPort: 80
-            },
+            // hmr: {
+            //     // домен, через который идёт websocket hot reload
+            //     host: 'laravel.local',
+            //     protocol: 'ws',
+            //     clientPort: 80
+            // },
 
             // следит за файлами внутри docker volume
             watch: {
-                usePolling: true,
+                usePolling: false,
             }
         }
 

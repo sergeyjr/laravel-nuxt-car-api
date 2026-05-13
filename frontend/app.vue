@@ -13,20 +13,20 @@ if (import.meta.client) {
 }
 
 await callOnce(async () => {
+
     if (!auth.isAuth) {
         cart.initialized = true
         return
     }
+
     try {
         await cart.fetch()
     } catch (e) {
         console.error('Ошибка загрузки корзины', e)
     }
+
 })
 
-/**
- * LOGIN / LOGOUT WATCHER
- */
 watch(
     () => auth.isAuth,
     async (isAuth, oldValue) => {

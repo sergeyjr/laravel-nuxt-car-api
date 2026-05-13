@@ -64,4 +64,5 @@ export const useOrderStatus = () => {
         getClass,
         getBadge
     }
+
 }

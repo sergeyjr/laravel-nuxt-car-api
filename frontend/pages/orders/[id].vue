@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useOrderStore } from '~/stores/order'
-import { useOrderStatus } from '~/composables/useOrderStatus'
+import {computed} from 'vue'
+import {useOrderStore} from '~/stores/order'
+import {useOrderStatus} from '~/composables/useOrderStatus'
+import BaseTextarea from "~/components/BaseTextarea.vue";
 
 const route = useRoute()
 const store = useOrderStore()
-const { getLabel, getBadge } = useOrderStatus()
+const {getLabel, getBadge} = useOrderStatus()
 
 const orderId = computed(() => {
     const id = route.params.id
@@ -36,10 +37,10 @@ const load = async () => {
     return res
 }
 
-const { pending } = await useAsyncData(
+const {pending} = await useAsyncData(
     () => `order-${orderId.value}`,
     load,
-    { watch: [orderId] }
+    {watch: [orderId]}
 )
 
 const order = computed(() => store.currentOrder)
@@ -178,19 +179,30 @@ const goBack = () => {
 
                 <div class="card border-0 shadow-sm mb-3">
                     <div class="card-body">
-                        <div class="text-muted small mb-1">Дата оформления:</div>
-                        <div class="fw-semibold">
-                            {{ formatDate(order.created_at) }}
+                        <div class="text-muted small mb-1">Комментарий к заказу:</div>
+                        {{ order.comment }}
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div class="text-muted small mb-1">Дата оформления:</div>
+                            <div class="fw-semibold">
+                                {{ formatDate(order.created_at) }}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card border-0 shadow-sm mb-3">
                     <div class="card-body">
-                        <div class="text-muted small mb-1">Статус:</div>
-                        <span class="badge" :class="getBadge(order.status).class">
+                        <div class="d-flex justify-content-between">
+                            <div class="text-muted small mb-1">Статус:</div>
+                            <span class="badge" :class="getBadge(order.status).class">
                             {{ getLabel(order.status) }}
                         </span>
+                        </div>
                     </div>
                 </div>
 

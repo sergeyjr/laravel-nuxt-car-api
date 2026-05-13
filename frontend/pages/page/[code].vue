@@ -29,7 +29,7 @@ const page = computed(() => store.current)
 
         <template v-if="store.loading">
             <div class="alert alert-light mb-4">
-                Идёт загрузка страницы...
+                Загрузка страницы...
             </div>
         </template>
 

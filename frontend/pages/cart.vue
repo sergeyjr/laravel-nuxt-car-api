@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 
-import { useCartStore } from '~/stores/cart'
+import {computed, ref} from 'vue'
+
+import {useCartStore} from '~/stores/cart'
 
 import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -29,10 +30,8 @@ const formatPrice = (v: number) =>
 
 function sanitizeQty(value: unknown) {
     let qty = Number(value)
-
     if (!Number.isInteger(qty)) qty = Math.floor(qty)
     if (Number.isNaN(qty) || qty < 1) qty = 1
-
     return qty
 }
 
@@ -65,13 +64,28 @@ const confirmCheckout = async () => {
     try {
         isSubmitting.value = true
 
-        const res = await cart.checkout({
+        const res: any = await cart.checkout({
             comment: comment.value
         })
 
+        console.log('checkout response', res)
+
+        const order = res?.data?.order
+
+        if (!order?.id) {
+            throw new Error('Order ID missing in response')
+        }
+
+        // обновляем dashboard
+        const dashboard = useDashboardStore()
+        await dashboard.fetchDashboard(true)
+
         showCheckoutModal.value = false
 
-        return navigateTo(`/order-success/${res.order.id}`)
+        return navigateTo(`/order-success/${order.id}`)
+
+    } catch (e) {
+        console.error('Checkout failed:', e)
     } finally {
         isSubmitting.value = false
     }
@@ -84,6 +98,7 @@ const goBack = () => {
         navigateTo('/dashboard')
     }
 }
+
 </script>
 
 <template>
@@ -102,10 +117,7 @@ const goBack = () => {
         </div>
 
         <!-- LOADING -->
-        <div
-            v-if="cart.loading"
-            class="alert alert-light border text-center py-4"
-        >
+        <div v-if="cart.loading" class="alert alert-light border text-center py-4">
             Загрузка корзины...
         </div>
 

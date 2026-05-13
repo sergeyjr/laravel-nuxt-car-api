@@ -1,6 +1,7 @@
 export default defineNuxtPlugin(async () => {
 
     const auth = useAuthStore()
+    const route = useRoute()
 
     console.log('[auth plugin] start', {
         initialized: auth.initialized,
@@ -9,7 +10,6 @@ export default defineNuxtPlugin(async () => {
 
     if (!auth.initialized) {
         console.log('[auth plugin] initAuth called')
-
         await auth.initAuth()
 
         console.log('[auth plugin] initAuth finished', {
@@ -17,9 +17,10 @@ export default defineNuxtPlugin(async () => {
             isAuth: auth.isAuth,
             user: auth.user
         })
+    }
 
-    } else {
-        console.log('[auth plugin] skipped (already initialized)')
+    if (auth.isAuth && route.path === '/login') {
+        await navigateTo('/dashboard', {replace: true})
     }
 
 })

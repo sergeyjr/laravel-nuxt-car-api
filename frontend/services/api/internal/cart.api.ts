@@ -2,38 +2,63 @@ export const useCartApi = () => {
 
     const api = useApi()
 
+    const logResponse = async <T>(label: string, promise: Promise<T>) => {
+        try {
+            const res = await promise
+            console.log(`[CartAPI] ${label} → response:`, res)
+            return res
+        } catch (err) {
+            console.error(`[CartAPI] ${label} → error:`, err)
+            throw err
+        }
+    }
+
     return {
 
-        getCart() {
+        async getCart() {
             console.log('[CartAPI] getCart → request')
-            return api.get('/api/cart')
+            return logResponse('getCart', api.get('/api/cart'))
         },
 
-        addItem(payload: { id: number; qty: number }) {
-            console.log('[CartAPI] addItem → request')
-            return api.post('/api/cart/add', payload)
+        async addItem(payload: { id: number; qty: number }) {
+            console.log('[CartAPI] addItem → request', payload)
+            return logResponse(
+                'addItem',
+                api.post('/api/cart/add', payload)
+            )
         },
 
-        updateItem(payload: { id: number; qty: number }) {
-            console.log('[CartAPI] updateItem → request')
-            return api.post('/api/cart/update', payload)
+        async updateItem(payload: { id: number; qty: number }) {
+            console.log('[CartAPI] updateItem → request', payload)
+            return logResponse(
+                'updateItem',
+                api.post('/api/cart/update', payload)
+            )
         },
 
-        removeItem(id: number) {
-            console.log('[CartAPI] removeItem → request')
-            return api.post('/api/cart/remove', {id})
+        async removeItem(id: number) {
+            console.log('[CartAPI] removeItem → request', { id })
+            return logResponse(
+                'removeItem',
+                api.post('/api/cart/remove', { id })
+            )
         },
 
-        clear() {
+        async clear() {
             console.log('[CartAPI] clear → request')
-            return api.post('/api/cart/clear')
+            return logResponse(
+                'clear',
+                api.post('/api/cart/clear')
+            )
         },
 
-        checkout(payload: { comment?: string }) {
-            console.log('[CartAPI] checkout → request')
-            return api.post('/api/orders/checkout', payload)
+        async checkout(payload: { comment?: string }) {
+            console.log('[CartAPI] checkout → request', payload)
+            return logResponse(
+                'checkout',
+                api.post('/api/orders/checkout', payload)
+            )
         }
 
     }
-
 }
