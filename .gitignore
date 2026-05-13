@@ -33,7 +33,6 @@ Thumbs.db
 # =========================
 
 /backend/vendor
-/backend/node_modules
 
 /backend/public/build
 /backend/public/hot
