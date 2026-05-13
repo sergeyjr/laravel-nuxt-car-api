@@ -20,54 +20,54 @@ Thumbs.db
 
 .phpactor.json
 .phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
+.fleet
+.idea
+.nova
+.phpunit.cache
+.vscode
+.zed
+auth.json
 
 # =========================
 # BACKEND (LARAVEL)
 # =========================
 
-/backend/vendor
+backend/vendor
 
-/backend/public/build
-/backend/public/hot
-/backend/storage/*.key
-/backend/storage/framework/*
-!/backend/storage/framework/.gitignore
-/backend/storage/pail
+backend/public/build
+backend/public/hot
+backend/storage/*.key
+backend/storage/framework/*
+!backend/storage/framework/.gitignore
+backend/storage/pail
 
-/backend/Homestead.json
-/backend/Homestead.yaml
+backend/Homestead.json
+backend/Homestead.yaml
 
-/backend/.env
+backend/.env
 
 # =========================
 # FRONTEND (NUXT 4)
 # =========================
 
-/frontend/node_modules
-/frontend/.nuxt
-/frontend/.output
-/frontend/.nitro
-/frontend/dist
-/frontend/.cache
-/frontend/.vite
-/frontend/.tsbuildinfo
+frontend/node_modules
+frontend/.nuxt
+frontend/.output
+frontend/.nitro
+frontend/dist
+frontend/.cache
+frontend/.vite
+frontend/.tsbuildinfo
 
-/frontend/.env
-/frontend/.env.*
+frontend/.env
+frontend/.env.*
 
 # НЕ НУЖНО В MONOREPO (удалить если есть)
-/frontend/.git
+frontend/.git
 
 # =========================
 # ROOT (fallback)
 # =========================
 
 node_modules
-/backend/public/storage
+backend/public/storage
