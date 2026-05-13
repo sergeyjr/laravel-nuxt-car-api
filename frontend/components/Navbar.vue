@@ -77,7 +77,10 @@ const isActive = (path: string) =>
                         :class="{ active: isActive('/cart') }"
                     >
                         Корзина
-                        <span class="badge rounded-pill bg-danger">
+                        <span
+                            class="badge rounded-pill"
+                            :class="cartCount > 0 ? 'bg-danger' : 'bg-secondary'"
+                        >
                             {{ cartCount }}
                         </span>
                     </NuxtLink>

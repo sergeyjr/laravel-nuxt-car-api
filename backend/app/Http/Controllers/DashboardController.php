@@ -35,7 +35,7 @@ class DashboardController extends Controller
         // Последние заказы пользователя
         $orders = Order::where('user_id', $user->id)
             ->latest()
-            ->take(3)
+            //->take(3)
             ->get()
             ->map(fn($o) => [
                 'id' => $o->id,

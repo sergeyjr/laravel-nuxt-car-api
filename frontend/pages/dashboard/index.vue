@@ -51,7 +51,7 @@ const formatDate = (date: any) => {
         <h1 class="mb-4">Панель управления</h1>
 
         <div v-if="dashboard.loading" class="alert alert-light">
-            Идёт загрузка страницы...
+            Загрузка страницы...
         </div>
 
         <template v-else>

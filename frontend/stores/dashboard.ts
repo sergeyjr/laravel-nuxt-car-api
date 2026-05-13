@@ -34,12 +34,16 @@ export const useDashboardStore = defineStore('dashboard', {
 
             try {
                 const data: any = await dashboardApi.getDashboard()
+
                 this.carsCount = data.carsCount ?? 0
                 this.myCarsCount = data.myCarsCount ?? 0
+
                 this.ordersCount = data.ordersCount ?? 0
                 this.orders = data.orders ?? []
+
                 this.cart = data.cart ?? {}
                 this.cartTotal = data.cartTotal ?? 0
+
                 this.loaded = true
             } catch (e: any) {
                 console.log('[dashboard] ERROR', e)

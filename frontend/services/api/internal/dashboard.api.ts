@@ -1,4 +1,4 @@
-import type {DashboardResponse} from "~/types/dashboard";
+import type { DashboardResponse } from "~/types/dashboard";
 
 export const useDashboardApi = () => {
 
@@ -6,12 +6,18 @@ export const useDashboardApi = () => {
 
     return {
 
-        getDashboard() {
+        async getDashboard() {
             console.log('[DashboardAPI] getDashboard → request')
-            return api.get<DashboardResponse>('/api/dashboard')
+            try {
+                const res = await api.get<DashboardResponse>('/api/dashboard')
+                console.log('[DashboardAPI] getDashboard → response:', res)
+                return res
+            } catch (err) {
+                console.error('[DashboardAPI] getDashboard → error:', err)
+                throw err
+            }
         }
 
     }
 
 }
-

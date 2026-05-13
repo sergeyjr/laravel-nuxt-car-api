@@ -282,21 +282,19 @@ export const useCartStore = defineStore('cart', {
             }
         },
 
+// stores/cart.ts
+
+// ...
         async checkout(payload: any = {}) {
             const cartApi = useCartApi()
-
             this.loadingCheckout = true
-
             try {
-                const data: any = await cartApi.checkout({
+                const data = await cartApi.checkout({
                     comment: payload.comment || null,
                 })
-
                 console.log('[cart store] checkout response', data)
-
                 this.items = {}
                 this.save()
-
                 return data
             } catch (e) {
                 console.error(e)
@@ -304,7 +302,8 @@ export const useCartStore = defineStore('cart', {
             } finally {
                 this.loadingCheckout = false
             }
-        },
+        }
+
     }
 
 })

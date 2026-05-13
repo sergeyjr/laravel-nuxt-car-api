@@ -32,10 +32,14 @@ const carImage = computed(() => {
 const formatPrice = (price?: number | null) =>
     new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
 
-const isInCart = (carId: number) => {
-    return Object.values(cart.items || {}).some(
-        (item: any) => Number(item?.id) === Number(carId)
-    )
+// const isInCart = (carId: number) => {
+//     return Object.values(cart.items || {}).some(
+//         (item: any) => Number(item?.id) === Number(carId)
+//     )
+// }
+
+const isInCart = (carId: number | string) => {
+    return !!cart.items[String(carId)]
 }
 
 const addToCart = async (car: any) => {

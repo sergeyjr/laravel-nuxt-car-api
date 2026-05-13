@@ -63,7 +63,7 @@ const confirmClearCart = async () => {
 const confirmCheckout = async () => {
     try {
         isSubmitting.value = true
-
+console.log('comment', comment)
         const res: any = await cart.checkout({
             comment: comment.value
         })
