@@ -57,10 +57,8 @@ export const useCartStore = defineStore('cart', {
         initialized: false,
         hydrated: false,
 
-        // общий
         loading: false,
 
-        // отдельные состояния
         loadingFetch: false,
         loadingAdd: false,
         loadingUpdate: false,
@@ -131,8 +129,6 @@ export const useCartStore = defineStore('cart', {
 
             try {
                 const data: any = await cartApi.getCart()
-
-                // ожидаем: { items: [...] }
                 this.items = cleanItems(data?.items ?? data)
                 this.save()
             } catch (e) {
@@ -182,7 +178,6 @@ export const useCartStore = defineStore('cart', {
                     id: Number(id),
                     qty: Number(newItem.qty ?? 1),
                 })
-
                 console.log('[cart store] add response', res)
             } catch (e) {
                 console.error(e)
@@ -223,7 +218,6 @@ export const useCartStore = defineStore('cart', {
                     id: Number(id),
                     qty,
                 })
-
                 console.log('[cart store] update response', res)
             } catch (e) {
                 console.error(e)
@@ -241,13 +235,9 @@ export const useCartStore = defineStore('cart', {
 
             try {
                 const res: any = await cartApi.removeItem(Number(id))
-
                 console.log('[cart store] remove response', res)
-
-                // удаляем только после успешного ответа API
                 const newItems = {...this.items}
                 delete newItems[id]
-
                 this.items = newItems
                 this.save()
             } catch (e) {
@@ -268,9 +258,7 @@ export const useCartStore = defineStore('cart', {
 
             try {
                 const res: any = await cartApi.clear()
-
                 console.log('[cart store] clear response', res)
-
                 this.items = {}
                 this.save()
             } catch (e) {
@@ -282,9 +270,6 @@ export const useCartStore = defineStore('cart', {
             }
         },
 
-// stores/cart.ts
-
-// ...
         async checkout(payload: any = {}) {
             const cartApi = useCartApi()
             this.loadingCheckout = true

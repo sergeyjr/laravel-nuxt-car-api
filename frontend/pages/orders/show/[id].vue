@@ -1,8 +1,10 @@
 <script setup lang="ts">
+
 import {computed} from 'vue'
+
 import {useOrderStore} from '~/stores/order'
+
 import {useOrderStatus} from '~/composables/useOrderStatus'
-import BaseTextarea from "~/components/BaseTextarea.vue";
 
 const route = useRoute()
 const store = useOrderStore()
@@ -45,6 +47,11 @@ const {pending} = await useAsyncData(
 
 const order = computed(() => store.currentOrder)
 
+const hasComment = computed(() =>
+    order.value?.comment != null &&
+    String(order.value.comment).trim() !== ''
+)
+
 const formatPrice = (v: number | string) =>
     new Intl.NumberFormat('ru-RU').format(Number(v || 0)) + ' ₽'
 
@@ -72,6 +79,7 @@ const goBack = () => {
         navigateTo('/dashboard')
     }
 }
+
 </script>
 
 <template>
@@ -177,7 +185,7 @@ const goBack = () => {
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm mb-3">
+                <div v-if="hasComment" class="card border-0 shadow-sm mb-3">
                     <div class="card-body">
                         <div class="text-muted small mb-1">Комментарий к заказу:</div>
                         {{ order.comment }}

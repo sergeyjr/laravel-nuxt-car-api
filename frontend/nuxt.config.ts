@@ -45,8 +45,15 @@ export default defineNuxtConfig({
         port: 3000,
     },
 
+    experimental: {
+        restoreState: false,
+    },
+
     // Vite сборка
     vite: {
+
+        cacheDir: '.nuxt/vite-cache-dev',
+
         build: {
             minify: false // минификация в dev (включение ускоряет сборку/отладку)
         },
@@ -78,7 +85,7 @@ export default defineNuxtConfig({
 
             // следит за файлами внутри docker volume
             watch: {
-                usePolling: false,
+                usePolling: true,
             }
         }
 

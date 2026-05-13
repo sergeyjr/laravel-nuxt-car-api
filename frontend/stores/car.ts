@@ -13,6 +13,7 @@ export const useCarStore = defineStore('car', {
         cars: [] as Car[],
         meta: null as CarsResponse | null,
         car: null as Car | null,
+        carsById: {} as Record<number, Car>,
 
         pages: {} as Record<number, PageCache>,
 
@@ -68,18 +69,31 @@ export const useCarStore = defineStore('car', {
         async fetchCar(id: number) {
             if (!id) {
                 this.car = null
-                this.carLoading = false
                 return null
             }
 
+            const cachedPage = this.pages[id] as any
+
+            if (cachedPage?.car) {
+                this.car = cachedPage.car
+                return cachedPage.car
+            }
+
             this.carLoading = true
-            this.car = null
 
             const carApi = useCarApi()
 
             try {
                 const car = await carApi.fetchCar(id)
+
                 this.car = car
+
+                this.pages[id] = {
+                    cars: [],
+                    meta: null as any,
+                    car
+                } as any
+
                 return car
             } catch {
                 this.car = null

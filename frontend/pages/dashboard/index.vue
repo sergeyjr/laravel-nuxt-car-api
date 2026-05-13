@@ -226,7 +226,7 @@ const formatDate = (date: any) => {
 
                             <td class="text-end">
                                 <NuxtLink
-                                    :to="`/orders/${order.id}`"
+                                    :to="`/orders/show/${order.id}`"
                                     class="btn btn-sm btn-outline-primary"
                                 >
                                     Открыть
