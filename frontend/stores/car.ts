@@ -2,126 +2,96 @@ import { defineStore } from 'pinia'
 import type { Car, CarsResponse } from '~/types/car'
 import { useCarApi } from '~/services/api/internal/car.api'
 
-type PageCache = {
-    cars: Car[]
-    meta: CarsResponse
-}
-
 export const useCarStore = defineStore('car', {
 
     state: () => ({
         cars: [] as Car[],
         meta: null as CarsResponse | null,
         car: null as Car | null,
-        carsById: {} as Record<number, Car>,
-
-        pages: {} as Record<number, PageCache>,
 
         latest: [] as Car[],
-        latestFetchedAt: 0,
-        latestCacheTtl: 1000 * 60 * 60,
+        adding: {} as Record<number, boolean>,
 
         listLoading: false,
         carLoading: false,
         latestLoading: false,
     }),
 
+    getters: {
+        isAdding: (state) => (id: number | string) => {
+            return !!state.adding[Number(id)]
+        },
+        isInCart: () => (cartStore: any, carId: number | string) => {
+            return !!cartStore.items[String(carId)]
+        }
+    },
+
     actions: {
 
-        async fetch(page = 1, force = false) {
-            const cached = this.pages[page]
+        // async fetch(page = 1) {
+        //     this.listLoading = true
+        //     const carApi = useCarApi()
+        //
+        //     try {
+        //         const res = await carApi.fetchCars(page)
+        //
+        //         this.cars = res.data || []
+        //         this.meta = res
+        //
+        //         return res
+        //     } catch {
+        //         this.cars = []
+        //         this.meta = null
+        //         return null
+        //     } finally {
+        //         this.listLoading = false
+        //     }
+        // },
 
-            if (!force && cached) {
-                this.cars = cached.cars
-                this.meta = cached.meta
-                return cached.meta
-            }
+        // async fetchCar(id: number) {
+        //     if (!id) {
+        //         this.car = null
+        //         return null
+        //     }
+        //
+        //     this.carLoading = true
+        //     const carApi = useCarApi()
+        //
+        //     try {
+        //         const car = await carApi.fetchCar(id)
+        //
+        //         this.car = car
+        //         return car
+        //     } catch {
+        //         this.car = null
+        //         return null
+        //     } finally {
+        //         this.carLoading = false
+        //     }
+        // },
 
-            this.listLoading = true
-
-            const carApi = useCarApi()
-
+        async addToCart(car: Car) {
+            const id = Number(car.id)
+            if (!id) return
+            this.adding[id] = true
             try {
-                const res = await carApi.fetchCars(page)
-
-                const cars = res.data || []
-
-                this.cars = cars
-                this.meta = res
-
-                this.pages[page] = {
-                    cars,
-                    meta: res
-                }
-
-                return res
-
-            } catch {
-                this.cars = []
-                this.meta = null
-                return null
-
+                await new Promise(resolve => setTimeout(resolve, 300))
+                return true
+            } catch (e) {
+                return false
             } finally {
-                this.listLoading = false
+                this.adding[id] = false
             }
         },
 
-        async fetchCar(id: number) {
-            if (!id) {
-                this.car = null
-                return null
-            }
-
-            const cachedPage = this.pages[id] as any
-
-            if (cachedPage?.car) {
-                this.car = cachedPage.car
-                return cachedPage.car
-            }
-
-            this.carLoading = true
-
-            const carApi = useCarApi()
-
-            try {
-                const car = await carApi.fetchCar(id)
-
-                this.car = car
-
-                this.pages[id] = {
-                    cars: [],
-                    meta: null as any,
-                    car
-                } as any
-
-                return car
-            } catch {
-                this.car = null
-                return null
-            } finally {
-                this.carLoading = false
-            }
-        },
-
-        async fetchLatest(force = false) {
-            const now = Date.now()
-
-            const isCached =
-                this.latest.length > 0 &&
-                now - this.latestFetchedAt < this.latestCacheTtl
-
-            if (!force && isCached) {
-                return this.latest
-            }
-
+        async fetchLatest() {
             this.latestLoading = true
-
             const carApi = useCarApi()
 
             try {
                 const res = await carApi.fetchLatest()
+
                 this.latest = res.data || []
-                this.latestFetchedAt = Date.now()
                 return this.latest
             } catch {
                 this.latest = []
@@ -130,10 +100,6 @@ export const useCarStore = defineStore('car', {
                 this.latestLoading = false
             }
         },
-
-        clearPagesCache() {
-            this.pages = {}
-        }
 
     }
 

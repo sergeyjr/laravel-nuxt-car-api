@@ -11,28 +11,36 @@ const store = useAuthStore()
 const email = ref('')
 const password = ref('')
 
-const submit = async () => {
-    store.errors = {}
+const validate = () => {
 
-    let hasError = false
+    const errors = {}
 
     if (!email.value) {
-        store.errors.email = 'Email обязателен'
-        hasError = true
+        errors.email = 'Email обязателен'
     }
 
     if (!password.value) {
-        store.errors.password = 'Пароль обязателен'
-        hasError = true
+        errors.password = 'Пароль обязателен'
     }
 
-    if (hasError) return
+    store.errors = {...errors}
 
-    const ok = await store.login(email.value, password.value)
+    return Object.keys(errors).length === 0
+}
+
+const submit = async () => {
+
+    if (!validate()) return
+
+    const ok = await store.login(
+        email.value,
+        password.value
+    )
 
     if (ok) {
         return navigateTo('/dashboard')
     }
+
 }
 
 onMounted(() => {
@@ -48,12 +56,11 @@ onMounted(() => {
 
                 <h1 class="mb-4">Авторизация</h1>
 
-                <p v-if="store.success" class="text-success text-center">
+                <p
+                    v-if="store.success"
+                    class="text-success text-center"
+                >
                     {{ store.success }}
-                </p>
-
-                <p v-if="store.error" class="text-danger text-center">
-                    {{ store.error }}
                 </p>
 
                 <form @submit.prevent="submit">
@@ -82,6 +89,7 @@ onMounted(() => {
                         <template #loading>
                             Входим...
                         </template>
+
                         Войти
                     </BaseButton>
 

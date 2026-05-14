@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import {computed, onMounted} from 'vue'
+
 import {useOrderStore} from '~/stores/order'
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
@@ -12,7 +13,7 @@ onMounted(async () => {
 })
 
 const orders = computed(() => store.orders || [])
-const loading = computed(() => store.loading)
+const loading = computed(() => store.loadingOrders)
 const initialized = computed(() => store.initialized)
 
 const formatPrice = (price: number | string) =>
@@ -69,15 +70,16 @@ const goBack = () => {
             </button>
         </div>
 
-        <div v-if="loading" class="alert alert-light">
-            Загружается...
+        <div v-if="loading || !initialized" class="alert alert-light border text-center py-4">
+            Страница загружается...
         </div>
 
-        <div v-else-if="initialized && !orders.length" class="alert alert-light">
+        <div v-else-if="!orders.length" class="alert alert-light border text-center py-4">
             У вас пока нет заказов
         </div>
 
         <div v-else class="table-responsive">
+
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                 <tr>
@@ -99,9 +101,9 @@ const goBack = () => {
                     </td>
 
                     <td>
-                            <span class="badge" :class="statusBadgeClass(order.status)">
-                                {{ getLabel(order.status) }}
-                            </span>
+                        <span class="badge" :class="statusBadgeClass(order.status)">
+                            {{ getLabel(order.status) }}
+                        </span>
                     </td>
 
                     <td>

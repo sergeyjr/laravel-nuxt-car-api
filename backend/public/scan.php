@@ -99,10 +99,24 @@ class ProjectTreeGenerator
 
     private function isExcluded(string $relativePath): bool
     {
+        $normalizedPath = trim(str_replace('\\', '/', $relativePath), '/');
+        $segments = explode('/', $normalizedPath);
+
         foreach ($this->excludePaths as $exclude) {
+            $exclude = trim($exclude, '/');
+
+            // 1. Глобальное исключение по имени директории/файла
+            if (!str_contains($exclude, '/')) {
+                if (in_array($exclude, $segments, true)) {
+                    return true;
+                }
+                continue;
+            }
+
+            // 2. Точное относительное совпадение или поддерево
             if (
-                $relativePath === $exclude ||
-                str_starts_with($relativePath, $exclude . '/')
+                $normalizedPath === $exclude ||
+                str_starts_with($normalizedPath, $exclude . '/')
             ) {
                 return true;
             }
@@ -130,12 +144,13 @@ $config = [
         '.idea',
         '.nuxt',
         '.vscode',
-        'docs',
-        'frontend/node_modules',
         'backend/public/build',
         'backend/public/storage/avatars',
-        'backend/storage',
-        'backend/vendor',
+        'docs',
+        'node_modules',
+        'screenshots',
+        'storage',
+        'vendor',
     ],
 
     // Показывать файлы

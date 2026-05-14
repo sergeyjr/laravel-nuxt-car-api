@@ -46,7 +46,11 @@ export default defineNuxtConfig({
     },
 
     experimental: {
-        restoreState: false,
+        // ОТКЛЮЧАЕТ восстановление состояния между навигациями
+        // restoreState: false,
+
+        // НЕ очищает кеш useAsyncData / useFetch при переходах между страницами
+        purgeCachedData: false,
     },
 
     // Vite сборка
@@ -55,7 +59,8 @@ export default defineNuxtConfig({
         cacheDir: '.nuxt/vite-cache-dev',
 
         build: {
-            minify: false // минификация в dev (включение ускоряет сборку/отладку)
+            // минификация в dev (включение ускоряет сборку/отладку)
+            minify: false
         },
 
         // зависимости, которые заранее бандлятся для ускорения

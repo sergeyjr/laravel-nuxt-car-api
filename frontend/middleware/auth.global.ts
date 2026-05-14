@@ -5,6 +5,11 @@ export default defineNuxtRouteMiddleware((to) => {
 
     if (import.meta.server) return
 
+    const error = useError()
+    if (error.value) {
+        return
+    }
+
     const auth = useAuthStore()
     const {requiresAuth} = useProtected()
     const needsAuth = requiresAuth(to.path)
@@ -36,7 +41,7 @@ export default defineNuxtRouteMiddleware((to) => {
         return
     }
 
-    if (needsAuth && !auth.isAuth) {
+    if (!auth.isAuth) {
         console.log('[middleware] redirect → login')
         return navigateTo('/login', {replace: true})
     }

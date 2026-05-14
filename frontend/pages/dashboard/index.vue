@@ -50,7 +50,7 @@ const formatDate = (date: any) => {
 
         <h1 class="mb-4">Панель управления</h1>
 
-        <div v-if="dashboard.loading" class="alert alert-light">
+        <div v-if="dashboard.loading" class="alert alert-light border text-center py-4">
             Загрузка страницы...
         </div>
 
@@ -122,17 +122,21 @@ const formatDate = (date: any) => {
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <NuxtLink to="/cart" class="text-decoration-none text-dark">
-                                <h5 class="mb-3">Корзина</h5>
-                            </NuxtLink>
+                            <template v-if="cartTotal === 0">
 
-                            <div v-if="cartTotal === 0">
-                                <div class="btn btn-outline-secondary w-100 mt-3">
+                                <h5 class="mb-3">Корзина</h5>
+
+                                <div class="btn btn-outline-secondary w-100 mt-3 disabled">
                                     Корзина пустая
                                 </div>
-                            </div>
 
-                            <div v-else>
+                            </template>
+
+                            <template v-else>
+
+                                <NuxtLink to="/cart" class="text-decoration-none text-dark">
+                                    <h5 class="mb-3">Корзина</h5>
+                                </NuxtLink>
 
                                 <p class="text-muted">
                                     Товаров:
@@ -151,7 +155,7 @@ const formatDate = (date: any) => {
                                     Перейти в корзину
                                 </NuxtLink>
 
-                            </div>
+                            </template>
 
                         </div>
                     </div>

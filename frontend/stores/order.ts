@@ -7,6 +7,8 @@ export const useOrderStore = defineStore('order', {
         currentOrder: null as any,
         orders: [] as any[],
         loading: false,
+        loadingOrder: false,
+        loadingOrders: false,
         error: null as any,
         initialized: false,
         orderCache: {} as Record<string, any>
@@ -24,7 +26,7 @@ export const useOrderStore = defineStore('order', {
                 return null
             }
 
-            this.loading = true
+            this.loadingOrder = true
             this.error = null
 
             try {
@@ -44,13 +46,15 @@ export const useOrderStore = defineStore('order', {
                 this.orderCache[key] = data
 
                 return data
+
             } catch (e) {
                 this.error = e
                 this.currentOrder = null
                 console.error('Order fetch error:', e)
                 return null
+
             } finally {
-                this.loading = false
+                this.loadingOrder = false
             }
         },
 
@@ -62,20 +66,27 @@ export const useOrderStore = defineStore('order', {
             }
 
             this.loading = true
+            this.loadingOrders = true
             this.error = null
 
             try {
                 const data = await orderApi.getOrders()
-                this.orders = Array.isArray(data) ? data : (data ?? [])
-                this.initialized = true
 
+                this.orders = Array.isArray(data)
+                    ? data
+                    : (data ?? [])
+
+                this.initialized = true
                 return this.orders
+
             } catch (e) {
                 this.error = e
                 console.error('Orders fetch error:', e)
                 return []
+
             } finally {
                 this.loading = false
+                this.loadingOrders = false
             }
         }
 

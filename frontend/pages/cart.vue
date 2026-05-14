@@ -3,6 +3,7 @@
 import {computed, ref} from 'vue'
 
 import {useCartStore} from '~/stores/cart'
+import {useDashboardStore} from '~/stores/dashboard'
 
 import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -25,31 +26,45 @@ const selectedItemId = ref<number | null>(null)
 const items = computed(() => cart.items)
 const total = computed(() => cart.total)
 
-const formatPrice = (v: number) =>
-    new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
+const formatPrice = (v: number) => new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
 
 function sanitizeQty(value: unknown) {
     let qty = Number(value)
-    if (!Number.isInteger(qty)) qty = Math.floor(qty)
-    if (Number.isNaN(qty) || qty < 1) qty = 1
+    if (!Number.isInteger(qty)) {
+        qty = Math.floor(qty)
+    }
+    if (Number.isNaN(qty) || qty < 1) {
+        qty = 1
+    }
     return qty
 }
 
 function openRemoveModal(id: number | string) {
+    if (isSubmitting.value) {
+        return
+    }
     selectedItemId.value = Number(id)
     showRemoveModal.value = true
 }
 
 function openClearModal() {
+    if (isSubmitting.value) {
+        return
+    }
     showClearModal.value = true
 }
 
 function openCheckoutModal() {
+    if (isSubmitting.value) {
+        return
+    }
     showCheckoutModal.value = true
 }
 
 const confirmRemoveItem = async () => {
-    if (!selectedItemId.value) return
+    if (!selectedItemId.value) {
+        return
+    }
     await cart.remove(selectedItemId.value)
     showRemoveModal.value = false
     selectedItemId.value = null
@@ -60,42 +75,30 @@ const confirmClearCart = async () => {
     showClearModal.value = false
 }
 
+const dashboard = useDashboardStore()
+
 const confirmCheckout = async () => {
+    if (isSubmitting.value) {
+        return
+    }
     try {
         isSubmitting.value = true
-console.log('comment', comment)
         const res: any = await cart.checkout({
             comment: comment.value
         })
-
-        console.log('checkout response', res)
-
-        const order = res?.data?.order
-
+        const order = res?.data?.order || res?.order
         if (!order?.id) {
             throw new Error('Order ID missing in response')
         }
-
-        // обновляем dashboard
-        const dashboard = useDashboardStore()
-        await dashboard.fetchDashboard(true)
-
         showCheckoutModal.value = false
-
-        return navigateTo(`/order-success/${order.id}`)
-
+        await dashboard.fetchDashboard(true)
+        await navigateTo(`/order-success/${order.id}`)
     } catch (e) {
-        console.error('Checkout failed:', e)
-    } finally {
+        console.error(
+            'Checkout failed:',
+            e
+        )
         isSubmitting.value = false
-    }
-}
-
-const goBack = () => {
-    if (import.meta.client && window.history.length > 1) {
-        window.history.back()
-    } else {
-        navigateTo('/dashboard')
     }
 }
 
@@ -106,14 +109,6 @@ const goBack = () => {
         <!-- HEADER -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Корзина</h2>
-
-            <button
-                type="button"
-                class="btn btn-outline-secondary"
-                @click="goBack"
-            >
-                ← Назад
-            </button>
         </div>
 
         <!-- LOADING -->
@@ -273,6 +268,7 @@ const goBack = () => {
                                 size="lg"
                                 class="w-100 py-3 fw-semibold"
                                 :loading="isSubmitting"
+                                :disabled="isSubmitting"
                                 @click="openCheckoutModal"
                             >
                                 Отправить заказ
@@ -297,6 +293,7 @@ const goBack = () => {
         </div>
 
         <!-- MODALS -->
+
         <CartRemoveItemModal
             :show="showRemoveModal"
             :product-id="selectedItemId"
@@ -315,5 +312,6 @@ const goBack = () => {
             @close="showClearModal = false"
             @success="confirmClearCart"
         />
+
     </div>
 </template>

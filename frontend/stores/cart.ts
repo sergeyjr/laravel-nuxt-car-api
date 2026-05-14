@@ -3,9 +3,7 @@ import {toRaw} from 'vue'
 import {useCartApi} from '~/services/api/internal/cart.api'
 
 function cleanItems(payload: any) {
-    if (!payload) {
-        return {}
-    }
+    if (!payload) return {}
 
     const items = Array.isArray(payload)
         ? payload
@@ -17,17 +15,13 @@ function cleanItems(payload: any) {
 
     if (Array.isArray(items)) {
         return items.reduce((acc: any, item: any) => {
-            if (!item?.id) {
-                return acc
-            }
-
+            if (!item?.id) return acc
             acc[String(item.id)] = {
                 ...item,
                 id: Number(item.id),
                 qty: Number(item.qty ?? 1),
-                price: Number(item.price ?? 0),
+                price: Number(item.price ?? 0)
             }
-
             return acc
         }, {})
     }
@@ -42,8 +36,8 @@ function cleanItems(payload: any) {
                         ...item,
                         id: Number(item?.id ?? key),
                         qty: Number(item?.qty ?? 1),
-                        price: Number(item?.price ?? 0),
-                    },
+                        price: Number(item?.price ?? 0)
+                    }
                 ])
         )
     }
@@ -52,13 +46,13 @@ function cleanItems(payload: any) {
 }
 
 export const useCartStore = defineStore('cart', {
+
     state: () => ({
         items: {} as Record<string, any>,
         initialized: false,
         hydrated: false,
 
         loading: false,
-
         loadingFetch: false,
         loadingAdd: false,
         loadingUpdate: false,
@@ -68,22 +62,22 @@ export const useCartStore = defineStore('cart', {
 
         updateQueue: {} as Record<string, number>,
         syncVersion: {} as Record<string, number>,
-        updating: {} as Record<string, boolean>,
+        updating: {} as Record<string, boolean>
     }),
 
     getters: {
-        total: (state) =>
-            Object.values(state.items).reduce((sum: number, item: any) => {
-                if (!item) return sum
-
-                return sum + Number(item.price) * Number(item.qty)
-            }, 0),
+        total: state =>
+            Object.values(state.items).reduce(
+                (sum: number, item: any) =>
+                    item ? sum + Number(item.price) * Number(item.qty) : sum,
+                0
+            )
     },
 
     actions: {
+
         hydrate() {
             if (!import.meta.client || this.hydrated) return
-
             this.hydrated = true
 
             const raw = localStorage.getItem('cartItems')
@@ -101,28 +95,18 @@ export const useCartStore = defineStore('cart', {
             const hasServerItems = Object.keys(this.items).length > 0
             const hasLocalItems = Object.keys(localItems).length > 0
 
-            if (!hasServerItems && hasLocalItems) {
-                this.items = localItems
-            }
-
+            if (!hasServerItems && hasLocalItems) this.items = localItems
             this.initialized = true
         },
 
         save() {
             if (!import.meta.client) return
-
-            localStorage.setItem(
-                'cartItems',
-                JSON.stringify(toRaw(this.items))
-            )
+            localStorage.setItem('cartItems', JSON.stringify(toRaw(this.items)))
         },
 
         async fetch(force = false) {
             const cartApi = useCartApi()
-
-            if (this.initialized && !force) {
-                return
-            }
+            if (this.initialized && !force) return
 
             this.loading = true
             this.loadingFetch = true
@@ -142,33 +126,26 @@ export const useCartStore = defineStore('cart', {
 
         async add(newItem: any) {
             const cartApi = useCartApi()
-
             const id = String(newItem.id)
             if (!id) return
 
             this.loading = true
             this.loadingAdd = true
 
-            const backup = JSON.parse(
-                JSON.stringify(toRaw(this.items))
-            )
-
+            const backup = JSON.parse(JSON.stringify(toRaw(this.items)))
             const current = this.items[id]
 
             this.items = {
                 ...this.items,
                 [id]: current
-                    ? {
-                        ...current,
-                        qty: Number(current.qty) + Number(newItem.qty ?? 1),
-                    }
+                    ? {...current, qty: Number(current.qty) + Number(newItem.qty ?? 1)}
                     : {
                         id: Number(id),
                         name: newItem.name,
                         price: Number(newItem.price ?? 0),
                         qty: Number(newItem.qty ?? 1),
-                        photo_url: newItem.photo_url || null,
-                    },
+                        photo_url: newItem.photo_url || null
+                    }
             }
 
             this.save()
@@ -176,7 +153,7 @@ export const useCartStore = defineStore('cart', {
             try {
                 const res: any = await cartApi.addItem({
                     id: Number(id),
-                    qty: Number(newItem.qty ?? 1),
+                    qty: Number(newItem.qty ?? 1)
                 })
                 console.log('[cart store] add response', res)
             } catch (e) {
@@ -191,33 +168,20 @@ export const useCartStore = defineStore('cart', {
 
         updateLocal(id: string, qty: number) {
             if (!this.items[id]) return
-
-            this.items = {
-                ...this.items,
-                [id]: {
-                    ...this.items[id],
-                    qty,
-                },
-            }
-
+            this.items = {...this.items, [id]: {...this.items[id], qty}}
             this.save()
         },
 
         async update(id: number | string, qty: number) {
             const cartApi = useCartApi()
-
             id = String(id)
             qty = Math.max(1, Number(qty))
 
             this.loadingUpdate = true
-
             this.updateLocal(id, qty)
 
             try {
-                const res: any = await cartApi.updateItem({
-                    id: Number(id),
-                    qty,
-                })
+                const res: any = await cartApi.updateItem({id: Number(id), qty})
                 console.log('[cart store] update response', res)
             } catch (e) {
                 console.error(e)
@@ -228,7 +192,6 @@ export const useCartStore = defineStore('cart', {
 
         async remove(id: number | string) {
             const cartApi = useCartApi()
-
             id = String(id)
 
             this.loadingRemove = true
@@ -236,6 +199,7 @@ export const useCartStore = defineStore('cart', {
             try {
                 const res: any = await cartApi.removeItem(Number(id))
                 console.log('[cart store] remove response', res)
+
                 const newItems = {...this.items}
                 delete newItems[id]
                 this.items = newItems
@@ -249,12 +213,9 @@ export const useCartStore = defineStore('cart', {
 
         async clear() {
             const cartApi = useCartApi()
-
             this.loadingClear = true
 
-            const backup = JSON.parse(
-                JSON.stringify(toRaw(this.items))
-            )
+            const backup = JSON.parse(JSON.stringify(toRaw(this.items)))
 
             try {
                 const res: any = await cartApi.clear()
@@ -273,9 +234,10 @@ export const useCartStore = defineStore('cart', {
         async checkout(payload: any = {}) {
             const cartApi = useCartApi()
             this.loadingCheckout = true
+
             try {
                 const data = await cartApi.checkout({
-                    comment: payload.comment || null,
+                    comment: payload.comment || null
                 })
                 console.log('[cart store] checkout response', data)
                 this.items = {}

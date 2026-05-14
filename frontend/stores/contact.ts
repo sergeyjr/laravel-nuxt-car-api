@@ -7,48 +7,26 @@ type ContactContext = 'home' | 'contactPage'
 export const useContactStore = defineStore('contact', {
 
     state: () => ({
-        form: {
-            name: '',
-            email: '',
-            subject: '',
-            body: ''
-        },
-
+        form: {name: '', email: '', subject: '', body: ''},
         errors: {} as Record<string, string[]>,
-
         loading: false,
-
         retryAfter: null as number | null,
         timer: null as ReturnType<typeof setInterval> | null,
         successCountdown: null as number | null,
-
         contexts: {
-            home: {
-                successMessage: '',
-                errorMessage: ''
-            },
-            contactPage: {
-                successMessage: '',
-                errorMessage: ''
-            }
-        } as Record<ContactContext, {
-            successMessage: string
-            errorMessage: string
-        }>
+            home: {successMessage: '', errorMessage: ''},
+            contactPage: {successMessage: '', errorMessage: ''}
+        } as Record<ContactContext, { successMessage: string; errorMessage: string }>
     }),
 
     actions: {
+
         resetErrors() {
             this.errors = {}
         },
 
         resetForm() {
-            this.form = {
-                name: '',
-                email: '',
-                subject: '',
-                body: ''
-            }
+            this.form = {name: '', email: '', subject: '', body: ''}
             this.errors = {}
         },
 
@@ -61,9 +39,8 @@ export const useContactStore = defineStore('contact', {
             if (this.timer) clearInterval(this.timer)
 
             this.timer = setInterval(() => {
-                if (this.retryAfter && this.retryAfter > 0) {
-                    this.retryAfter--
-                } else {
+                if (this.retryAfter && this.retryAfter > 0) this.retryAfter--
+                else {
                     if (this.timer) clearInterval(this.timer)
                     this.timer = null
                     this.retryAfter = null
@@ -91,10 +68,8 @@ export const useContactStore = defineStore('contact', {
 
                 console.log('data', data)
 
-                // запускаем таймер после успешной отправки
                 this.retryAfter = data?.retry_after ?? 60
                 this.startCountdown()
-
             } catch (e: any) {
                 const status = e?.status
                 const data = e?.data
@@ -112,7 +87,6 @@ export const useContactStore = defineStore('contact', {
                         'warning',
                         `Подождите ${this.retryAfter ?? ''} сек. перед следующим сообщением.`
                     )
-
                     return
                 }
 
@@ -126,7 +100,7 @@ export const useContactStore = defineStore('contact', {
                 this.loading = false
             }
         }
-    }
 
+    }
 
 })

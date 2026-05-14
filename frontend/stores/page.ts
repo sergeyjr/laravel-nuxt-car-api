@@ -47,17 +47,6 @@ export const usePageStore = defineStore('pages', {
             } finally {
                 this.loading = false
             }
-        },
-
-        clearCurrent() {
-            this.activeCode = null
-        },
-
-        clearCache() {
-            this.pages = {}
-            this.activeCode = null
-            this.loading = false
-            this.error = null
         }
 
     }

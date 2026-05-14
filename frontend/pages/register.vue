@@ -1,6 +1,6 @@
 <script setup>
 
-import {ref} from 'vue'
+import {ref, onMounted} from 'vue'
 import {useAuthStore} from '~/stores/auth'
 
 import BaseButton from '~/components/BaseButton.vue'
@@ -14,39 +14,36 @@ const password = ref('')
 const password_confirmation = ref('')
 
 const validate = () => {
-    store.clearErrors()
 
-    let hasError = false
+    const errors = {}
 
     if (!name.value) {
-        store.errors.name = 'Имя обязательно'
-        hasError = true
+        errors.name = 'Имя обязательно'
     }
 
     if (!email.value) {
-        store.errors.email = 'Email обязателен'
-        hasError = true
+        errors.email = 'Email обязателен'
     }
 
     if (!password.value) {
-        store.errors.password = 'Пароль обязателен'
-        hasError = true
+        errors.password = 'Пароль обязателен'
     }
 
     if (password.value && password.value.length < 6) {
-        store.errors.password = 'Минимум 6 символов'
-        hasError = true
+        errors.password = 'Минимум 6 символов'
     }
 
     if (password.value !== password_confirmation.value) {
-        store.errors.password_confirmation = 'Пароли не совпадают'
-        hasError = true
+        errors.password_confirmation = 'Пароли не совпадают'
     }
 
-    return !hasError
+    store.errors = {...errors}
+
+    return Object.keys(errors).length === 0
 }
 
 const submit = async () => {
+
     if (!validate()) return
 
     const ok = await store.register({
@@ -57,12 +54,19 @@ const submit = async () => {
     })
 
     if (ok) {
+
         name.value = ''
         email.value = ''
         password.value = ''
         password_confirmation.value = ''
+
     }
+
 }
+
+onMounted(() => {
+    store.clearErrors()
+})
 
 </script>
 
@@ -115,6 +119,7 @@ const submit = async () => {
                         <template #loading>
                             Регистрация...
                         </template>
+
                         Зарегистрироваться
                     </BaseButton>
 

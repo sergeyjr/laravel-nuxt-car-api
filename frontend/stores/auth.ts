@@ -12,11 +12,11 @@ export const useAuthStore = defineStore('auth', {
         loading: false,
         loggingOut: false,
         success: null as string | null,
-        errors: {} as Record<string, string[]>
+        errors: {} as Record<string, string>
     }),
 
     getters: {
-        isAuth: (state) => !!state.user
+        isAuth: state => !!state.user
     },
 
     actions: {
@@ -30,51 +30,40 @@ export const useAuthStore = defineStore('auth', {
             this.success = null
         },
 
+        normalizeErrors(errors: any) {
+            return Object.fromEntries(
+                Object.entries(errors || {}).map(([k, v]) => [
+                    k,
+                    Array.isArray(v) ? v[0] : v
+                ])
+            )
+        },
+
         async fetchUser() {
-
             const api = useAuthApi()
-
             try {
                 const user = await api.me()
-                if (!user) {
-                    this.user = null
-                    return false
-                }
-                this.user = user
-                return true
+                this.user = user || null
+                return !!user
             } catch (e: any) {
-                if (e?.status === 401) {
-                    this.user = null
-                }
+                if (e?.status === 401) this.user = null
                 return false
             }
-
         },
 
         async initAuth() {
-
-            if (this.initialized || this.initializing) {
-                return this.isAuth
-            }
-
+            if (this.initialized || this.initializing) return this.isAuth
             this.initializing = true
-
             try {
-
                 const ok = await this.fetchUser()
-
                 this.initialized = true
-
                 return ok
-
             } finally {
                 this.initializing = false
             }
-
         },
 
         async login(email: string, password: string) {
-
             this.loading = true
             this.clearErrors()
 
@@ -84,33 +73,22 @@ export const useAuthStore = defineStore('auth', {
             try {
                 await api.csrf()
                 const data: any = await api.login(email, password)
-                if (data?.user) {
-                    this.user = data.user
-                } else {
-                    await this.fetchUser()
-                }
+                this.user = data?.user || (await this.fetchUser() ? this.user : null)
                 this.initialized = true
                 return true
             } catch (e: any) {
                 if (e?.status === 422) {
-                    this.errors = e.data?.errors || {}
+                    this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
-                const message = e?.data?.message || 'Ошибка входа'
-                alert.add('error', message)
+                alert.add('error', e?.data?.message || 'Ошибка входа')
+                return false
             } finally {
                 this.loading = false
             }
-
         },
 
-        async register(payload: {
-            name: string
-            email: string
-            password: string
-            password_confirmation: string
-        }) {
-
+        async register(payload: any) {
             this.loading = true
             this.clearErrors()
 
@@ -126,22 +104,18 @@ export const useAuthStore = defineStore('auth', {
                 return true
             } catch (e: any) {
                 if (e?.status === 422) {
-                    this.errors = e.data?.errors || {}
+                    this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
-                const message = e?.data?.message || 'Регистрация не удалась.'
-                alert.add('error', message)
+                alert.add('error', e?.data?.message || 'Регистрация не удалась.')
                 return false
             } finally {
                 this.loading = false
             }
-
         },
 
         async logout() {
-
             this.loggingOut = true
-
             const api = useAuthApi()
             const alert = useAlertStore()
 
@@ -151,13 +125,11 @@ export const useAuthStore = defineStore('auth', {
                 this.logoutLocal()
                 return true
             } catch (e: any) {
-                const message = e?.data?.message || 'Ошибка выхода.'
-                alert.add('error', message)
+                alert.add('error', e?.data?.message || 'Ошибка выхода.')
                 return false
             } finally {
                 this.loggingOut = false
             }
-
         },
 
         logoutLocal() {

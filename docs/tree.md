@@ -85,6 +85,7 @@ laravel/
 │   │   ├── logging.php
 │   │   ├── mail.php
 │   │   ├── queue.php
+│   │   ├── rate_limits.php
 │   │   ├── sanctum.php
 │   │   ├── services.php
 │   │   └── session.php
@@ -126,12 +127,7 @@ laravel/
 │   │       ├── passwords.php
 │   │       └── validation.php
 │   ├── public/
-│   │   ├── storage/
-│   │   │   ├── cars/
-│   │   │   │   └── car.jpg
-│   │   │   └── .gitignore
 │   │   ├── index.php
-│   │   ├── php.php
 │   │   └── scan.php
 │   ├── routes/
 │   │   ├── api.php
@@ -150,52 +146,6 @@ laravel/
 │   ├── composer.json
 │   └── composer.lock
 ├── frontend/
-│   ├── .nuxt/
-│   │   ├── dev/
-│   │   │   ├── index.mjs
-│   │   │   └── index.mjs.map
-│   │   ├── dist/
-│   │   ├── manifest/
-│   │   │   ├── meta/
-│   │   │   │   ├── dev.json
-│   │   │   │   └── f804375c-27f0-4830-8c40-af17eb071548.json
-│   │   │   └── latest.json
-│   │   ├── schema/
-│   │   │   ├── nuxt.schema.d.ts
-│   │   │   └── nuxt.schema.json
-│   │   ├── types/
-│   │   │   ├── app.config.d.ts
-│   │   │   ├── build.d.ts
-│   │   │   ├── builder-env.d.ts
-│   │   │   ├── components.d.ts
-│   │   │   ├── imports.d.ts
-│   │   │   ├── layouts.d.ts
-│   │   │   ├── middleware.d.ts
-│   │   │   ├── modules.d.ts
-│   │   │   ├── nitro-config.d.ts
-│   │   │   ├── nitro-imports.d.ts
-│   │   │   ├── nitro-layouts.d.ts
-│   │   │   ├── nitro-middleware.d.ts
-│   │   │   ├── nitro-nuxt.d.ts
-│   │   │   ├── nitro-routes.d.ts
-│   │   │   ├── nitro.d.ts
-│   │   │   ├── plugins.d.ts
-│   │   │   ├── runtime-config.d.ts
-│   │   │   ├── shared-imports.d.ts
-│   │   │   └── vue-shim.d.ts
-│   │   ├── app.config.mjs
-│   │   ├── components.d.ts
-│   │   ├── imports.d.ts
-│   │   ├── nitro.json
-│   │   ├── nuxt.d.ts
-│   │   ├── nuxt.json
-│   │   ├── nuxt.node.d.ts
-│   │   ├── nuxt.shared.d.ts
-│   │   ├── tsconfig.app.json
-│   │   ├── tsconfig.json
-│   │   ├── tsconfig.node.json
-│   │   ├── tsconfig.server.json
-│   │   └── tsconfig.shared.json
 │   ├── assets/
 │   │   ├── css/
 │   │   │   └── app.css
@@ -206,9 +156,12 @@ laravel/
 │   ├── components/
 │   │   ├── modals/
 │   │   │   ├── AuthModal.vue
+│   │   │   ├── CartCheckoutModal.vue
+│   │   │   ├── CartClearModal.vue
+│   │   │   ├── CartRemoveItemModal.vue
+│   │   │   ├── DeleteAccountModal.vue
 │   │   │   └── LogoutConfirmModal.vue
 │   │   ├── Alerts.vue
-│   │   ├── AppLoader.vue
 │   │   ├── BaseButton.vue
 │   │   ├── BaseInput.vue
 │   │   ├── BaseTextarea.vue
@@ -218,6 +171,7 @@ laravel/
 │   │   ├── useApi.ts
 │   │   ├── useApiToken.ts
 │   │   ├── useAuthActions.ts
+│   │   ├── useModal.ts
 │   │   ├── useOrderStatus.ts
 │   │   └── useProtected.ts
 │   ├── layouts/
@@ -237,7 +191,8 @@ laravel/
 │   │   ├── order-success/
 │   │   │   └── [id].vue
 │   │   ├── orders/
-│   │   │   ├── [id].vue
+│   │   │   ├── show/
+│   │   │   │   └── [id].vue
 │   │   │   └── index.vue
 │   │   ├── page/
 │   │   │   └── [code].vue
@@ -245,7 +200,6 @@ laravel/
 │   │   ├── contact.vue
 │   │   ├── index.vue
 │   │   ├── login.vue
-│   │   ├── not-found.vue
 │   │   └── register.vue
 │   ├── plugins/
 │   │   ├── api.token.ts
@@ -283,8 +237,7 @@ laravel/
 │   │   ├── dashboard.ts
 │   │   ├── order.ts
 │   │   ├── page.ts
-│   │   ├── profile.ts
-│   │   └── ui.ts
+│   │   └── profile.ts
 │   ├── types/
 │   │   ├── auth.ts
 │   │   ├── car.ts
@@ -296,6 +249,7 @@ laravel/
 │   │   └── debug.ts
 │   ├── .gitignore
 │   ├── app.vue
+│   ├── error.vue
 │   ├── nuxt.config.ts
 │   ├── package-lock.json
 │   ├── package.json

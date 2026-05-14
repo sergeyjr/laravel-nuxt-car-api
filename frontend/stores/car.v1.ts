@@ -1,7 +1,7 @@
-import { useCarV1Api } from '~/services/api/external/v1/car.api'
-import { defineStore } from 'pinia'
-import { useAlertStore } from './alert'
-import { useAuthStore } from './auth'
+import {useCarV1Api} from '~/services/api/external/v1/car.api'
+import {defineStore} from 'pinia'
+import {useAlertStore} from './alert'
+import {useAuthStore} from './auth'
 
 type CarForm = {
     title: string
@@ -111,7 +111,7 @@ export const useCarV1Store = defineStore('car', {
                     }
                 }
 
-                const res = await carV1Api.create(payload)
+                const res: any = await carV1Api.create(payload)
 
                 this.showAlert('success', res.message || `Создано ID: ${res.data.id}`)
                 this.reset()
@@ -152,7 +152,7 @@ export const useCarV1Store = defineStore('car', {
             const carV1Api = useCarV1Api()
 
             try {
-                const res = await carV1Api.generateMock()
+                const res: any = await carV1Api.generateMock()
                 const car = res.data
 
                 Object.assign(this.form, {

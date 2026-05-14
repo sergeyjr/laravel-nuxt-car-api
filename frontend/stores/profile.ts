@@ -141,8 +141,8 @@ export const useProfileStore = defineStore('profile', {
         async deleteAccount() {
 
             const alert = useAlertStore()
-            // const auth = useAuthStore()
-            // const router = useRouter()
+            const auth = useAuthStore()
+            const router = useRouter()
             const profileApi = useProfileApi()
 
             this.loadingAll = true
@@ -152,12 +152,12 @@ export const useProfileStore = defineStore('profile', {
             try {
                 const data: any = await profileApi.delete()
 
-                // auth.user = null
+                auth.user = null
                 this.success = true
 
                 alert.add('success', data?.message || 'Аккаунт удален.')
 
-                // await router.push('/')
+                await router.push('/')
 
             } catch (e: any) {
 
