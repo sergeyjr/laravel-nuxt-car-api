@@ -1,22 +1,33 @@
 <script setup lang="ts">
 
-import {computed} from 'vue'
-import {useCartStore} from '~/stores/cart'
+const props = defineProps<{
+    show: boolean
+    processing?: boolean
+}>()
 
-const props = defineProps<{ show: boolean }>()
-const emit = defineEmits(['close'])
-
-const cart = useCartStore()
-
-const isProcessing = computed(() => cart.loadingClear)
+const emit = defineEmits<{
+    (e: 'close'): void
+    (e: 'confirm'): void
+}>()
 
 const close = () => {
-    if (!isProcessing.value) emit('close')
+
+    if (props.processing) {
+        return
+    }
+
+    emit('close')
+
 }
 
-const confirmClear = async () => {
-    await cart.clear()
-    close()
+const confirm = () => {
+
+    if (props.processing) {
+        return
+    }
+
+    emit('confirm')
+
 }
 
 </script>
@@ -37,7 +48,12 @@ const confirmClear = async () => {
                         Очистка корзины
                     </h5>
 
-                    <button class="btn-close" @click="close" :disabled="isProcessing"/>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        :disabled="processing"
+                        @click="close"
+                    />
                 </div>
 
                 <div class="modal-body">
@@ -49,12 +65,25 @@ const confirmClear = async () => {
 
                 <div class="modal-footer">
 
-                    <BaseButton variant="warning" :disabled="isProcessing" @click="confirmClear">
-                        <span v-if="isProcessing">Очищаем...</span>
-                        <span v-else>Очистить</span>
+                    <BaseButton
+                        variant="warning"
+                        :disabled="processing"
+                        @click="confirm"
+                    >
+                        <span v-if="processing">
+                            Очищаем...
+                        </span>
+
+                        <span v-else>
+                            Очистить
+                        </span>
                     </BaseButton>
 
-                    <BaseButton variant="secondary" :disabled="isProcessing" @click="close">
+                    <BaseButton
+                        variant="secondary"
+                        :disabled="processing"
+                        @click="close"
+                    >
                         Отмена
                     </BaseButton>
 

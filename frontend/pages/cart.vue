@@ -106,17 +106,15 @@ const confirmCheckout = async () => {
 
 <template>
     <div class="container py-4">
-        <!-- HEADER -->
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Корзина</h2>
         </div>
 
-        <!-- LOADING -->
         <div v-if="cart.loading" class="alert alert-light border text-center py-4">
             Загрузка корзины...
         </div>
 
-        <!-- EMPTY -->
         <div
             v-else-if="!Object.keys(items).length"
             class="card border-0 shadow-sm"
@@ -131,9 +129,8 @@ const confirmCheckout = async () => {
             </div>
         </div>
 
-        <!-- CONTENT -->
         <div v-else class="row g-4 align-items-start">
-            <!-- ITEMS -->
+
             <div class="col-12 col-lg-8">
                 <div
                     v-for="(itemData, itemId) in items"
@@ -200,14 +197,12 @@ const confirmCheckout = async () => {
                                 </div>
                             </div>
 
-                            <!-- PRICE -->
                             <div class="col-8 col-md-3 text-md-end">
                                 <div class="fw-bold fs-5">
                                     {{ formatPrice(itemData.price * itemData.qty) }}
                                 </div>
                             </div>
 
-                            <!-- REMOVE -->
                             <div class="col-4 col-md-1 text-end">
                                 <button
                                     type="button"
@@ -217,6 +212,7 @@ const confirmCheckout = async () => {
                                     ✕
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -225,7 +221,6 @@ const confirmCheckout = async () => {
             <!-- SIDEBAR -->
             <div class="col-12 col-lg-4">
                 <div class="position-lg-sticky" style="top: 1rem;">
-                    <!-- TOTAL -->
                     <div class="card border-0 shadow-sm mb-3">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -244,7 +239,6 @@ const confirmCheckout = async () => {
                         </div>
                     </div>
 
-                    <!-- COMMENT -->
                     <div class="card border-0 shadow-sm mb-3">
                         <div class="card-body">
                             <label class="form-label fw-semibold">
@@ -260,7 +254,6 @@ const confirmCheckout = async () => {
                         </div>
                     </div>
 
-                    <!-- ACTIONS -->
                     <div class="card border-0 shadow-sm">
                         <div class="card-body d-grid gap-2">
                             <BaseButton
@@ -288,17 +281,16 @@ const confirmCheckout = async () => {
                             </BaseButton>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
 
-        <!-- MODALS -->
-
         <CartRemoveItemModal
             :show="showRemoveModal"
-            :product-id="selectedItemId"
+            :processing="cart.loadingRemove"
             @close="showRemoveModal = false"
-            @success="confirmRemoveItem"
+            @confirm="confirmRemoveItem"
         />
 
         <CartCheckoutModal
@@ -309,8 +301,9 @@ const confirmCheckout = async () => {
 
         <CartClearModal
             :show="showClearModal"
+            :processing="cart.loadingClear"
             @close="showClearModal = false"
-            @success="confirmClearCart"
+            @confirm="confirmClearCart"
         />
 
     </div>

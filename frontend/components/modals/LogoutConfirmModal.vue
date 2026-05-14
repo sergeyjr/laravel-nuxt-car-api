@@ -2,13 +2,15 @@
 
 import {computed} from 'vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     show: boolean
-    loading: boolean
-}>()
+    loading?: boolean
+}>(), {
+    loading: false
+})
 
 const emit = defineEmits<{
-    (e: 'close'): void
+    (e: 'update:show', value: boolean): void
     (e: 'confirm'): void
 }>()
 
@@ -18,7 +20,7 @@ const close = () => {
     if (isProcessing.value) {
         return
     }
-    emit('close')
+    emit('update:show', false)
 }
 
 const confirmLogout = () => {
@@ -32,9 +34,9 @@ const confirmLogout = () => {
 
 <template>
     <div
+        v-if="show"
         class="modal fade show d-block"
         tabindex="-1"
-        v-if="show"
         style="background: rgba(0,0,0,.5);"
         @click.self="close"
     >
@@ -42,17 +44,22 @@ const confirmLogout = () => {
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Выход из аккаунта</h5>
+                    <h5 class="modal-title">
+                        Выход из аккаунта
+                    </h5>
+
                     <button
                         type="button"
                         class="btn-close"
                         :disabled="isProcessing"
                         @click="close"
-                    ></button>
+                    />
                 </div>
 
                 <div class="modal-body">
-                    <p class="mb-0">Вы уверены, что хотите выйти?</p>
+                    <p class="mb-0">
+                        Вы уверены, что хотите выйти?
+                    </p>
                 </div>
 
                 <div class="modal-footer">

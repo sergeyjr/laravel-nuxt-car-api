@@ -26,7 +26,7 @@ class CarController extends Controller
     {
         $pagination = new PaginationRequest([
             'page' => $request->query('page', 1),
-            'perPage' => 6,
+            'perPage' => 9,
             'sort' => $request->query('sort', '-id'),
         ]);
 

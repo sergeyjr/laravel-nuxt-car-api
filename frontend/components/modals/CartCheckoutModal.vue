@@ -46,17 +46,16 @@ const confirmOrder = () => {
             <div class="modal-content">
 
                 <div class="modal-header">
-
                     <h5 class="modal-title text-primary">
                         Оформление заказа
                     </h5>
 
                     <button
+                        type="button"
                         class="btn-close"
-                        @click="close"
                         :disabled="isProcessing"
+                        @click="close"
                     />
-
                 </div>
 
                 <div class="modal-body">

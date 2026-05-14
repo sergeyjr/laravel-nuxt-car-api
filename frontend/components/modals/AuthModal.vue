@@ -1,7 +1,9 @@
 <script setup lang="ts">
 
 import {ref, watch} from 'vue'
+
 import {useAuthStore} from '~/stores/auth'
+
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 

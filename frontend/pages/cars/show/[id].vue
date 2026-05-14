@@ -1,70 +1,101 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue'
-import {useNuxtApp, useRoute, navigateTo} from '#imports'
+
+import {computed, ref, watch} from 'vue'
+import {navigateTo, useNuxtApp, useRoute} from '#imports'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
-import {useCarApi} from '~/services/api/internal/car.api'
+import {useCarStore} from '~/stores/car'
+
 import type {Car} from '~/types/car'
 
 import AuthModal from '~/components/modals/AuthModal.vue'
-import BaseButton from '~/components/BaseButton.vue'
 
 const nuxtApp = useNuxtApp()
+
 const route = useRoute()
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
-
-const carApi = useCarApi()
+const carStore = useCarStore()
 
 const showAuth = ref(false)
-const addingToCart = ref<number | null>(null)
 const showImage = ref(false)
 
-const carId = Number(route.params.id)
+const carId = computed(() => Number(route.params.id))
 
-const openAuthModal = () => {
+const openAuthModal = (event?: Event) => {
+
+    event?.stopPropagation()
+    event?.preventDefault()
+
     showAuth.value = true
+
 }
 
-const {data: car, pending: carLoading} = await useAsyncData<Car | null>(
-    () => `car-${carId}`,
-    () => carApi.fetchCar(carId),
+const carKey = computed(() => `car-${carId.value}`)
+
+const {pending: carLoading} = await useAsyncData<Car | null>(
+    carKey,
+    async () => {
+
+        return await carStore.fetchCar(carId.value)
+
+    },
     {
         default: () => null,
+
         getCachedData(key) {
-            return nuxtApp.payload.data[key] ?? nuxtApp.static?.data[key]
-        }
+
+            return (
+                nuxtApp.payload.data[key]
+                ?? nuxtApp.static?.data[key]
+            )
+
+        },
     }
 )
+
+watch(
+    carId,
+    async (value) => {
+
+        await carStore.fetchCar(value)
+
+    },
+    {
+        immediate: true,
+    }
+)
+
+const car = computed(() => carStore.car)
 
 const carImage = computed(() => {
     return car.value?.photo_url || '/images/default_car.jpg'
 })
 
-const formatPrice = (price?: number | null) =>
-    new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
+const formatPrice = (price?: number | null) => {
+
+    return new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
+
+}
 
 const isInCart = (id: number | string) => {
+
     return !!cartStore.items[String(id)]
+
 }
 
 const addToCart = async (carItem: Car) => {
-    const id = Number(carItem?.id)
-    if (!id) return
-    try {
-        addingToCart.value = id
-        await cartStore.add({
-            id,
-            name: carItem.title ?? '',
-            price: carItem.price ?? 0,
-            qty: 1,
-            photo_url: carItem.photo_url ?? null,
-        })
-    } finally {
-        addingToCart.value = null
-    }
+
+    await carStore.addToCart(carItem)
+
+}
+
+const isAdding = (id: number | string) => {
+
+    return carStore.isAdding(id)
+
 }
 
 const openImage = () => {
@@ -76,29 +107,41 @@ const closeImage = () => {
 }
 
 const goBack = () => {
-    if (import.meta.client && history.state?.back) {
+
+    if (
+        import.meta.client &&
+        history.state?.back
+    ) {
         window.history.back()
     } else {
         navigateTo('/cars')
     }
+
 }
 
 </script>
 
 <template>
     <div class="container mt-4 position-relative">
+
         <div v-if="!carLoading && !car">
             Автомобиль не найден
         </div>
 
         <template v-else-if="car">
+
             <div class="row">
+
                 <div class="col-12">
-                    <h1 class="mb-4">{{ car.title }} [id: {{ car.id }}]</h1>
+                    <h1 class="mb-4">
+                        {{ car.title }} [id: {{ car.id }}]
+                    </h1>
                 </div>
 
                 <div class="col-md-5">
+
                     <div class="car-image-wrapper">
+
                         <img
                             :src="carImage"
                             class="img-fluid rounded car-image"
@@ -106,6 +149,7 @@ const goBack = () => {
                             alt=""
                             @click="openImage"
                         >
+
                     </div>
 
                     <div
@@ -113,67 +157,111 @@ const goBack = () => {
                         class="image-modal"
                         @click="closeImage"
                     >
+
                         <img
                             :src="carImage"
                             class="image-full"
                             @click.stop
                             alt=""
                         >
+
                     </div>
+
                 </div>
 
                 <div class="col-md-7">
+
                     <div class="table-responsive mb-3">
+
                         <table class="table table-sm align-middle mb-0 description-table">
+
                             <tbody>
+
                             <tr v-if="car.description">
-                                <td class="text-muted fw-semibold w-25">Описание</td>
-                                <td>{{ car.description }}</td>
+                                <td class="text-muted fw-semibold w-25">
+                                    Описание
+                                </td>
+                                <td>
+                                    {{ car.description }}
+                                </td>
                             </tr>
 
                             <tr v-if="car.options?.brand">
-                                <td class="text-muted fw-semibold">Бренд</td>
-                                <td>{{ car.options.brand }}</td>
+                                <td class="text-muted fw-semibold">
+                                    Бренд
+                                </td>
+                                <td>
+                                    {{ car.options.brand }}
+                                </td>
                             </tr>
 
                             <tr v-if="car.options?.model">
-                                <td class="text-muted fw-semibold">Модель</td>
-                                <td>{{ car.options.model }}</td>
+                                <td class="text-muted fw-semibold">
+                                    Модель
+                                </td>
+                                <td>
+                                    {{ car.options.model }}
+                                </td>
                             </tr>
 
                             <tr v-if="car.options?.year">
-                                <td class="text-muted fw-semibold">Год</td>
-                                <td>{{ car.options.year }}</td>
+                                <td class="text-muted fw-semibold">
+                                    Год
+                                </td>
+                                <td>
+                                    {{ car.options.year }}
+                                </td>
                             </tr>
 
                             <tr v-if="car.options?.mileage">
-                                <td class="text-muted fw-semibold">Пробег</td>
-                                <td>{{ car.options.mileage }}</td>
+                                <td class="text-muted fw-semibold">
+                                    Пробег
+                                </td>
+                                <td>
+                                    {{ car.options.mileage }}
+                                </td>
                             </tr>
 
                             <tr v-if="authStore.user && car.price">
-                                <td class="text-muted fw-semibold">Цена</td>
-                                <td>{{ formatPrice(car.price) }}</td>
+
+                                <td class="text-muted fw-semibold">
+                                    Цена
+                                </td>
+
+                                <td>
+                                    {{ formatPrice(car.price) }}
+                                </td>
+
                             </tr>
 
                             <tr v-else>
-                                <td class="text-muted fw-semibold">Цена</td>
+
+                                <td class="text-muted fw-semibold">
+                                    Цена
+                                </td>
+
                                 <td>
+
                                     <button
+                                        type="button"
                                         class="btn btn-light"
-                                        @click="openAuthModal"
+                                        @click.stop.prevent="openAuthModal"
                                     >
                                         Авторизуйтесь, чтобы увидеть цену
                                     </button>
+
                                 </td>
+
                             </tr>
+
                             </tbody>
+
                         </table>
 
-                        <AuthModal v-model="showAuth"/>
                     </div>
 
                     <div v-if="authStore.user">
+
                         <BaseButton
                             v-if="isInCart(car.id)"
                             variant="light"
@@ -187,23 +275,30 @@ const goBack = () => {
                             v-else
                             variant="success"
                             class="w-100"
-                            :disabled="addingToCart === car.id"
+                            :disabled="isAdding(car.id)"
                             @click="addToCart(car)"
                         >
-                            <span v-if="addingToCart === car.id">
+
+                            <span v-if="isAdding(car.id)">
                                 Добавляется...
                             </span>
+
                             <span v-else>
                                 В корзину
                             </span>
+
                         </BaseButton>
+
                     </div>
+
                 </div>
+
             </div>
 
             <hr>
 
             <div class="d-flex justify-content-between align-items-center">
+
                 <BaseButton
                     variant="light"
                     @click="goBack"
@@ -211,20 +306,44 @@ const goBack = () => {
                     ← Назад
                 </BaseButton>
 
-                <NuxtLink to="/cars" class="text-decoration-none">
+                <NuxtLink
+                    to="/cars"
+                    class="text-decoration-none"
+                >
+
                     <BaseButton variant="light">
                         В каталог →
                     </BaseButton>
+
                 </NuxtLink>
+
             </div>
+
         </template>
 
-        <div v-if="carLoading" class="loading-overlay">
+        <div
+            v-if="carLoading"
+            class="loading-overlay"
+        >
+
             <div class="loading-modal">
-                <div class="spinner-border" role="status" aria-label="Загрузка"></div>
-                <div class="mt-2">Загрузка автомобиля...</div>
+
+                <div
+                    class="spinner-border"
+                    role="status"
+                    aria-label="Загрузка"
+                />
+
+                <div class="mt-2">
+                    Загрузка автомобиля...
+                </div>
+
             </div>
+
         </div>
+
+        <AuthModal v-model="showAuth"/>
+
     </div>
 </template>
 

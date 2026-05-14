@@ -42,9 +42,9 @@ const confirmDelete = async () => {
                     <button
                         type="button"
                         class="btn-close"
-                        @click="close"
                         :disabled="isProcessing"
-                    ></button>
+                        @click="close"
+                    />
                 </div>
 
                 <div class="modal-body">

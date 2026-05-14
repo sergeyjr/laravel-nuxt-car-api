@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', {
         loading: false,
         loggingOut: false,
         success: null as string | null,
-        errors: {} as Record<string, string>
+        errors: {} as Record<string, string[]>,
     }),
 
     getters: {

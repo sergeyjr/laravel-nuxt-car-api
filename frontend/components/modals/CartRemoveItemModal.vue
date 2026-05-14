@@ -1,27 +1,33 @@
 <script setup lang="ts">
 
-import {computed} from 'vue'
-import {useCartStore} from '~/stores/cart'
-
 const props = defineProps<{
     show: boolean
-    productId: number | null
+    processing?: boolean
 }>()
 
-const emit = defineEmits(['close'])
-
-const cart = useCartStore()
-
-const isProcessing = computed(() => cart.loadingRemove)
+const emit = defineEmits<{
+    (e: 'close'): void
+    (e: 'confirm'): void
+}>()
 
 const close = () => {
-    if (!isProcessing.value) emit('close')
+
+    if (props.processing) {
+        return
+    }
+
+    emit('close')
+
 }
 
-const confirmDelete = async () => {
-    if (!props.productId) return
-    await cart.remove(props.productId)
-    close()
+const confirm = () => {
+
+    if (props.processing) {
+        return
+    }
+
+    emit('confirm')
+
 }
 
 </script>
@@ -42,7 +48,12 @@ const confirmDelete = async () => {
                         Удаление товара
                     </h5>
 
-                    <button class="btn-close" @click="close" :disabled="isProcessing"/>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        :disabled="processing"
+                        @click="close"
+                    />
                 </div>
 
                 <div class="modal-body">
@@ -54,12 +65,25 @@ const confirmDelete = async () => {
 
                 <div class="modal-footer">
 
-                    <BaseButton variant="danger" :disabled="isProcessing" @click="confirmDelete">
-                        <span v-if="isProcessing">Удаляем...</span>
-                        <span v-else>Удалить</span>
+                    <BaseButton
+                        variant="danger"
+                        :disabled="processing"
+                        @click="confirm"
+                    >
+                        <span v-if="processing">
+                            Удаляем...
+                        </span>
+
+                        <span v-else>
+                            Удалить
+                        </span>
                     </BaseButton>
 
-                    <BaseButton variant="secondary" :disabled="isProcessing" @click="close">
+                    <BaseButton
+                        variant="secondary"
+                        :disabled="processing"
+                        @click="close"
+                    >
                         Отмена
                     </BaseButton>
 

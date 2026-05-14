@@ -1,15 +1,14 @@
 <script setup lang="ts">
 
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useNuxtApp, useRoute, navigateTo} from '#imports'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
 import {useCartStore} from '~/stores/cart'
 
-import {useCarApi} from '~/services/api/internal/car.api'
-
 import type {Car, CarsResponse} from '~/types/car'
+import AuthModal from "~/components/modals/AuthModal.vue";
 
 const nuxtApp = useNuxtApp()
 
@@ -18,7 +17,6 @@ const carStore = useCarStore()
 const cartStore = useCartStore()
 
 const route = useRoute()
-const carApi = useCarApi()
 
 const clientReady = ref(false)
 
@@ -26,9 +24,13 @@ onMounted(() => {
     clientReady.value = true
 })
 
-const page = computed(() => Number(route.query.page || 1))
+const page = computed(() => {
+    return Number(route.query.page || 1)
+})
 
-const carsKey = computed(() => `cars-page-${page.value}`)
+const carsKey = computed(() => {
+    return `cars-page-${page.value}`
+})
 
 const emptyMeta = (): CarsResponse => ({
     data: [],
@@ -40,46 +42,110 @@ const emptyMeta = (): CarsResponse => ({
     per_page: 0,
 })
 
-const {data: carsResponse, pending: listLoading} = useAsyncData(
+const {pending: listLoading} = await useAsyncData(
     carsKey,
-    () => carApi.fetchCars(page.value),
+    async () => {
+
+        return await carStore.fetch(page.value)
+
+    },
     {
         deep: false,
+
         default: emptyMeta,
+
         getCachedData(key) {
-            return nuxtApp.payload.data[key] ?? nuxtApp.static?.data[key]
+
+            return (
+                nuxtApp.payload.data[key]
+                ?? nuxtApp.static?.data[key]
+            )
+
         },
     }
 )
 
-const meta = computed(() => carsResponse.value || null)
-const cars = computed(() => carsResponse.value?.data || [])
+watchEffect(() => {
 
-const changePage = (newPage: number) => {
-    navigateTo({
-        path: '/cars',
-        query: {page: newPage},
-    })
+    const cached = carStore.pages[page.value]
+
+    if (!cached) {
+        return
+    }
+
+    carStore.cars = cached.data || []
+    carStore.meta = cached
+
+})
+
+watch(
+    page,
+    async (value) => {
+
+        await carStore.fetch(value)
+
+    },
+    {
+        immediate: true,
+    }
+)
+
+const meta = computed(() => {
+    return carStore.meta
+})
+
+const cars = computed(() => {
+    return carStore.cars
+})
+
+const showAuth = ref(false)
+
+const openAuthModal = () => {
+    showAuth.value = true
 }
 
-const getImage = (car: any) => car.photo_url || '/images/default_car.jpg'
+const changePage = (newPage: number) => {
 
-const formatPrice = (price?: number | null) =>
-    new Intl.NumberFormat('ru-RU', {
+    navigateTo({
+        path: '/cars',
+        query: {
+            page: newPage,
+        },
+    })
+
+}
+
+const getImage = (car: Car) => {
+    return car.photo_url || '/images/default_car.jpg'
+}
+
+const formatPrice = (price?: number | null) => {
+
+    return new Intl.NumberFormat('ru-RU', {
         style: 'currency',
         currency: 'RUB',
         maximumFractionDigits: 0,
     }).format(price ?? 0)
 
+}
+
 const addToCart = async (car: Car) => {
+
     await carStore.addToCart(car)
+
 }
 
 const isInCart = (carId: number | string) => {
+
     return !!cartStore.items[String(carId)]
+
 }
 
-const isAdding = (id: number | string) => carStore.isAdding(id)
+const isAdding = (id: number | string) => {
+
+    return carStore.isAdding(id)
+
+}
 
 </script>
 
@@ -133,9 +199,14 @@ const isAdding = (id: number | string) => carStore.isAdding(id)
                                 </span>
                             </p>
 
-                            <p v-else class="text-muted">
+                            <button
+                                v-else
+                                type="button"
+                                class="btn btn-light"
+                                @click.stop.prevent="openAuthModal"
+                            >
                                 Авторизуйтесь, чтобы увидеть цену
-                            </p>
+                            </button>
                         </div>
                     </NuxtLink>
 
@@ -192,6 +263,8 @@ const isAdding = (id: number | string) => carStore.isAdding(id)
             · Показано {{ meta.from }}–{{ meta.to }}
             из {{ meta.total }}
         </div>
+
+        <AuthModal v-model="showAuth"/>
 
     </div>
 </template>
