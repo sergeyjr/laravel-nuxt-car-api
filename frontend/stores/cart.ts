@@ -88,7 +88,7 @@ export const useCartStore = defineStore('cart', {
             try {
                 localItems = cleanItems(JSON.parse(raw))
             } catch (e) {
-                console.error('Ошибка чтения cartItems из localStorage:', e)
+                console.error(e)
                 return
             }
 
@@ -116,7 +116,7 @@ export const useCartStore = defineStore('cart', {
                 this.items = cleanItems(data?.items ?? data)
                 this.save()
             } catch (e) {
-                console.error('Ошибка загрузки корзины:', e)
+                console.error(e)
             } finally {
                 this.loading = false
                 this.loadingFetch = false

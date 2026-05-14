@@ -42,7 +42,7 @@ export const usePageStore = defineStore('pages', {
                 return data
             } catch (e: any) {
                 this.error = e
-                console.error('[page store] fetch error:', e)
+                console.error(e)
                 return null
             } finally {
                 this.loading = false

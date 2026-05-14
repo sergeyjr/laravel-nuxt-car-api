@@ -11,23 +11,17 @@ const emit = defineEmits<{
 }>()
 
 const close = () => {
-
     if (props.processing) {
         return
     }
-
     emit('close')
-
 }
 
 const confirm = () => {
-
     if (props.processing) {
         return
     }
-
     emit('confirm')
-
 }
 
 </script>

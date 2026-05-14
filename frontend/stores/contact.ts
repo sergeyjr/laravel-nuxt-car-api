@@ -95,7 +95,7 @@ export const useContactStore = defineStore('contact', {
 
                 alert.add('error', this.contexts[context].errorMessage)
 
-                console.error('Contact error:', e)
+                console.error(e)
             } finally {
                 this.loading = false
             }

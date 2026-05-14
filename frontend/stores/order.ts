@@ -50,7 +50,7 @@ export const useOrderStore = defineStore('order', {
             } catch (e) {
                 this.error = e
                 this.currentOrder = null
-                console.error('Order fetch error:', e)
+                console.error(e)
                 return null
 
             } finally {
@@ -81,7 +81,7 @@ export const useOrderStore = defineStore('order', {
 
             } catch (e) {
                 this.error = e
-                console.error('Orders fetch error:', e)
+                console.error(e)
                 return []
 
             } finally {

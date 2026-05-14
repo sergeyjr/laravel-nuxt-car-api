@@ -26,7 +26,7 @@ export function useAuthActions() {
 
             return true
         } catch (e) {
-            console.error('Запрос на выход из системы не удался:', e)
+            console.error(e)
             return false
         }
     }
