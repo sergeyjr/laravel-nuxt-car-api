@@ -65,7 +65,11 @@ const changePage = (newPage: number) => {
 const getImage = (car: any) => car.photo_url || '/images/default_car.jpg'
 
 const formatPrice = (price?: number | null) =>
-    new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
+    new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: 'RUB',
+        maximumFractionDigits: 0,
+    }).format(price ?? 0)
 
 const addToCart = async (car: Car) => {
     await carStore.addToCart(car)
@@ -108,6 +112,7 @@ const isAdding = (id: number | string) => carStore.isAdding(id)
                 class="col-4 mb-3"
             >
                 <div class="card car-card text-center">
+
                     <NuxtLink
                         :to="`/cars/show/${car.id}`"
                         class="text-decoration-none text-dark"
@@ -122,8 +127,10 @@ const isAdding = (id: number | string) => carStore.isAdding(id)
                         <div class="card-body">
                             <h5>{{ car.title }} [id: {{ car.id }}]</h5>
 
-                            <p v-if="authStore.user">
-                                {{ formatPrice(car.price) }}
+                            <p v-if="authStore.user" class="mb-0">
+                                <span class="fs-5 fw-bold text-success">
+                                    {{ formatPrice(car.price) }}
+                                </span>
                             </p>
 
                             <p v-else class="text-muted">

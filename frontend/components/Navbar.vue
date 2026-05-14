@@ -8,6 +8,8 @@ import {useCartStore} from '~/stores/cart'
 
 import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
 
+import {useAuthActions} from '~/composables/useAuthActions'
+
 const auth = useAuthStore()
 const cart = useCartStore()
 const route = useRoute()
@@ -24,16 +26,31 @@ onMounted(() => {
 })
 
 const cartCount = computed(() => {
-
     if (!mounted.value || !auth.isAuth) {
         return 0
     }
-
     return Object.keys(cart.items || {}).length
 })
 
-const isActive = (path: string) =>
-    route.path === path || route.path.startsWith(path + '/')
+const isLogoutLoading = ref(false)
+
+const isActive = (path: string) => route.path === path || route.path.startsWith(path + '/')
+
+const {handleLogout} = useAuthActions()
+
+const onLogout = async () => {
+    if (isLogoutLoading.value) return
+    isLogoutLoading.value = true
+    try {
+        const ok = await handleLogout()
+        if (ok) {
+            showLogoutModal.value = false
+            navigateTo('/login')
+        }
+    } finally {
+        isLogoutLoading.value = false
+    }
+}
 
 </script>
 
@@ -104,8 +121,9 @@ const isActive = (path: string) =>
         </div>
 
         <LogoutModal
-            :show="showLogoutModal"
-            @close="showLogoutModal = false"
+            v-model:show="showLogoutModal"
+            :loading="isLogoutLoading"
+            @confirm="onLogout"
         />
 
     </nav>

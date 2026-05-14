@@ -1,24 +1,31 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
-import {useAuthActions} from '~/composables/useAuthActions'
 
-const props = defineProps<{ show: boolean }>()
-const emit = defineEmits(['close'])
+const props = defineProps<{
+    show: boolean
+    loading: boolean
+}>()
 
-const {handleLogout} = useAuthActions()
+const emit = defineEmits<{
+    (e: 'close'): void
+    (e: 'confirm'): void
+}>()
 
-const isProcessing = computed(() => false)
+const isProcessing = computed(() => props.loading)
 
 const close = () => {
+    if (isProcessing.value) {
+        return
+    }
     emit('close')
 }
 
-const confirmLogout = async () => {
-    const ok = await handleLogout()
-    if (ok) {
-        close()
+const confirmLogout = () => {
+    if (isProcessing.value) {
+        return
     }
+    emit('confirm')
 }
 
 </script>
@@ -36,7 +43,12 @@ const confirmLogout = async () => {
 
                 <div class="modal-header">
                     <h5 class="modal-title">Выход из аккаунта</h5>
-                    <button type="button" class="btn-close" @click="close"></button>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        :disabled="isProcessing"
+                        @click="close"
+                    ></button>
                 </div>
 
                 <div class="modal-body">
@@ -50,7 +62,12 @@ const confirmLogout = async () => {
                         :disabled="isProcessing"
                         @click="confirmLogout"
                     >
-                        Выйти
+                        <span v-if="isProcessing">
+                            Выходим...
+                        </span>
+                        <span v-else>
+                            Выйти
+                        </span>
                     </BaseButton>
 
                     <BaseButton

@@ -94,7 +94,7 @@ const goBack = () => {
         <template v-else-if="car">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="mb-4">{{ car.title }}</h1>
+                    <h1 class="mb-4">{{ car.title }} [id: {{ car.id }}]</h1>
                 </div>
 
                 <div class="col-md-5">

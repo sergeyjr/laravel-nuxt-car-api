@@ -76,7 +76,6 @@ const confirmOrder = () => {
                         <span v-if="isProcessing">
                             Отправка...
                         </span>
-
                         <span v-else>
                             Подтвердить
                         </span>
