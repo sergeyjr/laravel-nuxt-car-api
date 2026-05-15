@@ -2,14 +2,19 @@
 
 import {computed} from 'vue'
 
-import {useProfileStore} from '~/stores/profile'
+import BaseButton from '~/components/BaseButton.vue'
 
-const props = defineProps<{ show: boolean }>()
-const emit = defineEmits(['close'])
+const props = defineProps<{
+    show: boolean
+    loading?: boolean
+}>()
 
-const profile = useProfileStore()
+const emit = defineEmits<{
+    (e: 'close'): void
+    (e: 'confirm'): void
+}>()
 
-const isProcessing = computed(() => profile.loadingDelete)
+const isProcessing = computed(() => props.loading)
 
 const close = () => {
     if (!isProcessing.value) {
@@ -17,18 +22,19 @@ const close = () => {
     }
 }
 
-const confirmDelete = async () => {
-    await profile.deleteAccount()
-    close()
+const confirmDelete = () => {
+    if (!isProcessing.value) {
+        emit('confirm')
+    }
 }
 
 </script>
 
 <template>
     <div
+        v-if="show"
         class="modal fade show d-block"
         tabindex="-1"
-        v-if="show"
         style="background: rgba(0,0,0,.6);"
         @click.self="close"
     >

@@ -5,6 +5,7 @@ export interface User {
     created_at?: string
     updated_at?: string
     role?: string
+    avatar?: string
 }
 
 export interface AuthResponse {

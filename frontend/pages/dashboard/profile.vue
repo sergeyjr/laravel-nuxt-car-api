@@ -59,7 +59,7 @@ const password_confirmation = ref('')
    utils
 ------------------------------*/
 
-const formatDate = (date) => {
+const formatDate = (date: any) => {
     if (!date) return ''
 
     return new Intl.DateTimeFormat('ru-RU', {
@@ -174,6 +174,18 @@ const submitPassword = async () => {
     }
 }
 
+/* -----------------------------
+   delete account
+------------------------------*/
+
+const confirmDeleteAccount = async () => {
+    const ok = await profile.deleteAccount()
+
+    if (ok) {
+        showDeleteModal.value = false
+    }
+}
+
 </script>
 
 <template>
@@ -200,7 +212,8 @@ const submitPassword = async () => {
                             width="120"
                             height="120"
                             @click="profile.openAvatar"
-                            alt=""/>
+                            alt=""
+                        />
 
                         <h4>{{ user?.name }}</h4>
 
@@ -223,7 +236,8 @@ const submitPassword = async () => {
                         :src="avatarUrl"
                         class="avatar-full"
                         @click.stop
-                        alt=""/>
+                        alt=""
+                    />
                 </div>
 
                 <!-- DELETE ACCOUNT -->
@@ -261,7 +275,7 @@ const submitPassword = async () => {
                                 label="Имя"
                                 type="text"
                                 required
-                                :error="profile.errors.name?.[0]"
+                                :error="profile.errors.name"
                             />
 
                             <BaseInput
@@ -269,7 +283,7 @@ const submitPassword = async () => {
                                 label="Email"
                                 type="email"
                                 disabled
-                                :error="profile.errors.email?.[0]"
+                                :error="profile.errors.email"
                             />
 
                             <small class="text-muted d-block mt-1 mb-3">
@@ -287,7 +301,7 @@ const submitPassword = async () => {
                                     @change="profile.onFile"
                                 >
                                 <small v-if="profile.errors.avatar" class="text-danger">
-                                    {{ profile.errors.avatar[0] }}
+                                    {{ profile.errors.avatar }}
                                 </small>
                             </div>
 
@@ -340,7 +354,7 @@ const submitPassword = async () => {
                                 label="Текущий пароль"
                                 type="password"
                                 required
-                                :error="profile.errors.current_password?.[0]"
+                                :error="profile.errors.current_password"
                             />
 
                             <BaseInput
@@ -348,7 +362,7 @@ const submitPassword = async () => {
                                 label="Новый пароль"
                                 type="password"
                                 required
-                                :error="profile.errors.password?.[0]"
+                                :error="profile.errors.password"
                             />
 
                             <BaseInput
@@ -356,7 +370,7 @@ const submitPassword = async () => {
                                 label="Подтверждение"
                                 type="password"
                                 required
-                                :error="profile.errors.password_confirmation?.[0]"
+                                :error="profile.errors.password_confirmation"
                             />
 
                             <BaseButton
@@ -426,12 +440,12 @@ const submitPassword = async () => {
                         :disabled="profile.loadingDelete"
                         @click="confirmDeleteAccount"
                     >
-                    <span v-if="profile.loadingDelete">
-                        Удаляем...
-                    </span>
+                        <span v-if="profile.loadingDelete">
+                            Удаляем...
+                        </span>
                         <span v-else>
-                        Да, удалить
-                    </span>
+                            Да, удалить
+                        </span>
                     </button>
 
                 </div>
@@ -442,7 +456,9 @@ const submitPassword = async () => {
 
     <DeleteAccountModal
         :show="showDeleteModal"
+        :loading="profile.loadingDelete"
         @close="showDeleteModal = false"
+        @confirm="confirmDeleteAccount"
     />
 
 </template>

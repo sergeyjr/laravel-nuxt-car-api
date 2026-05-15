@@ -1,7 +1,13 @@
-import {defineStore} from 'pinia'
-import {useAuthStore} from './auth'
-import {useAlertStore} from './alert'
-import {useProfileApi} from '~/services/api/internal/profile.api'
+import { defineStore } from 'pinia'
+import { useAuthStore } from './auth'
+import { useAlertStore } from './alert'
+import { useProfileApi } from '~/services/api/internal/profile.api'
+
+type ProfilePasswordForm = {
+    current_password: string
+    password: string
+    password_confirmation: string
+}
 
 export const useProfileStore = defineStore('profile', {
 
@@ -17,9 +23,9 @@ export const useProfileStore = defineStore('profile', {
             current_password: '',
             password: '',
             password_confirmation: ''
-        },
+        } as ProfilePasswordForm,
 
-        errors: {} as Record<string, string[] | string>,
+        errors: {} as Record<string, string>,
 
         loadingProfile: false,
         loadingAvatar: false,
@@ -66,7 +72,16 @@ export const useProfileStore = defineStore('profile', {
             this.errors = {}
         },
 
-        async updateProfile(payload: any) {
+        normalizeErrors(errors: any): Record<string, string> {
+            return Object.fromEntries(
+                Object.entries(errors || {}).map(([k, v]) => [
+                    k,
+                    Array.isArray(v) ? (v[0] ?? '') : String(v ?? ''),
+                ]),
+            )
+        },
+
+        async updateProfile(payload: any): Promise<boolean> {
 
             const alert = useAlertStore()
             const auth = useAuthStore()
@@ -86,14 +101,18 @@ export const useProfileStore = defineStore('profile', {
 
                 alert.add('success', data?.message || 'Профиль обновлён.')
 
+                return true
+
             } catch (e: any) {
 
                 if (e?.status === 422) {
-                    this.errors = e.data?.errors || {}
-                    return
+                    this.errors = this.normalizeErrors(e.data?.errors)
+                    return false
                 }
 
                 alert.add('error', 'Ошибка обновления профиля.')
+
+                return false
 
             } finally {
                 this.loadingAll = false
@@ -101,7 +120,7 @@ export const useProfileStore = defineStore('profile', {
             }
         },
 
-        async changePassword(payload: typeof this.passwordForm) {
+        async changePassword(payload: ProfilePasswordForm): Promise<boolean> {
 
             const alert = useAlertStore()
             const profileApi = useProfileApi()
@@ -112,6 +131,7 @@ export const useProfileStore = defineStore('profile', {
 
             try {
                 const data: any = await profileApi.changePassword(payload)
+
                 this.passwordForm = {
                     current_password: '',
                     password: '',
@@ -122,14 +142,18 @@ export const useProfileStore = defineStore('profile', {
 
                 alert.add('success', data?.message || 'Пароль обновлён.')
 
+                return true
+
             } catch (e: any) {
 
                 if (e?.status === 422) {
-                    this.errors = e.data?.errors || {}
-                    return
+                    this.errors = this.normalizeErrors(e.data?.errors)
+                    return false
                 }
 
                 alert.add('error', 'Ошибка смены пароля.')
+
+                return false
 
             } finally {
                 this.loadingAll = false
@@ -138,7 +162,7 @@ export const useProfileStore = defineStore('profile', {
 
         },
 
-        async deleteAccount() {
+        async deleteAccount(): Promise<boolean> {
 
             const alert = useAlertStore()
             const auth = useAuthStore()
@@ -159,14 +183,18 @@ export const useProfileStore = defineStore('profile', {
 
                 await router.push('/')
 
+                return true
+
             } catch (e: any) {
 
                 if (e?.status === 422) {
-                    this.errors = e.data?.errors || {}
-                    return
+                    this.errors = this.normalizeErrors(e.data?.errors)
+                    return false
                 }
 
                 alert.add('error', 'Ошибка удаления аккаунта')
+
+                return false
 
             } finally {
                 this.loadingAll = false
