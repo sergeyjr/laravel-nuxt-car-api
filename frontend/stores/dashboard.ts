@@ -37,7 +37,7 @@ export const useDashboardStore = defineStore('dashboard', {
 
                 this.loaded = true
             } catch (e: any) {
-                console.log('[dashboard] ERROR', e)
+                console.error('[dashboard] ERROR', e)
                 this.error = e
             } finally {
                 this.loading = false
