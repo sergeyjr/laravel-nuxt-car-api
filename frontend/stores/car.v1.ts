@@ -161,11 +161,11 @@ export const useCarV1Store = defineStore('car', {
                     price: car.price,
                     photo_url: car.photo_url,
                     contacts: car.contacts,
-                    brand: car.option?.brand,
-                    model: car.option?.model,
-                    year: car.option?.year,
-                    body: car.option?.body,
-                    mileage: car.option?.mileage
+                    brand: car.options?.brand,
+                    model: car.options?.model,
+                    year: car.options?.year,
+                    body: car.options?.body,
+                    mileage: car.options?.mileage
                 })
             } catch {
                 this.showAlert('error', 'Ошибка генерации данных')

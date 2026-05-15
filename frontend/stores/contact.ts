@@ -8,9 +8,9 @@ export const useContactStore = defineStore('contact', {
 
     state: () => ({
         form: {name: '', email: '', subject: '', body: ''},
-        errors: {} as Record<string, string[]>,
+        errors: {} as Record<string, string>,
         loading: false,
-        retryAfter: null as number | null,
+        retryAfter: 0,
         timer: null as ReturnType<typeof setInterval> | null,
         successCountdown: null as number | null,
         contexts: {
@@ -20,6 +20,13 @@ export const useContactStore = defineStore('contact', {
     }),
 
     actions: {
+
+        stopCountdown() {
+            if (this.timer) {
+                clearInterval(this.timer)
+                this.timer = null
+            }
+        },
 
         resetErrors() {
             this.errors = {}
@@ -35,15 +42,24 @@ export const useContactStore = defineStore('contact', {
             this.contexts[context].errorMessage = ''
         },
 
+        normalizeErrors(errors: any): Record<string, string> {
+            return Object.fromEntries(
+                Object.entries(errors || {}).map(([k, v]) => [
+                    k,
+                    Array.isArray(v) ? (v[0] ?? '') : String(v ?? ''),
+                ]),
+            )
+        },
+
         startCountdown() {
-            if (this.timer) clearInterval(this.timer)
+            this.stopCountdown()
 
             this.timer = setInterval(() => {
-                if (this.retryAfter && this.retryAfter > 0) this.retryAfter--
-                else {
-                    if (this.timer) clearInterval(this.timer)
-                    this.timer = null
-                    this.retryAfter = null
+                if (this.retryAfter > 0) {
+                    this.retryAfter--
+                } else {
+                    this.stopCountdown()
+                    this.retryAfter = 0
                 }
             }, 1000)
         },
@@ -66,8 +82,6 @@ export const useContactStore = defineStore('contact', {
 
                 alert.add('success', this.contexts[context].successMessage)
 
-                console.log('data', data)
-
                 this.retryAfter = data?.retry_after ?? 60
                 this.startCountdown()
             } catch (e: any) {
@@ -75,17 +89,17 @@ export const useContactStore = defineStore('contact', {
                 const data = e?.data
 
                 if (status === 422) {
-                    this.errors = data?.errors || {}
+                    this.errors = this.normalizeErrors(data?.errors)
                     return
                 }
 
                 if (status === 429) {
-                    this.retryAfter = data?.retry_after ?? null
+                    this.retryAfter = data?.retry_after ?? 60
                     this.startCountdown()
 
                     alert.add(
                         'warning',
-                        `Подождите ${this.retryAfter ?? ''} сек. перед следующим сообщением.`
+                        `Подождите ${this.retryAfter} сек. перед следующим сообщением.`,
                     )
                     return
                 }

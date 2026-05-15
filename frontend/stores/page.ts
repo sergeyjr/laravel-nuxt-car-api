@@ -21,7 +21,10 @@ export const usePageStore = defineStore('pages', {
     actions: {
 
         async fetch(code: string) {
-            if (!code) return null
+
+            if (!code) {
+                return null
+            }
 
             this.error = null
             this.activeCode = code
@@ -33,20 +36,27 @@ export const usePageStore = defineStore('pages', {
             }
 
             this.loading = true
-
             const pageApi = usePageApi()
 
             try {
                 const data = await pageApi.fetchPage(code)
+                if (this.activeCode !== code) {
+                    return null
+                }
                 this.pages[code] = data
                 return data
             } catch (e: any) {
-                this.error = e
+                if (this.activeCode === code) {
+                    this.error = e
+                }
                 console.error(e)
                 return null
             } finally {
-                this.loading = false
+                if (this.activeCode === code) {
+                    this.loading = false
+                }
             }
+
         }
 
     }

@@ -83,7 +83,7 @@ onMounted(() => {
                         type="email"
                         label="Email"
                         required
-                        :error="store.errors.email?.[0]"
+                        :error="store.errors.email"
                     />
 
                     <BaseInput
@@ -91,7 +91,7 @@ onMounted(() => {
                         type="password"
                         label="Пароль"
                         required
-                        :error="store.errors.password?.[0]"
+                        :error="store.errors.password"
                     />
 
                     <BaseButton

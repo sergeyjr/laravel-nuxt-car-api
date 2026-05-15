@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {useCarStore} from '~/stores/car'
+import {useCarV1Store} from '~/stores/car.v1'
 
 import BaseInput from '~/components/BaseInput.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -9,8 +9,7 @@ import BaseButton from '~/components/BaseButton.vue'
    store
 ------------------------------*/
 
-const store = useCarStore()
-const router = useRouter()
+const store = useCarV1Store()
 
 /* -----------------------------
    init
@@ -25,7 +24,6 @@ store.reset()
 const submit = async () => {
     try {
         const result = await store.submit()
-
         if (result?.id) {
             await navigateTo(`/cars/show/${result.id}`)
         }
@@ -69,7 +67,7 @@ const generate = async () => {
 
                     <BaseInput
                         :model-value="store.form.price ?? ''"
-                        @update:modelValue="val => store.form.price = val === '' ? null : Number(val)"
+                        @update:modelValue="val => store.form.price = val === '' ? '' : Number(val)"
                         type="number"
                         label="Цена"
                         :error="store.errors.price"
@@ -138,6 +136,7 @@ const generate = async () => {
                     <template #loading>
                         Отправляем...
                     </template>
+
                     Отправить
                 </BaseButton>
 
@@ -152,6 +151,7 @@ const generate = async () => {
                     <template #loading>
                         Получаем данные...
                     </template>
+
                     Сгенерировать
                 </BaseButton>
 

@@ -1,6 +1,7 @@
 import {ref, computed, watch, onBeforeUnmount} from 'vue'
 
 export function useModal(initial = false) {
+
     const isOpen = ref(initial)
 
     const open = () => {
@@ -45,4 +46,5 @@ export function useModal(initial = false) {
         close,
         toggle,
     }
+
 }

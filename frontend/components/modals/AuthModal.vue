@@ -22,9 +22,6 @@ const store = useAuthStore()
 const email = ref('')
 const password = ref('')
 
-/**
- * loading теперь управляется снаружи (как checkout modal)
- */
 const isProcessing = computed(() => {
     return props.loading ?? false
 })
@@ -101,7 +98,7 @@ watch(() => props.show, (val) => {
                             type="email"
                             label="Email"
                             required
-                            :error="store.errors.email?.[0]"
+                            :error="store.errors.email"
                         />
 
                         <BaseInput
@@ -109,7 +106,7 @@ watch(() => props.show, (val) => {
                             type="password"
                             label="Пароль"
                             required
-                            :error="store.errors.password?.[0]"
+                            :error="store.errors.password"
                         />
 
                         <BaseButton

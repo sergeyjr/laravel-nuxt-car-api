@@ -18,10 +18,7 @@ const store = useContactStore()
 
 const onSubmit = async (e: Event) => {
     const form = e.target as HTMLFormElement
-
-    // native validation guard
     if (!form.checkValidity()) return
-
     await store.submit('contactPage')
 }
 
@@ -34,7 +31,8 @@ const onSubmit = async (e: Event) => {
 
                 <h1 class="mb-4">Контактная форма</h1>
 
-                <div v-if="store.retryAfter" class="alert alert-warning mt-4">
+                <!-- rate limit warning -->
+                <div v-if="store.retryAfter > 0" class="alert alert-warning mt-4">
                     Следующее сообщение можно отправить через {{ store.retryAfter }} сек.
                 </div>
 
@@ -45,7 +43,7 @@ const onSubmit = async (e: Event) => {
                         label="Имя"
                         required
                         :disabled="store.retryAfter > 0"
-                        :error="store.errors.name?.[0]"
+                        :error="store.errors.name"
                     />
 
                     <BaseInput
@@ -54,7 +52,7 @@ const onSubmit = async (e: Event) => {
                         label="Email"
                         required
                         :disabled="store.retryAfter > 0"
-                        :error="store.errors.email?.[0]"
+                        :error="store.errors.email"
                     />
 
                     <BaseInput
@@ -62,7 +60,7 @@ const onSubmit = async (e: Event) => {
                         label="Тема"
                         required
                         :disabled="store.retryAfter > 0"
-                        :error="store.errors.subject?.[0]"
+                        :error="store.errors.subject"
                     />
 
                     <BaseTextarea
@@ -70,7 +68,7 @@ const onSubmit = async (e: Event) => {
                         label="Сообщение"
                         required
                         :disabled="store.retryAfter > 0"
-                        :error="store.errors.body?.[0]"
+                        :error="store.errors.body"
                     />
 
                     <BaseButton

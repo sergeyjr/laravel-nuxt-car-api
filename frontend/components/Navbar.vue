@@ -1,64 +1,95 @@
 <script setup lang="ts">
 
-import {computed, ref, onMounted} from 'vue'
+import { computed, ref } from 'vue'
 
-import {useAuthStore} from '~/stores/auth'
-import {useCartStore} from '~/stores/cart'
+import { useAuthStore } from '~/stores/auth'
+import { useCartStore } from '~/stores/cart'
 
 import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
+
+/* -----------------------------
+   stores
+------------------------------*/
 
 const auth = useAuthStore()
 const cart = useCartStore()
 
 const route = useRoute()
-const router = useRouter()
+
+/* -----------------------------
+   config
+------------------------------*/
 
 const config = useRuntimeConfig()
 const appName = config.public.appName
 
+/* -----------------------------
+   state
+------------------------------*/
+
 const showLogoutModal = ref(false)
+const isLogoutLoading = ref(false)
 
-const mounted = ref(false)
-
-onMounted(() => {
-    mounted.value = true
-})
+/* -----------------------------
+   computed
+------------------------------*/
 
 const cartCount = computed(() => {
-    if (!mounted.value || !auth.isAuth) {
+    if (!auth.isAuth) {
         return 0
     }
+
     return Object.keys(cart.items || {}).length
 })
 
-const isLogoutLoading = ref(false)
+/* -----------------------------
+   helpers
+------------------------------*/
 
-const isActive = (path: string) => route.path === path || route.path.startsWith(path + '/')
+const isActive = (path: string) =>
+    route.path === path || route.path.startsWith(path + '/')
+
+/* -----------------------------
+   logout
+------------------------------*/
 
 const onLogout = async () => {
+
     if (isLogoutLoading.value) {
         return
     }
+
     isLogoutLoading.value = true
+
     try {
+
         const ok = await auth.logout()
+
         if (!ok) {
-            return false
+            return
         }
+
+        cart.items = {}
+        cart.initialized = false
+
+        showLogoutModal.value = false
+
         const path = route.path
+
         if (
             path.startsWith('/cart') ||
             path.startsWith('/dashboard') ||
             path.startsWith('/cars/create')
         ) {
-            await router.push('/login')
+            await navigateTo('/login')
         }
-        if (ok) {
-            showLogoutModal.value = false
-        }
+
     } finally {
+
         isLogoutLoading.value = false
+
     }
+
 }
 
 </script>

@@ -2,6 +2,10 @@
 
 import {computed} from 'vue'
 
+/* -----------------------------
+   props
+------------------------------*/
+
 const props = withDefaults(defineProps<{
     show: boolean
     loading?: boolean
@@ -14,19 +18,23 @@ const emit = defineEmits<{
     (e: 'confirm'): void
 }>()
 
+/* -----------------------------
+   computed
+------------------------------*/
+
 const isProcessing = computed(() => props.loading)
 
+/* -----------------------------
+   actions
+------------------------------*/
+
 const close = () => {
-    if (isProcessing.value) {
-        return
-    }
+    if (isProcessing.value) return
     emit('update:show', false)
 }
 
 const confirmLogout = () => {
-    if (isProcessing.value) {
-        return
-    }
+    if (isProcessing.value) return
     emit('confirm')
 }
 
