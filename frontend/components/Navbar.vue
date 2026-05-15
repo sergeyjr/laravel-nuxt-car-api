@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import { computed, ref } from 'vue'
+import {computed, ref} from 'vue'
 
-import { useAuthStore } from '~/stores/auth'
-import { useCartStore } from '~/stores/cart'
+import {useAuthStore} from '~/stores/auth'
+import {useCartStore} from '~/stores/cart'
 
+import {useLogout} from '~/composables/useLogout'
 import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
 
 /* -----------------------------
@@ -15,6 +16,12 @@ const auth = useAuthStore()
 const cart = useCartStore()
 
 const route = useRoute()
+
+/* -----------------------------
+   logout composable
+------------------------------*/
+
+const {logout} = useLogout()
 
 /* -----------------------------
    config
@@ -35,10 +42,7 @@ const isLogoutLoading = ref(false)
 ------------------------------*/
 
 const cartCount = computed(() => {
-    if (!auth.isAuth) {
-        return 0
-    }
-
+    if (!auth.isAuth) return 0
     return Object.keys(cart.items || {}).length
 })
 
@@ -50,46 +54,19 @@ const isActive = (path: string) =>
     route.path === path || route.path.startsWith(path + '/')
 
 /* -----------------------------
-   logout
+   logout handler
 ------------------------------*/
 
 const onLogout = async () => {
-
-    if (isLogoutLoading.value) {
-        return
-    }
-
+    if (isLogoutLoading.value) return
     isLogoutLoading.value = true
-
     try {
-
-        const ok = await auth.logout()
-
-        if (!ok) {
-            return
-        }
-
-        cart.items = {}
-        cart.initialized = false
-
+        const ok = await logout(route.path)
+        if (!ok) return
         showLogoutModal.value = false
-
-        const path = route.path
-
-        if (
-            path.startsWith('/cart') ||
-            path.startsWith('/dashboard') ||
-            path.startsWith('/cars/create')
-        ) {
-            await navigateTo('/login')
-        }
-
     } finally {
-
         isLogoutLoading.value = false
-
     }
-
 }
 
 </script>
@@ -98,12 +75,10 @@ const onLogout = async () => {
     <nav class="nav-bar">
         <div class="container nav-inner">
 
-            <!-- logo -->
             <NuxtLink to="/" class="logo">
                 {{ appName }}
             </NuxtLink>
 
-            <!-- links -->
             <div class="nav-links">
 
                 <NuxtLink to="/cars" class="nav-link" :class="{ active: isActive('/cars') }">
