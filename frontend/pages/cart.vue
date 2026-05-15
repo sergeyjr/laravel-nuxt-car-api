@@ -1,3 +1,5 @@
+<!-- pages/cart.vue -->
+
 <script setup lang="ts">
 
 import {computed, ref} from 'vue'
@@ -26,7 +28,8 @@ const selectedItemId = ref<number | null>(null)
 const items = computed(() => cart.items)
 const total = computed(() => cart.total)
 
-const formatPrice = (v: number) => new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
+const formatPrice = (v: number) =>
+    new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
 
 function sanitizeQty(value: unknown) {
     let qty = Number(value)
@@ -94,10 +97,7 @@ const confirmCheckout = async () => {
         await dashboard.fetchDashboard(true)
         await navigateTo(`/order-success/${order.id}`)
     } catch (e) {
-        console.error(
-            'Checkout failed:',
-            e
-        )
+        console.error('Checkout failed:', e)
         isSubmitting.value = false
     }
 }

@@ -1,17 +1,15 @@
 <script setup lang="ts">
 
-import {computed, ref, watch} from 'vue'
-import {navigateTo, useNuxtApp, useRoute} from '#imports'
+import {computed, ref, onMounted, watch} from 'vue'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 import {useCarStore} from '~/stores/car'
 
+import type {LoginPayload} from "~/types/auth";
 import type {Car} from '~/types/car'
 
 import AuthModal from '~/components/modals/AuthModal.vue'
-
-const nuxtApp = useNuxtApp()
 
 const route = useRoute()
 
@@ -21,328 +19,229 @@ const carStore = useCarStore()
 
 const showAuth = ref(false)
 const showImage = ref(false)
+const loaded = ref(false)
 
 const carId = computed(() => Number(route.params.id))
 
 const openAuthModal = (event?: Event) => {
-
     event?.stopPropagation()
     event?.preventDefault()
-
     showAuth.value = true
-
 }
 
-const carKey = computed(() => `car-${carId.value}`)
+const loadCar = async (id: number) => {
+    await carStore.fetchCar(id)
+}
 
-const {pending: carLoading} = await useAsyncData<Car | null>(
-    carKey,
-    async () => {
+onMounted(() => {
+    loadCar(carId.value)
+})
 
-        return await carStore.fetchCar(carId.value)
-
-    },
-    {
-        default: () => null,
-
-        getCachedData(key) {
-
-            return (
-                nuxtApp.payload.data[key]
-                ?? nuxtApp.static?.data[key]
-            )
-
-        },
-    }
-)
-
-watch(
-    carId,
-    async (value) => {
-
-        await carStore.fetchCar(value)
-
-    },
-    {
-        immediate: true,
-    }
-)
+watch(carId, (newId) => {
+    if (newId) loadCar(newId)
+})
 
 const car = computed(() => carStore.car)
 
-const carImage = computed(() => {
-    return car.value?.photo_url || '/images/default_car.jpg'
-})
+const carImage = computed(() =>
+    car.value?.photo_url || '/images/default_car.jpg'
+)
 
-const formatPrice = (price?: number | null) => {
+const formatPrice = (price?: number | null) =>
+    new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: 'RUB',
+        maximumFractionDigits: 0,
+    }).format(price ?? 0)
 
-    return new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
+const isInCart = (id: number | string) =>
+    !!cartStore.items[String(id)]
 
-}
+const addToCart = (carItem: Car) =>
+    carStore.addToCart(carItem)
 
-const isInCart = (id: number | string) => {
+const isAdding = (id: number | string) =>
+    carStore.isAdding(id)
 
-    return !!cartStore.items[String(id)]
-
-}
-
-const addToCart = async (carItem: Car) => {
-
-    await carStore.addToCart(carItem)
-
-}
-
-const isAdding = (id: number | string) => {
-
-    return carStore.isAdding(id)
-
-}
-
-const openImage = () => {
-    showImage.value = true
-}
-
-const closeImage = () => {
-    showImage.value = false
-}
+const openImage = () => showImage.value = true
+const closeImage = () => showImage.value = false
 
 const goBack = () => {
-
-    if (
-        import.meta.client &&
-        history.state?.back
-    ) {
+    if (import.meta.client && window.history.length > 1) {
         window.history.back()
     } else {
         navigateTo('/cars')
     }
+}
 
+const authLoading = ref(false)
+
+const confirmLogin = async (payload: LoginPayload) => {
+    const {email, password} = payload
+    authLoading.value = true
+    try {
+        const ok = await authStore.login(email, password)
+        if (ok) {
+            showAuth.value = false
+        }
+    } finally {
+        authLoading.value = false
+    }
 }
 
 </script>
 
 <template>
-    <div class="container mt-4 position-relative">
+    <div class="container mt-4">
 
-        <div v-if="!carLoading && !car">
-            Автомобиль не найден
-        </div>
-
-        <template v-else-if="car">
-
-            <div class="row">
-
-                <div class="col-12">
-                    <h1 class="mb-4">
-                        {{ car.title }} [id: {{ car.id }}]
-                    </h1>
-                </div>
-
-                <div class="col-md-5">
-
-                    <div class="car-image-wrapper">
-
-                        <img
-                            :src="carImage"
-                            class="img-fluid rounded car-image"
-                            style="max-height:400px;object-fit:contain;"
-                            alt=""
-                            @click="openImage"
-                        >
-
-                    </div>
-
-                    <div
-                        v-if="showImage"
-                        class="image-modal"
-                        @click="closeImage"
-                    >
-
-                        <img
-                            :src="carImage"
-                            class="image-full"
-                            @click.stop
-                            alt=""
-                        >
-
-                    </div>
-
-                </div>
-
-                <div class="col-md-7">
-
-                    <div class="table-responsive mb-3">
-
-                        <table class="table table-sm align-middle mb-0 description-table">
-
-                            <tbody>
-
-                            <tr v-if="car.description">
-                                <td class="text-muted fw-semibold w-25">
-                                    Описание
-                                </td>
-                                <td>
-                                    {{ car.description }}
-                                </td>
-                            </tr>
-
-                            <tr v-if="car.options?.brand">
-                                <td class="text-muted fw-semibold">
-                                    Бренд
-                                </td>
-                                <td>
-                                    {{ car.options.brand }}
-                                </td>
-                            </tr>
-
-                            <tr v-if="car.options?.model">
-                                <td class="text-muted fw-semibold">
-                                    Модель
-                                </td>
-                                <td>
-                                    {{ car.options.model }}
-                                </td>
-                            </tr>
-
-                            <tr v-if="car.options?.year">
-                                <td class="text-muted fw-semibold">
-                                    Год
-                                </td>
-                                <td>
-                                    {{ car.options.year }}
-                                </td>
-                            </tr>
-
-                            <tr v-if="car.options?.mileage">
-                                <td class="text-muted fw-semibold">
-                                    Пробег
-                                </td>
-                                <td>
-                                    {{ car.options.mileage }}
-                                </td>
-                            </tr>
-
-                            <tr v-if="authStore.user && car.price">
-
-                                <td class="text-muted fw-semibold">
-                                    Цена
-                                </td>
-
-                                <td>
-                                    {{ formatPrice(car.price) }}
-                                </td>
-
-                            </tr>
-
-                            <tr v-else>
-
-                                <td class="text-muted fw-semibold">
-                                    Цена
-                                </td>
-
-                                <td>
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-light"
-                                        @click.stop.prevent="openAuthModal"
-                                    >
-                                        Авторизуйтесь, чтобы увидеть цену
-                                    </button>
-
-                                </td>
-
-                            </tr>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                    <div v-if="authStore.user">
-
-                        <BaseButton
-                            v-if="isInCart(car.id)"
-                            variant="light"
-                            class="w-100"
-                            disabled
-                        >
-                            Товар в корзине
-                        </BaseButton>
-
-                        <BaseButton
-                            v-else
-                            variant="success"
-                            class="w-100"
-                            :disabled="isAdding(car.id)"
-                            @click="addToCart(car)"
-                        >
-
-                            <span v-if="isAdding(car.id)">
-                                Добавляется...
-                            </span>
-
-                            <span v-else>
-                                В корзину
-                            </span>
-
-                        </BaseButton>
-
-                    </div>
-
-                </div>
-
+        <template v-if="carStore.carLoading">
+            <div class="alert alert-light mb-4">
+                Загрузка страницы...
             </div>
-
-            <hr>
-
-            <div class="d-flex justify-content-between align-items-center">
-
-                <BaseButton
-                    variant="light"
-                    @click="goBack"
-                >
-                    ← Назад
-                </BaseButton>
-
-                <NuxtLink
-                    to="/cars"
-                    class="text-decoration-none"
-                >
-
-                    <BaseButton variant="light">
-                        В каталог →
-                    </BaseButton>
-
-                </NuxtLink>
-
-            </div>
-
         </template>
 
-        <div
-            v-if="carLoading"
-            class="loading-overlay"
-        >
+        <template v-else>
+            <template v-if="car">
 
-            <div class="loading-modal">
+                <div class="row">
 
-                <div
-                    class="spinner-border"
-                    role="status"
-                    aria-label="Загрузка"
-                />
+                    <div class="col-12">
+                        <h1 class="mb-4">{{ car.title }} [id: {{ car.id }}]</h1>
+                    </div>
 
-                <div class="mt-2">
-                    Загрузка автомобиля...
+                    <div class="col-md-5">
+
+                        <div class="car-image-wrapper">
+                            <img
+                                :src="carImage"
+                                class="img-fluid rounded car-image"
+                                style="max-height:400px;object-fit:contain;"
+                                alt=""
+                                @click="openImage"
+                            >
+                        </div>
+
+                        <div v-if="showImage" class="image-modal" @click="closeImage">
+                            <img
+                                :src="carImage"
+                                class="image-full"
+                                @click.stop
+                                alt=""
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-7">
+
+                        <div class="table-responsive mb-3">
+
+                            <table class="table table-sm align-middle mb-0 description-table">
+                                <tbody>
+
+                                <tr v-if="car.description">
+                                    <td class="text-muted fw-semibold w-25">Описание</td>
+                                    <td>{{ car.description }}</td>
+                                </tr>
+
+                                <tr v-if="car.options?.brand">
+                                    <td class="text-muted fw-semibold">Бренд</td>
+                                    <td>{{ car.options.brand }}</td>
+                                </tr>
+
+                                <tr v-if="car.options?.model">
+                                    <td class="text-muted fw-semibold">Модель</td>
+                                    <td>{{ car.options.model }}</td>
+                                </tr>
+
+                                <tr v-if="car.options?.year">
+                                    <td class="text-muted fw-semibold">Год</td>
+                                    <td>{{ car.options.year }}</td>
+                                </tr>
+
+                                <tr v-if="car.options?.mileage">
+                                    <td class="text-muted fw-semibold">Пробег</td>
+                                    <td>{{ car.options.mileage }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td class="text-muted fw-semibold">Цена</td>
+                                    <td>
+                                        <p v-if="authStore.user && car.price" class="mb-0">
+                                        <span class="fs-5 fw-bold text-success">
+                                            {{ formatPrice(car.price) }}
+                                        </span>
+                                        </p>
+
+                                        <BaseButton
+                                            v-else
+                                            type="button"
+                                            class="btn btn-light"
+                                            @click.stop.prevent="openAuthModal"
+                                        >
+                                            Авторизуйтесь, чтобы увидеть цену
+                                        </BaseButton>
+                                    </td>
+                                </tr>
+
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                        <div v-if="authStore.user">
+
+                            <BaseButton
+                                v-if="isInCart(car.id)"
+                                variant="light"
+                                class="w-100"
+                                disabled
+                            >
+                                Товар в корзине
+                            </BaseButton>
+
+                            <BaseButton
+                                v-else
+                                variant="success"
+                                class="w-100"
+                                :disabled="isAdding(car.id)"
+                                @click="addToCart(car)"
+                            >
+                                <span v-if="isAdding(car.id)">Добавляется...</span>
+                                <span v-else>В корзину</span>
+                            </BaseButton>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
-            </div>
+                <hr>
 
-        </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <BaseButton variant="light" @click="goBack">← Назад</BaseButton>
 
-        <AuthModal v-model="showAuth"/>
+                    <NuxtLink to="/cars" class="text-decoration-none">
+                        <BaseButton variant="light">В каталог →</BaseButton>
+                    </NuxtLink>
+                </div>
+
+                <AuthModal
+                    v-model:show="showAuth"
+                    :loading="authLoading"
+                    @confirm="confirmLogin"
+                />
+
+            </template>
+
+            <template v-else-if="loaded">
+                <div class="alert alert-light mb-4">
+                    Автомобиль не найден.
+                </div>
+            </template>
+
+        </template>
 
     </div>
 </template>
@@ -393,25 +292,6 @@ const goBack = () => {
 
 .description-table td {
     padding: 10px 12px;
-}
-
-.loading-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(2px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.loading-modal {
-    background: white;
-    padding: 20px 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    text-align: center;
 }
 
 </style>

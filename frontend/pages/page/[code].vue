@@ -40,7 +40,9 @@ const page = computed(() => store.current)
         </template>
 
         <template v-else-if="!store.loading">
-            <h3>Страница не найдена</h3>
+            <div class="alert alert-light mb-4">
+                Страница не найдена.
+            </div>
         </template>
 
     </div>

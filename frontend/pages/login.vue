@@ -56,10 +56,7 @@ onMounted(() => {
 
                 <h1 class="mb-4">Авторизация</h1>
 
-                <p
-                    v-if="store.success"
-                    class="text-success text-center"
-                >
+                <p v-if="store.success" class="text-success text-center">
                     {{ store.success }}
                 </p>
 
@@ -70,7 +67,7 @@ onMounted(() => {
                         type="email"
                         label="Email"
                         required
-                        :error="store.errors.email"
+                        :error="store.errors.email?.[0]"
                     />
 
                     <BaseInput
@@ -78,7 +75,7 @@ onMounted(() => {
                         type="password"
                         label="Пароль"
                         required
-                        :error="store.errors.password"
+                        :error="store.errors.password?.[0]"
                     />
 
                     <BaseButton

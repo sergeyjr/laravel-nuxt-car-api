@@ -4,43 +4,49 @@ import {useCartStore} from '~/stores/cart'
 import {useCarApi} from '~/services/api/internal/car.api'
 
 export const useCarStore = defineStore('car', {
-
     state: () => ({
         cars: [] as Car[],
         meta: null as CarsResponse | null,
         car: null as Car | null,
-        pages: {} as Record<number, CarsResponse>,
+        currentPage: null as number | null,
+
         latest: [] as Car[],
+
         adding: {} as Record<number, boolean>,
+
         listLoading: false,
         carLoading: false,
         latestLoading: false,
     }),
 
     getters: {
-        isAdding: (state) => (id: number | string) => {
-            return !!state.adding[Number(id)]
-        },
+        isAdding: (state) => (id: number | string) => !!state.adding[Number(id)],
     },
 
     actions: {
 
         async fetch(page = 1) {
-            if (this.pages[page]) {
-                const cached = this.pages[page]
-                this.cars = cached.data || []
-                this.meta = cached
-                return cached
-            }
+
+            // TODO
+            // console.log('fetch', this.currentPage, page, this.cars, this.cars.length)
+            //
+            // if (this.currentPage === page && this.cars.length) {
+            //     console.log('currentPage', page)
+            //     return {
+            //         cars: this.cars,
+            //         meta: this.meta
+            //     }
+            // }
 
             this.listLoading = true
-            const carApi = useCarApi()
+
+            const api = useCarApi()
 
             try {
-                const res = await carApi.fetchCars(page)
-                this.pages[page] = res
+                const res = await api.fetchCars(page)
                 this.cars = res.data || []
                 this.meta = res
+                this.currentPage = page
                 return res
             } catch {
                 this.cars = []
@@ -52,20 +58,23 @@ export const useCarStore = defineStore('car', {
         },
 
         async fetchCar(id: number) {
+
             if (!id) {
                 this.car = null
                 return null
             }
 
-            if (this.car && Number(this.car.id) === Number(id)) {
+            if (this.car?.id === id) {
+                this.carLoading = false
                 return this.car
             }
 
             this.carLoading = true
-            const carApi = useCarApi()
+
+            const api = useCarApi()
 
             try {
-                const car = await carApi.fetchCar(id)
+                const car = await api.fetchCar(id)
                 this.car = car
                 return car
             } catch {
@@ -77,14 +86,16 @@ export const useCarStore = defineStore('car', {
         },
 
         async addToCart(car: Car) {
+
             const id = Number(car.id)
-            if (!id) return false
+            if (!id) {
+                return false
+            }
 
             this.adding[id] = true
 
             try {
-                const cartStore = useCartStore()
-                await cartStore.add({
+                await useCartStore().add({
                     id,
                     name: car.title,
                     price: car.price,
@@ -98,14 +109,17 @@ export const useCarStore = defineStore('car', {
             } finally {
                 this.adding[id] = false
             }
+
         },
 
         async fetchLatest() {
+
             this.latestLoading = true
-            const carApi = useCarApi()
+
+            const api = useCarApi()
 
             try {
-                const res = await carApi.fetchLatest()
+                const res = await api.fetchLatest()
                 this.latest = res.data || []
                 return this.latest
             } catch {
@@ -114,7 +128,8 @@ export const useCarStore = defineStore('car', {
             } finally {
                 this.latestLoading = false
             }
-        },
+
+        }
 
     }
 

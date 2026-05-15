@@ -42,7 +42,7 @@ const goBack = () => {
     navigateTo('/dashboard')
 }
 
-/// PROFILE FORM (JSON)
+// PROFILE FORM (JSON)
 const name = ref('')
 const email = ref('')
 const remove_avatar = ref(false)

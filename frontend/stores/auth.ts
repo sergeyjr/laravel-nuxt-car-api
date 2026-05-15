@@ -75,6 +75,7 @@ export const useAuthStore = defineStore('auth', {
                 const data: any = await api.login(email, password)
                 this.user = data?.user || (await this.fetchUser() ? this.user : null)
                 this.initialized = true
+                alert.add('success', data?.message || 'Вы вошли в аккаунт.')
                 return true
             } catch (e: any) {
                 if (e?.status === 422) {

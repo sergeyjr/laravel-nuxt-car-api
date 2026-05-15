@@ -1,20 +1,18 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
-import {useRoute, createError} from '#imports'
 import {useAsyncData} from '#app'
 
 import {useOrderStore} from '~/stores/order'
+
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
 const route = useRoute()
 const store = useOrderStore()
+
 const {getLabel, getBadge} = useOrderStatus()
 
-const orderId = computed(() => {
-    const id = route.params.id
-    return Array.isArray(id) ? id[0] : id
-})
+const orderId = computed(() => String(route.params.id ?? ''))
 
 if (!orderId.value) {
     throw createError({
@@ -129,7 +127,7 @@ const goBack = () => {
                                             :src="getItemPhoto(item)"
                                             class="rounded border"
                                             style="width:110px;height:80px;object-fit:contain;"
-                                        />
+                                         alt=""/>
                                     </NuxtLink>
 
                                     <div>
@@ -179,8 +177,8 @@ const goBack = () => {
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-muted">Итого:</span>
                             <span class="fs-4 fw-bold text-success">
-                {{ formatPrice(order.total) }}
-              </span>
+                                {{ formatPrice(order.total) }}
+                            </span>
                         </div>
 
                         <hr>
@@ -188,8 +186,8 @@ const goBack = () => {
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Позиций:</span>
                             <span class="fw-semibold">
-                {{ order.items?.length || 0 }}
-              </span>
+                                {{ order.items?.length || 0 }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -219,8 +217,8 @@ const goBack = () => {
                         <div class="d-flex justify-content-between">
                             <div class="text-muted small">Статус:</div>
                             <span class="badge" :class="getBadge(order.status).class">
-                {{ getLabel(order.status) }}
-              </span>
+                                {{ getLabel(order.status) }}
+                            </span>
                         </div>
                     </div>
                 </div>

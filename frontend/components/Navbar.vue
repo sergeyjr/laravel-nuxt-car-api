@@ -1,18 +1,17 @@
 <script setup lang="ts">
 
 import {computed, ref, onMounted} from 'vue'
-import {useRoute} from 'vue-router'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
 import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
 
-import {useAuthActions} from '~/composables/useAuthActions'
-
 const auth = useAuthStore()
 const cart = useCartStore()
+
 const route = useRoute()
+const router = useRouter()
 
 const config = useRuntimeConfig()
 const appName = config.public.appName
@@ -36,16 +35,26 @@ const isLogoutLoading = ref(false)
 
 const isActive = (path: string) => route.path === path || route.path.startsWith(path + '/')
 
-const {handleLogout} = useAuthActions()
-
 const onLogout = async () => {
-    if (isLogoutLoading.value) return
+    if (isLogoutLoading.value) {
+        return
+    }
     isLogoutLoading.value = true
     try {
-        const ok = await handleLogout()
+        const ok = await auth.logout()
+        if (!ok) {
+            return false
+        }
+        const path = route.path
+        if (
+            path.startsWith('/cart') ||
+            path.startsWith('/dashboard') ||
+            path.startsWith('/cars/create')
+        ) {
+            await router.push('/login')
+        }
         if (ok) {
             showLogoutModal.value = false
-            navigateTo('/login')
         }
     } finally {
         isLogoutLoading.value = false

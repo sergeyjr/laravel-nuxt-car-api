@@ -22,10 +22,17 @@ const store = useAuthStore()
 const email = ref('')
 const password = ref('')
 
-const isProcessing = computed(() => props.loading ?? false)
+/**
+ * loading теперь управляется снаружи (как checkout modal)
+ */
+const isProcessing = computed(() => {
+    return props.loading ?? false
+})
 
 const close = () => {
-    if (isProcessing.value) return
+    if (isProcessing.value) {
+        return
+    }
     emit('update:show', false)
 }
 

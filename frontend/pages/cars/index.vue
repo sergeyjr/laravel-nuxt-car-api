@@ -1,16 +1,15 @@
 <script setup lang="ts">
 
-import {computed, onMounted, ref, watch} from 'vue'
-import {useNuxtApp, useRoute, navigateTo} from '#imports'
+import {computed, ref, onMounted, watch} from 'vue'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
 import {useCartStore} from '~/stores/cart'
 
-import type {Car, CarsResponse} from '~/types/car'
-import AuthModal from "~/components/modals/AuthModal.vue";
+import type {LoginPayload} from '~/types/auth'
+import type {Car} from '~/types/car'
 
-const nuxtApp = useNuxtApp()
+import AuthModal from '~/components/modals/AuthModal.vue'
 
 const authStore = useAuthStore()
 const carStore = useCarStore()
@@ -18,145 +17,103 @@ const cartStore = useCartStore()
 
 const route = useRoute()
 
-const clientReady = ref(false)
+const page = computed(() => Number(route.query.page || 1))
 
-onMounted(() => {
-    clientReady.value = true
-})
+/**
+ * первичная загрузка страницы
+ * нужна, чтобы loader показался сразу при первом входе в каталог
+ */
+const initialLoading = ref(true)
 
-const page = computed(() => {
-    return Number(route.query.page || 1)
-})
+const loadCars = async (newPage: number) => {
+    await carStore.fetch(newPage)
+}
 
-const carsKey = computed(() => {
-    return `cars-page-${page.value}`
-})
-
-const emptyMeta = (): CarsResponse => ({
-    data: [],
-    current_page: page.value,
-    last_page: 1,
-    from: 0,
-    to: 0,
-    total: 0,
-    per_page: 0,
-})
-
-const {pending: listLoading} = await useAsyncData(
-    carsKey,
-    async () => {
-
-        return await carStore.fetch(page.value)
-
-    },
-    {
-        deep: false,
-
-        default: emptyMeta,
-
-        getCachedData(key) {
-
-            return (
-                nuxtApp.payload.data[key]
-                ?? nuxtApp.static?.data[key]
-            )
-
-        },
+onMounted(async () => {
+    try {
+        initialLoading.value = true
+        await loadCars(page.value)
+    } finally {
+        initialLoading.value = false
     }
-)
-
-watchEffect(() => {
-
-    const cached = carStore.pages[page.value]
-
-    if (!cached) {
-        return
-    }
-
-    carStore.cars = cached.data || []
-    carStore.meta = cached
-
 })
 
-watch(
-    page,
-    async (value) => {
-
-        await carStore.fetch(value)
-
-    },
-    {
-        immediate: true,
-    }
-)
-
-const meta = computed(() => {
-    return carStore.meta
+watch(page, async (newPage) => {
+    await loadCars(newPage)
 })
 
-const cars = computed(() => {
-    return carStore.cars
-})
+const listLoading = computed(() => carStore.listLoading)
+
+/**
+ * единый флаг для отображения прелоадера
+ * - при первом входе: initialLoading
+ * - при переходе между страницами: listLoading
+ */
+const pageLoading = computed(() => initialLoading.value || listLoading.value)
+
+const meta = computed(() => carStore.meta)
+const cars = computed(() => carStore.cars)
 
 const showAuth = ref(false)
 
-const openAuthModal = () => {
+const openAuthModal = (event?: Event) => {
+    event?.stopPropagation()
+    event?.preventDefault()
     showAuth.value = true
 }
 
-const changePage = (newPage: number) => {
+const changePage = (newPage: number) =>
+    navigateTo({path: '/cars', query: {page: newPage}})
 
-    navigateTo({
-        path: '/cars',
-        query: {
-            page: newPage,
-        },
-    })
+const getImage = (car: Car) =>
+    car.photo_url || '/images/default_car.jpg'
 
-}
-
-const getImage = (car: Car) => {
-    return car.photo_url || '/images/default_car.jpg'
-}
-
-const formatPrice = (price?: number | null) => {
-
-    return new Intl.NumberFormat('ru-RU', {
+const formatPrice = (price?: number | null) =>
+    new Intl.NumberFormat('ru-RU', {
         style: 'currency',
         currency: 'RUB',
         maximumFractionDigits: 0,
     }).format(price ?? 0)
 
-}
+const isInCart = (id: number | string) =>
+    !!cartStore.items[String(id)]
 
-const addToCart = async (car: Car) => {
+const addToCart = async (car: Car) =>
+    carStore.addToCart(car)
 
-    await carStore.addToCart(car)
+const isAdding = (id: number | string) =>
+    carStore.isAdding(id)
 
-}
+const authLoading = ref(false)
 
-const isInCart = (carId: number | string) => {
-
-    return !!cartStore.items[String(carId)]
-
-}
-
-const isAdding = (id: number | string) => {
-
-    return carStore.isAdding(id)
-
+const confirmLogin = async (payload: LoginPayload) => {
+    const {email, password} = payload
+    authLoading.value = true
+    try {
+        const ok = await authStore.login(email, password)
+        if (ok) {
+            showAuth.value = false
+        }
+    } finally {
+        authLoading.value = false
+    }
 }
 
 </script>
 
 <template>
     <div class="container mt-4">
+
+        <div v-if="pageLoading" class="loading-overlay">
+            <div class="loading-modal">
+                <div class="spinner-border" role="status"></div>
+                <div class="mt-2">Загрузка каталога...</div>
+            </div>
+        </div>
+
         <h1 class="mb-4">Каталог</h1>
 
-        <div
-            v-if="meta"
-            class="d-flex gap-2 mb-3 align-items-center flex-wrap"
-        >
+        <div v-if="meta" class="d-flex gap-2 mb-3 align-items-center flex-wrap">
             <Pagination
                 :meta="meta"
                 :loading="listLoading"
@@ -164,19 +121,8 @@ const isAdding = (id: number | string) => {
             />
         </div>
 
-        <div v-if="listLoading" class="loading-overlay">
-            <div class="loading-modal">
-                <div class="spinner-border" role="status"></div>
-                <div class="mt-2">Загрузка каталога...</div>
-            </div>
-        </div>
-
         <div class="row">
-            <div
-                v-for="car in cars"
-                :key="car.id"
-                class="col-4 mb-3"
-            >
+            <div v-for="car in cars" :key="car.id" class="col-4 mb-3">
                 <div class="card car-card text-center">
 
                     <NuxtLink
@@ -189,60 +135,48 @@ const isAdding = (id: number | string) => {
                             style="height: 200px; object-fit: contain;"
                             alt=""
                         >
-
-                        <div class="card-body">
-                            <h5>{{ car.title }} [id: {{ car.id }}]</h5>
-
-                            <p v-if="authStore.user" class="mb-0">
-                                <span class="fs-5 fw-bold text-success">
-                                    {{ formatPrice(car.price) }}
-                                </span>
-                            </p>
-
-                            <button
-                                v-else
-                                type="button"
-                                class="btn btn-light"
-                                @click.stop.prevent="openAuthModal"
-                            >
-                                Авторизуйтесь, чтобы увидеть цену
-                            </button>
-                        </div>
                     </NuxtLink>
+
+                    <div class="card-body">
+                        <h5>{{ car.title }} [id: {{ car.id }}]</h5>
+
+                        <p v-if="authStore.user && car.price" class="mb-0">
+                            <span class="fs-5 fw-bold text-success">
+                                {{ formatPrice(car.price) }}
+                            </span>
+                        </p>
+
+                        <BaseButton
+                            v-else
+                            type="button"
+                            class="btn btn-light"
+                            @click.stop.prevent="openAuthModal"
+                        >
+                            Авторизуйтесь, чтобы увидеть цену
+                        </BaseButton>
+                    </div>
 
                     <div v-if="authStore.user" class="p-3 pt-0">
 
-                        <div v-if="!clientReady" class="w-100 btn btn-light disabled">
-                            Проверка корзины...
-                        </div>
+                        <BaseButton
+                            v-if="isInCart(car.id)"
+                            variant="light"
+                            class="w-100"
+                            disabled
+                        >
+                            Товар в корзине
+                        </BaseButton>
 
-                        <template v-else>
-
-                            <BaseButton
-                                v-if="isInCart(car.id)"
-                                variant="light"
-                                class="w-100"
-                                disabled
-                            >
-                                Товар в корзине
-                            </BaseButton>
-
-                            <BaseButton
-                                v-else
-                                variant="success"
-                                class="w-100"
-                                :disabled="isAdding(car.id)"
-                                @click.stop="addToCart(car)"
-                            >
-                                <span v-if="isAdding(car.id)">
-                                    Добавляется...
-                                </span>
-                                <span v-else>
-                                    В корзину
-                                </span>
-                            </BaseButton>
-
-                        </template>
+                        <BaseButton
+                            v-else
+                            variant="success"
+                            class="w-100"
+                            :disabled="isAdding(car.id)"
+                            @click.stop="addToCart(car)"
+                        >
+                            <span v-if="isAdding(car.id)">Добавляется...</span>
+                            <span v-else>В корзину</span>
+                        </BaseButton>
 
                     </div>
 
@@ -264,7 +198,11 @@ const isAdding = (id: number | string) => {
             из {{ meta.total }}
         </div>
 
-        <AuthModal v-model="showAuth"/>
+        <AuthModal
+            v-model:show="showAuth"
+            :loading="authLoading"
+            @confirm="confirmLogin"
+        />
 
     </div>
 </template>
