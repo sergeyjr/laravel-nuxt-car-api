@@ -1,4 +1,5 @@
 import type {FetchResponse, FetchRequest} from 'ofetch'
+
 import {useAlertStore} from '~/stores/alert'
 
 export default defineNuxtPlugin(() => {

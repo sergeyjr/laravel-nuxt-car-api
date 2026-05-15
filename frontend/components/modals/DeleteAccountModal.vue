@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
+
 import {useProfileStore} from '~/stores/profile'
 
 const props = defineProps<{ show: boolean }>()

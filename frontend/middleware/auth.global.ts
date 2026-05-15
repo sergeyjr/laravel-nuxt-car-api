@@ -1,5 +1,6 @@
-import {useProtected} from '~/composables/useProtected'
 import {useAuthStore} from '~/stores/auth'
+
+import {useProtected} from '~/composables/useProtected'
 
 export default defineNuxtRouteMiddleware((to) => {
 

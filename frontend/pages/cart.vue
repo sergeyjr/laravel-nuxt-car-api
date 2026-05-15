@@ -1,5 +1,3 @@
-<!-- pages/cart.vue -->
-
 <script setup lang="ts">
 
 import {computed, ref} from 'vue'
@@ -14,7 +12,16 @@ import CartRemoveItemModal from '~/components/modals/CartRemoveItemModal.vue'
 import CartCheckoutModal from '~/components/modals/CartCheckoutModal.vue'
 import CartClearModal from '~/components/modals/CartClearModal.vue'
 
+/* -----------------------------
+   stores
+------------------------------*/
+
 const cart = useCartStore()
+const dashboard = useDashboardStore()
+
+/* -----------------------------
+   state
+------------------------------*/
 
 const isSubmitting = ref(false)
 const comment = ref('')
@@ -25,79 +32,102 @@ const showClearModal = ref(false)
 
 const selectedItemId = ref<number | null>(null)
 
+/* -----------------------------
+   computed
+------------------------------*/
+
 const items = computed(() => cart.items)
 const total = computed(() => cart.total)
 
+/* -----------------------------
+   utils
+------------------------------*/
+
+// price format
 const formatPrice = (v: number) =>
     new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
 
+// normalize qty
 function sanitizeQty(value: unknown) {
     let qty = Number(value)
+
     if (!Number.isInteger(qty)) {
         qty = Math.floor(qty)
     }
+
     if (Number.isNaN(qty) || qty < 1) {
         qty = 1
     }
+
     return qty
 }
 
+/* -----------------------------
+   modal openers
+------------------------------*/
+
 function openRemoveModal(id: number | string) {
-    if (isSubmitting.value) {
-        return
-    }
+    if (isSubmitting.value) return
+
     selectedItemId.value = Number(id)
     showRemoveModal.value = true
 }
 
 function openClearModal() {
-    if (isSubmitting.value) {
-        return
-    }
+    if (isSubmitting.value) return
     showClearModal.value = true
 }
 
 function openCheckoutModal() {
-    if (isSubmitting.value) {
-        return
-    }
+    if (isSubmitting.value) return
     showCheckoutModal.value = true
 }
 
+/* -----------------------------
+   actions
+------------------------------*/
+
+// remove item
 const confirmRemoveItem = async () => {
-    if (!selectedItemId.value) {
-        return
-    }
+    if (!selectedItemId.value) return
+
     await cart.remove(selectedItemId.value)
+
     showRemoveModal.value = false
     selectedItemId.value = null
 }
 
+// clear cart
 const confirmClearCart = async () => {
     await cart.clear()
     showClearModal.value = false
 }
 
-const dashboard = useDashboardStore()
-
+// checkout
 const confirmCheckout = async () => {
-    if (isSubmitting.value) {
-        return
-    }
+    if (isSubmitting.value) return
+
+    isSubmitting.value = true
+
     try {
-        isSubmitting.value = true
         const res: any = await cart.checkout({
             comment: comment.value
         })
+
         const order = res?.data?.order || res?.order
+
         if (!order?.id) {
             throw new Error('Order ID missing in response')
         }
+
         showCheckoutModal.value = false
+
         await dashboard.fetchDashboard(true)
         await navigateTo(`/order-success/${order.id}`)
+
     } catch (e) {
         console.error('Checkout failed:', e)
+    } finally {
         isSubmitting.value = false
     }
 }

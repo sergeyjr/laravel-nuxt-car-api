@@ -4,11 +4,11 @@ import {useCartStore} from '~/stores/cart'
 import {useCarApi} from '~/services/api/internal/car.api'
 
 export const useCarStore = defineStore('car', {
+
     state: () => ({
         cars: [] as Car[],
         meta: null as CarsResponse | null,
         car: null as Car | null,
-        currentPage: null as number | null,
 
         latest: [] as Car[],
 
@@ -27,17 +27,6 @@ export const useCarStore = defineStore('car', {
 
         async fetch(page = 1) {
 
-            // TODO
-            // console.log('fetch', this.currentPage, page, this.cars, this.cars.length)
-            //
-            // if (this.currentPage === page && this.cars.length) {
-            //     console.log('currentPage', page)
-            //     return {
-            //         cars: this.cars,
-            //         meta: this.meta
-            //     }
-            // }
-
             this.listLoading = true
 
             const api = useCarApi()
@@ -46,7 +35,6 @@ export const useCarStore = defineStore('car', {
                 const res = await api.fetchCars(page)
                 this.cars = res.data || []
                 this.meta = res
-                this.currentPage = page
                 return res
             } catch {
                 this.cars = []
@@ -62,11 +50,6 @@ export const useCarStore = defineStore('car', {
             if (!id) {
                 this.car = null
                 return null
-            }
-
-            if (this.car?.id === id) {
-                this.carLoading = false
-                return this.car
             }
 
             this.carLoading = true

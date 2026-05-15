@@ -1,12 +1,12 @@
 export const useProtected = () => {
 
     const protectedPages = [
+        '/admin',
+        '/cabinet',
         '/dashboard',
+        '/orders',
         '/profile',
         '/settings',
-        '/orders',
-        '/cabinet',
-        '/admin'
     ]
 
     const requiresAuth = (path: string) =>

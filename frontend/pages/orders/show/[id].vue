@@ -7,10 +7,22 @@ import {useOrderStore} from '~/stores/order'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
+/* -----------------------------
+   route / store
+------------------------------*/
+
 const route = useRoute()
 const store = useOrderStore()
 
+/* -----------------------------
+   status helper
+------------------------------*/
+
 const {getLabel, getBadge} = useOrderStatus()
+
+/* -----------------------------
+   order id
+------------------------------*/
 
 const orderId = computed(() => String(route.params.id ?? ''))
 
@@ -21,16 +33,24 @@ if (!orderId.value) {
     })
 }
 
+/* -----------------------------
+   fetch (SSR + client)
+------------------------------*/
+
 await useAsyncData(
     () => `order-${orderId.value}`,
     async () => {
         try {
             const result = await store.fetchOrder(orderId.value)
+
             return result ?? store.currentOrder ?? null
+
         } catch (err: any) {
+            // soft fallback for not found
             if (err?.statusCode === 404 || err?.status === 404) {
                 return null
             }
+
             throw err
         }
     },
@@ -39,19 +59,34 @@ await useAsyncData(
     }
 )
 
+/* -----------------------------
+   state
+------------------------------*/
+
 const order = computed(() => store.currentOrder)
 const loadingOrder = computed(() => store.loadingOrder)
 
-const hasComment = computed(() =>
-    order.value?.comment != null &&
-    String(order.value.comment).trim() !== ''
-)
+/* -----------------------------
+   derived state
+------------------------------*/
 
+const hasComment = computed(() => {
+    const c = order.value?.comment
+    return c != null && String(c).trim() !== ''
+})
+
+/* -----------------------------
+   formatters
+------------------------------*/
+
+// price
 const formatPrice = (v: number | string) =>
     new Intl.NumberFormat('ru-RU').format(Number(v || 0)) + ' ₽'
 
+// date
 const formatDate = (date: string) => {
     if (!date) return ''
+
     return new Intl.DateTimeFormat('ru-RU', {
         dateStyle: 'short',
         timeStyle: 'medium',
@@ -59,13 +94,19 @@ const formatDate = (date: string) => {
     }).format(new Date(date))
 }
 
-const getItemName = (item: any) => {
-    return item?.name || item?.car?.title || `Машина #${item?.car_id ?? ''}`
-}
+/* -----------------------------
+   item helpers
+------------------------------*/
 
-const getItemPhoto = (item: any) => {
-    return item?.photo_url || item?.car?.photo_url || '/images/default_car.jpg'
-}
+const getItemName = (item: any) =>
+    item?.name || item?.car?.title || `Машина #${item?.car_id ?? ''}`
+
+const getItemPhoto = (item: any) =>
+    item?.photo_url || item?.car?.photo_url || '/images/default_car.jpg'
+
+/* -----------------------------
+   navigation
+------------------------------*/
 
 const goBack = () => {
     if (import.meta.client && window.history.length > 1) {
@@ -127,7 +168,7 @@ const goBack = () => {
                                             :src="getItemPhoto(item)"
                                             class="rounded border"
                                             style="width:110px;height:80px;object-fit:contain;"
-                                         alt=""/>
+                                            alt=""/>
                                     </NuxtLink>
 
                                     <div>

@@ -7,18 +7,38 @@ import {useDashboardStore} from '~/stores/dashboard'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
+/* -----------------------------
+   helpers
+------------------------------*/
+
 const {getBadge} = useOrderStatus()
+
+/* -----------------------------
+   stores
+------------------------------*/
 
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
 
 onMounted(async () => {
     await dashboard.fetchDashboard()
 })
 
+/* -----------------------------
+   auth state
+------------------------------*/
+
 const user = computed(() => auth.user)
 
 const isApiUser = computed(() => auth.user?.role === 'api')
+
+/* -----------------------------
+   dashboard state
+------------------------------*/
 
 const ordersCount = computed(() => dashboard.ordersCount)
 
@@ -30,10 +50,16 @@ const cartCount = computed(() =>
 
 const cartTotal = computed(() => dashboard.cartTotal || 0)
 
-const formatPrice = (v: any) =>
-    new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
+/* -----------------------------
+   formatters
+------------------------------*/
 
-const formatDate = (date: any) => {
+// price
+const formatPrice = (v: number | string | null | undefined) =>
+    new Intl.NumberFormat('ru-RU').format(Number(v || 0)) + ' ₽'
+
+// date
+const formatDate = (date: string | number | Date | null | undefined) => {
     if (!date) return ''
 
     return new Intl.DateTimeFormat('ru-RU', {

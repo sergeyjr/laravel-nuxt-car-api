@@ -1,4 +1,4 @@
-import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import {ref, computed, watch, onBeforeUnmount} from 'vue'
 
 export function useModal(initial = false) {
     const isOpen = ref(initial)

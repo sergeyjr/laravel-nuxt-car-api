@@ -2,6 +2,8 @@
 
 import {computed, ref, onMounted, watch} from 'vue'
 
+import {useRoute} from 'vue-router'
+
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
 import {useCartStore} from '~/stores/cart'
@@ -11,24 +13,39 @@ import type {Car} from '~/types/car'
 
 import AuthModal from '~/components/modals/AuthModal.vue'
 
+/* -----------------------------
+   stores
+------------------------------*/
+
 const authStore = useAuthStore()
 const carStore = useCarStore()
 const cartStore = useCartStore()
 
 const route = useRoute()
 
-const page = computed(() => Number(route.query.page || 1))
+/* -----------------------------
+   state
+------------------------------*/
 
-/**
- * первичная загрузка страницы
- * нужна, чтобы loader показался сразу при первом входе в каталог
- */
+const showAuth = ref(false)
+const authLoading = ref(false)
 const initialLoading = ref(true)
 
-const loadCars = async (newPage: number) => {
-    await carStore.fetch(newPage)
+/* -----------------------------
+   route
+------------------------------*/
+
+const page = computed(() => Number(route.query.page || 1))
+
+/* -----------------------------
+   load data
+------------------------------*/
+
+const loadCars = async (p: number) => {
+    await carStore.fetch(p)
 }
 
+/* initial load (first visit) */
 onMounted(async () => {
     try {
         initialLoading.value = true
@@ -38,36 +55,44 @@ onMounted(async () => {
     }
 })
 
+/* pagination change */
 watch(page, async (newPage) => {
     await loadCars(newPage)
 })
 
+/* -----------------------------
+   store bindings
+------------------------------*/
+
 const listLoading = computed(() => carStore.listLoading)
-
-/**
- * единый флаг для отображения прелоадера
- * - при первом входе: initialLoading
- * - при переходе между страницами: listLoading
- */
-const pageLoading = computed(() => initialLoading.value || listLoading.value)
-
 const meta = computed(() => carStore.meta)
 const cars = computed(() => carStore.cars)
 
-const showAuth = ref(false)
+/* unified loader */
+const pageLoading = computed(() =>
+    initialLoading.value || listLoading.value
+)
 
+/* -----------------------------
+   helpers
+------------------------------*/
+
+// open auth modal
 const openAuthModal = (event?: Event) => {
     event?.stopPropagation()
     event?.preventDefault()
     showAuth.value = true
 }
 
+// pagination
 const changePage = (newPage: number) =>
     navigateTo({path: '/cars', query: {page: newPage}})
 
+// image
 const getImage = (car: Car) =>
     car.photo_url || '/images/default_car.jpg'
 
+// price format
 const formatPrice = (price?: number | null) =>
     new Intl.NumberFormat('ru-RU', {
         style: 'currency',
@@ -75,25 +100,28 @@ const formatPrice = (price?: number | null) =>
         maximumFractionDigits: 0,
     }).format(price ?? 0)
 
+// cart state
 const isInCart = (id: number | string) =>
     !!cartStore.items[String(id)]
 
-const addToCart = async (car: Car) =>
+// add to cart
+const addToCart = (car: Car) =>
     carStore.addToCart(car)
 
+// adding state
 const isAdding = (id: number | string) =>
     carStore.isAdding(id)
 
-const authLoading = ref(false)
-
+/* -----------------------------
+   auth
+------------------------------*/
 const confirmLogin = async (payload: LoginPayload) => {
     const {email, password} = payload
+
     authLoading.value = true
     try {
         const ok = await authStore.login(email, password)
-        if (ok) {
-            showAuth.value = false
-        }
+        if (ok) showAuth.value = false
     } finally {
         authLoading.value = false
     }

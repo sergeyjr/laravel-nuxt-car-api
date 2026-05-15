@@ -1,16 +1,31 @@
-<script setup>
+<script setup lang="ts">
 
 import {computed} from 'vue'
+
+import {useRoute} from 'vue-router'
 
 import {useOrderStore} from '~/stores/order'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
-const route = useRoute()
+/* -----------------------------
+   stores
+------------------------------*/
+
 const store = useOrderStore()
 const {getLabel, getClass} = useOrderStatus()
 
+const route = useRoute()
+
+/* -----------------------------
+   route params
+------------------------------*/
+
 const orderId = computed(() => route.params.id)
+
+/* -----------------------------
+   load order (once)
+------------------------------*/
 
 await callOnce(async () => {
     if (!orderId.value) {
@@ -19,14 +34,23 @@ await callOnce(async () => {
 
     try {
         await store.fetchOrder(orderId.value)
-    } catch (e) {
+    } catch {
         throw createError({statusCode: 404})
     }
 })
 
+/* -----------------------------
+   computed state
+------------------------------*/
+
 const order = computed(() => store.currentOrder)
 
-const formatPrice = (price) => new Intl.NumberFormat('ru-RU').format(price)
+/* -----------------------------
+   helpers
+------------------------------*/
+
+const formatPrice = (price: number | string) =>
+    new Intl.NumberFormat('ru-RU').format(Number(price || 0))
 
 </script>
 

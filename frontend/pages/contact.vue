@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import {useContactStore} from '~/stores/contact'
 
@@ -6,10 +6,22 @@ import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 import BaseTextarea from '~/components/BaseTextarea.vue'
 
+/* -----------------------------
+   store
+------------------------------*/
+
 const store = useContactStore()
 
-const onSubmit = async (e) => {
-    if (!e.target.checkValidity()) return
+/* -----------------------------
+   submit
+------------------------------*/
+
+const onSubmit = async (e: Event) => {
+    const form = e.target as HTMLFormElement
+
+    // native validation guard
+    if (!form.checkValidity()) return
+
     await store.submit('contactPage')
 }
 

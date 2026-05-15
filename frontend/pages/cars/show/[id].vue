@@ -1,45 +1,41 @@
 <script setup lang="ts">
 
 import {computed, ref, onMounted, watch} from 'vue'
+import {useRoute} from 'vue-router'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 import {useCarStore} from '~/stores/car'
 
-import type {LoginPayload} from "~/types/auth";
+import type {LoginPayload} from '~/types/auth'
 import type {Car} from '~/types/car'
 
 import AuthModal from '~/components/modals/AuthModal.vue'
 
-const route = useRoute()
+/* -----------------------------
+   stores
+------------------------------*/
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const carStore = useCarStore()
 
+const route = useRoute()
+
+/* -----------------------------
+   state (ui)
+------------------------------*/
+
 const showAuth = ref(false)
 const showImage = ref(false)
 const loaded = ref(false)
+const authLoading = ref(false)
+
+/* -----------------------------
+   computed route data
+------------------------------*/
 
 const carId = computed(() => Number(route.params.id))
-
-const openAuthModal = (event?: Event) => {
-    event?.stopPropagation()
-    event?.preventDefault()
-    showAuth.value = true
-}
-
-const loadCar = async (id: number) => {
-    await carStore.fetchCar(id)
-}
-
-onMounted(() => {
-    loadCar(carId.value)
-})
-
-watch(carId, (newId) => {
-    if (newId) loadCar(newId)
-})
 
 const car = computed(() => carStore.car)
 
@@ -47,6 +43,11 @@ const carImage = computed(() =>
     car.value?.photo_url || '/images/default_car.jpg'
 )
 
+/* -----------------------------
+   helpers
+------------------------------*/
+
+// цена
 const formatPrice = (price?: number | null) =>
     new Intl.NumberFormat('ru-RU', {
         style: 'currency',
@@ -54,18 +55,35 @@ const formatPrice = (price?: number | null) =>
         maximumFractionDigits: 0,
     }).format(price ?? 0)
 
+// корзина
 const isInCart = (id: number | string) =>
     !!cartStore.items[String(id)]
 
-const addToCart = (carItem: Car) =>
-    carStore.addToCart(carItem)
-
+// загрузка добавления
 const isAdding = (id: number | string) =>
     carStore.isAdding(id)
 
+/* -----------------------------
+   actions
+------------------------------*/
+
+// открыть модалку логина
+const openAuthModal = (event?: Event) => {
+    event?.stopPropagation()
+    event?.preventDefault()
+    showAuth.value = true
+}
+
+// загрузка авто
+const loadCar = async (id: number) => {
+    await carStore.fetchCar(id)
+}
+
+// картинка
 const openImage = () => showImage.value = true
 const closeImage = () => showImage.value = false
 
+// назад
 const goBack = () => {
     if (import.meta.client && window.history.length > 1) {
         window.history.back()
@@ -74,20 +92,37 @@ const goBack = () => {
     }
 }
 
-const authLoading = ref(false)
+// добавить в корзину
+const addToCart = (carItem: Car) =>
+    carStore.addToCart(carItem)
 
+// логин из модалки
 const confirmLogin = async (payload: LoginPayload) => {
     const {email, password} = payload
+
     authLoading.value = true
     try {
         const ok = await authStore.login(email, password)
-        if (ok) {
-            showAuth.value = false
-        }
+        if (ok) showAuth.value = false
     } finally {
         authLoading.value = false
     }
 }
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
+
+// initial load
+onMounted(() => {
+    loadCar(carId.value)
+    loaded.value = true
+})
+
+// react to route change
+watch(carId, (newId) => {
+    if (newId) loadCar(newId)
+})
 
 </script>
 

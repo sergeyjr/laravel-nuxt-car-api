@@ -1,6 +1,8 @@
-<script setup>
+<script setup lang="ts">
 
 import {computed, ref, onMounted} from 'vue'
+
+import {useRouter} from 'vue-router'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
@@ -8,17 +10,29 @@ import {useCarStore} from '~/stores/car'
 import BaseButton from '~/components/BaseButton.vue'
 import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
 
-// router
+/* -----------------------------
+   router
+------------------------------*/
+
 const router = useRouter()
 
-// auth
+/* -----------------------------
+   auth
+------------------------------*/
+
 const auth = useAuthStore()
 const user = computed(() => auth.user)
 
-// logout modal
+/* -----------------------------
+   UI state
+------------------------------*/
+
 const showLogoutModal = ref(false)
 
-// swiper
+/* -----------------------------
+   swiper
+------------------------------*/
+
 import {Navigation, Pagination} from 'swiper/modules'
 import {Swiper, SwiperSlide} from 'swiper/vue'
 
@@ -43,32 +57,37 @@ const swiperOptions = {
     }
 }
 
-// cars
+/* -----------------------------
+   cars
+------------------------------*/
+
 const carStore = useCarStore()
 
 onMounted(() => {
     carStore.fetchLatest()
 })
 
-// helpers
-const getImage = (car) => {
-    if (!car.photo_url) {
-        return '/images/default_car.jpg'
-    }
+/* -----------------------------
+   helpers
+------------------------------*/
 
-    return car.photo_url
-}
+// image fallback
+const getImage = (car: any) =>
+    car?.photo_url || '/images/default_car.jpg'
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
-}
+// price format
+const formatPrice = (price: number | null | undefined) =>
+    new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
 
-const openCar = (id) => {
+// navigation
+const openCar = (id: number | string) => {
     router.push(`/cars/show/${id}`)
 }
 
-const onImgError = (e) => {
-    e.target.src = '/images/default_car.jpg'
+// image fallback handler
+const onImgError = (e: Event) => {
+    const target = e.target as HTMLImageElement
+    target.src = '/images/default_car.jpg'
 }
 
 </script>

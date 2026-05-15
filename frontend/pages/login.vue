@@ -1,19 +1,32 @@
-<script setup>
+<script setup lang="ts">
 
 import {ref, onMounted} from 'vue'
+
 import {useAuthStore} from '~/stores/auth'
+import {navigateTo} from '#app'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
+/* -----------------------------
+   store
+------------------------------*/
+
 const store = useAuthStore()
+
+/* -----------------------------
+   form state
+------------------------------*/
 
 const email = ref('')
 const password = ref('')
 
-const validate = () => {
+/* -----------------------------
+   validation
+------------------------------*/
 
-    const errors = {}
+const validate = () => {
+    const errors: Record<string, string> = {}
 
     if (!email.value) {
         errors.email = 'Email обязателен'
@@ -28,20 +41,23 @@ const validate = () => {
     return Object.keys(errors).length === 0
 }
 
-const submit = async () => {
+/* -----------------------------
+   submit
+------------------------------*/
 
+const submit = async () => {
     if (!validate()) return
 
-    const ok = await store.login(
-        email.value,
-        password.value
-    )
+    const ok = await store.login(email.value, password.value)
 
     if (ok) {
         return navigateTo('/dashboard')
     }
-
 }
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
 
 onMounted(() => {
     store.clearErrors()

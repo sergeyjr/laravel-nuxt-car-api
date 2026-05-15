@@ -3,22 +3,46 @@
 import {computed, onMounted} from 'vue'
 
 import {useOrderStore} from '~/stores/order'
+
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
+/* -----------------------------
+   store
+------------------------------*/
+
 const store = useOrderStore()
+
+/* -----------------------------
+   status helper
+------------------------------*/
+
 const {getLabel} = useOrderStatus()
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
 
 onMounted(async () => {
     await store.fetchOrders()
 })
 
+/* -----------------------------
+   state
+------------------------------*/
+
 const orders = computed(() => store.orders || [])
 const loading = computed(() => store.loadingOrders)
 const initialized = computed(() => store.initialized)
 
+/* -----------------------------
+   formatters
+------------------------------*/
+
+// price
 const formatPrice = (price: number | string) =>
     new Intl.NumberFormat('ru-RU').format(Number(price)) + ' ₽'
 
+// date
 const formatDate = (date: string) => {
     if (!date) return ''
 
@@ -28,6 +52,10 @@ const formatDate = (date: string) => {
         timeZone: 'Europe/Amsterdam'
     }).format(new Date(date))
 }
+
+/* -----------------------------
+   status UI
+------------------------------*/
 
 const statusBadgeClass = (status: string) => {
     switch (status) {
@@ -48,6 +76,10 @@ const statusBadgeClass = (status: string) => {
             return 'bg-secondary'
     }
 }
+
+/* -----------------------------
+   navigation
+------------------------------*/
 
 const goBack = () => {
     if (import.meta.client && window.history.length > 1) {

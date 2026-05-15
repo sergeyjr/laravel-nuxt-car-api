@@ -1,6 +1,7 @@
-<script setup>
+<script setup lang="ts">
 
 import {ref, computed, watch} from 'vue'
+
 import {useAuthStore} from '~/stores/auth'
 import {useProfileStore} from '~/stores/profile'
 
@@ -8,14 +9,26 @@ import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 import DeleteAccountModal from '~/components/modals/DeleteAccountModal.vue'
 
+/* -----------------------------
+   store
+------------------------------*/
+
 const auth = useAuthStore()
 const profile = useProfileStore()
+
+/* -----------------------------
+   init
+------------------------------*/
 
 await callOnce(() => {
     if (auth.user) {
         profile.load(auth.user)
     }
 })
+
+/* -----------------------------
+   computed
+------------------------------*/
 
 const user = computed(() => auth.user)
 
@@ -26,7 +39,25 @@ const avatarUrl = computed(() => {
     return '/images/default-avatar.png'
 })
 
+/* -----------------------------
+   state
+------------------------------*/
+
 const showDeleteModal = ref(false)
+
+/* profile form */
+const name = ref('')
+const email = ref('')
+const remove_avatar = ref(false)
+
+/* password form */
+const current_password = ref('')
+const password = ref('')
+const password_confirmation = ref('')
+
+/* -----------------------------
+   utils
+------------------------------*/
 
 const formatDate = (date) => {
     if (!date) return ''
@@ -42,10 +73,9 @@ const goBack = () => {
     navigateTo('/dashboard')
 }
 
-// PROFILE FORM (JSON)
-const name = ref('')
-const email = ref('')
-const remove_avatar = ref(false)
+/* -----------------------------
+   watch
+------------------------------*/
 
 watch(
     () => auth.user,
@@ -61,6 +91,10 @@ watch(
     {immediate: true}
 )
 
+/* -----------------------------
+   profile validation
+------------------------------*/
+
 const validateUpdateProfile = () => {
     profile.resetErrors()
 
@@ -74,6 +108,10 @@ const validateUpdateProfile = () => {
     return !hasError
 }
 
+/* -----------------------------
+   profile submit
+------------------------------*/
+
 const submitUpdateProfile = async () => {
     if (!validateUpdateProfile()) return
 
@@ -84,10 +122,9 @@ const submitUpdateProfile = async () => {
     })
 }
 
-/// PASSWORD
-const current_password = ref('')
-const password = ref('')
-const password_confirmation = ref('')
+/* -----------------------------
+   password validation
+------------------------------*/
 
 const validatePassword = () => {
     profile.resetErrors()
@@ -116,6 +153,10 @@ const validatePassword = () => {
 
     return !hasError
 }
+
+/* -----------------------------
+   password submit
+------------------------------*/
 
 const submitPassword = async () => {
     if (!validatePassword()) return

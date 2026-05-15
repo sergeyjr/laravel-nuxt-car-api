@@ -1,21 +1,33 @@
-<script setup>
+<script setup lang="ts">
 
 import {ref, onMounted} from 'vue'
+
 import {useAuthStore} from '~/stores/auth'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
+/* -----------------------------
+   store
+------------------------------*/
+
 const store = useAuthStore()
+
+/* -----------------------------
+   form state
+------------------------------*/
 
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const password_confirmation = ref('')
 
-const validate = () => {
+/* -----------------------------
+   validation
+------------------------------*/
 
-    const errors = {}
+const validate = () => {
+    const errors: Record<string, string> = {}
 
     if (!name.value) {
         errors.name = 'Имя обязательно'
@@ -42,8 +54,11 @@ const validate = () => {
     return Object.keys(errors).length === 0
 }
 
-const submit = async () => {
+/* -----------------------------
+   submit
+------------------------------*/
 
+const submit = async () => {
     if (!validate()) return
 
     const ok = await store.register({
@@ -54,15 +69,17 @@ const submit = async () => {
     })
 
     if (ok) {
-
+        // reset form
         name.value = ''
         email.value = ''
         password.value = ''
         password_confirmation.value = ''
-
     }
-
 }
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
 
 onMounted(() => {
     store.clearErrors()

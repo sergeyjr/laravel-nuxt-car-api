@@ -1,13 +1,26 @@
 <script setup lang="ts">
 
 import {useCarStore} from '~/stores/car'
+
 import BaseInput from '~/components/BaseInput.vue'
 import BaseButton from '~/components/BaseButton.vue'
+
+/* -----------------------------
+   store
+------------------------------*/
 
 const store = useCarStore()
 const router = useRouter()
 
+/* -----------------------------
+   init
+------------------------------*/
+
 store.reset()
+
+/* -----------------------------
+   actions
+------------------------------*/
 
 const submit = async () => {
     try {
