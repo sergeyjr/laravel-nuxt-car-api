@@ -1,5 +1,75 @@
 export default {
 
+    auth: {
+        emailRequired: 'Email обязателен',
+        login: 'Войти',
+        loginLink: 'Войти',
+        loginTitle: 'Авторизация',
+        loggingIn: 'Входим...',
+        name: 'Имя',
+        nameRequired: 'Имя обязательно',
+        password: 'Пароль',
+        passwordConfirm: 'Повтор пароля',
+        passwordMin: 'Минимум 6 символов',
+        passwordMismatch: 'Пароли не совпадают',
+        passwordRequired: 'Пароль обязателен',
+        register: 'Зарегистрироваться',
+        registerLink: 'Зарегистрироваться',
+        registerTitle: 'Регистрация',
+        registering: 'Регистрация...'
+    },
+
+    cart: {
+        checkout: 'Отправить заказ',
+        checkoutLoading: 'Отправляем заказ...',
+        clear: 'Очистить корзину',
+        comment: 'Комментарий к заказу:',
+        commentPlaceholder: 'Например: позвонить перед доставкой',
+        emptyText: 'Вы ещё не добавили товары',
+        emptyTitle: 'Корзина пуста',
+        goToCatalog: 'Перейти в каталог',
+        items: 'Позиций',
+        loading: 'Загрузка корзины...',
+        perItem: 'шт',
+        title: 'Корзина',
+        total: 'Итого'
+    },
+
+    contact: {
+        formTitle: 'Контактная форма',
+        message: 'Сообщение',
+        name: 'Имя',
+        retry: 'Следующее сообщение можно отправить через {sec} сек.',
+        send: 'Отправить сообщение',
+        sending: 'Отправляем...',
+        subject: 'Тема',
+        title: 'Контакты'
+    },
+
+    footer: {
+        allRightsReserved: 'Все права защищены.'
+    },
+
+    home: {
+        authHint: 'Войдите или зарегистрируйтесь',
+        buttons: {
+            dashboard: 'Личный кабинет',
+            login: 'Войти',
+            profile: 'Профиль',
+            register: 'Регистрация'
+        },
+        guest: 'Гость',
+        loading: 'Загрузка новинок...',
+        loggedIn: 'Вы авторизованы',
+        newArrivals: 'Новинки',
+        priceHint: 'Авторизуйтесь, чтобы увидеть цену',
+        quickActions: 'Быстрые действия',
+        stack: 'Laravel 13 + Nuxt 4 + Pinia 3',
+        title: 'Главная страница',
+        userStatusTitle: 'Статус пользователя',
+        welcome: 'Добро пожаловать'
+    },
+
     nav: {
         about: 'О проекте',
         cart: 'Корзина',
@@ -8,84 +78,12 @@ export default {
         dashboard: 'Кабинет',
         info: 'Инфо',
         login: 'Вход',
-        logout: 'Выход',
-    },
-
-    home: {
-        title: 'Главная страница',
-        stack: 'Laravel 13 + Nuxt 4 + Pinia 3',
-        userStatusTitle: 'Статус пользователя',
-        welcome: 'Добро пожаловать',
-        loggedIn: 'Вы авторизованы',
-        guest: 'Гость',
-        authHint: 'Войдите или зарегистрируйтесь',
-        quickActions: 'Быстрые действия',
-        newArrivals: 'Новинки',
-        loading: 'Загрузка новинок...',
-        priceHint: 'Авторизуйтесь, чтобы увидеть цену',
-        buttons: {
-            dashboard: 'Личный кабинет',
-            profile: 'Профиль',
-            login: 'Войти',
-            register: 'Регистрация',
-        }
-    },
-
-    footer: {
-        allRightsReserved: 'Все права защищены.',
-    },
-
-    auth: {
-        loginTitle: 'Авторизация',
-        registerTitle: 'Регистрация',
-        login: 'Войти',
-        register: 'Зарегистрироваться',
-        loginLink: 'Войти',
-        registerLink: 'Зарегистрироваться',
-        password: 'Пароль',
-        passwordConfirm: 'Повтор пароля',
-        name: 'Имя',
-
-        emailRequired: 'Email обязателен',
-        passwordRequired: 'Пароль обязателен',
-        nameRequired: 'Имя обязательно',
-        passwordMin: 'Минимум 6 символов',
-        passwordMismatch: 'Пароли не совпадают',
-
-        loggingIn: 'Входим...',
-        registering: 'Регистрация...'
-    },
-
-    contact: {
-        title: 'Контакты',
-        formTitle: 'Контактная форма',
-        retry: 'Следующее сообщение можно отправить через {sec} сек.',
-        name: 'Имя',
-        subject: 'Тема',
-        message: 'Сообщение',
-        send: 'Отправить сообщение',
-        sending: 'Отправляем...'
-    },
-
-    cart: {
-        title: 'Корзина',
-        loading: 'Загрузка корзины...',
-        emptyTitle: 'Корзина пуста',
-        emptyText: 'Вы ещё не добавили товары',
-        goToCatalog: 'Перейти в каталог',
-        perItem: 'шт',
-        total: 'Итого',
-        items: 'Позиций',
-        comment: 'Комментарий к заказу:',
-        commentPlaceholder: 'Например: позвонить перед доставкой',
-        checkout: 'Отправить заказ',
-        checkoutLoading: 'Отправляем заказ...',
-        clear: 'Очистить корзину'
+        logout: 'Выход'
     },
 
     page: {
         loading: 'Загрузка страницы...',
         notFound: 'Страница не найдена.'
-    },
+    }
 
 }

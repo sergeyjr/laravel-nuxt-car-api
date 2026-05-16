@@ -31,11 +31,12 @@ export default defineNuxtConfig({
 
     i18n: {
         defaultLocale: 'ru',
-        strategy: 'prefix_except_default',
+        // langDir: 'locales/',
         locales: [
             {code: 'ru', file: 'ru.ts'},
             {code: 'en', file: 'en.ts'}
         ],
+        strategy: 'prefix_except_default',
     },
 
     // Конфигурация окружений
@@ -101,6 +102,7 @@ export default defineNuxtConfig({
 
             // следит за файлами внутри docker volume
             watch: {
+                interval: 100,
                 usePolling: true,
             }
         }

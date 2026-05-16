@@ -34,7 +34,7 @@ const publicLinks = computed(() => [
         <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
 
             <div class="text-muted small">
-                © {{ year }} {{ appName }}. Все права защищены.
+                © {{ year }} {{ appName }}. {{ t('footer.allRightsReserved') }}
             </div>
 
             <div class="d-flex gap-3 mt-2 mt-md-0">

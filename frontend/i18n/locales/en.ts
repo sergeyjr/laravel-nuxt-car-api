@@ -1,5 +1,75 @@
 export default {
 
+    auth: {
+        emailRequired: 'Email is required',
+        login: 'Login',
+        loginLink: 'Login',
+        loginTitle: 'Authorization',
+        loggingIn: 'Logging in...',
+        name: 'Name',
+        nameRequired: 'Name is required',
+        password: 'Password',
+        passwordConfirm: 'Repeat password',
+        passwordMin: 'Minimum 6 characters',
+        passwordMismatch: 'Passwords do not match',
+        passwordRequired: 'Password is required',
+        register: 'Register',
+        registerLink: 'Register',
+        registerTitle: 'Registration',
+        registering: 'Registering...'
+    },
+
+    cart: {
+        checkout: 'Place order',
+        checkoutLoading: 'Processing order...',
+        clear: 'Clear cart',
+        comment: 'Order comment:',
+        commentPlaceholder: 'e.g. call before delivery',
+        emptyText: 'You have not added any items yet',
+        emptyTitle: 'Cart is empty',
+        goToCatalog: 'Go to catalog',
+        items: 'Items',
+        loading: 'Loading cart...',
+        perItem: 'pcs',
+        title: 'Cart',
+        total: 'Total'
+    },
+
+    contact: {
+        formTitle: 'Contact form',
+        message: 'Message',
+        name: 'Name',
+        retry: 'Next message can be sent in {sec} sec.',
+        send: 'Send message',
+        sending: 'Sending...',
+        subject: 'Subject',
+        title: 'Contacts'
+    },
+
+    footer: {
+        allRightsReserved: 'All rights reserved.'
+    },
+
+    home: {
+        authHint: 'Log in or register',
+        buttons: {
+            dashboard: 'Dashboard',
+            login: 'Login',
+            profile: 'Profile',
+            register: 'Register'
+        },
+        guest: 'Guest',
+        loading: 'Loading new arrivals...',
+        loggedIn: 'You are logged in',
+        newArrivals: 'New arrivals',
+        priceHint: 'Log in to see price',
+        quickActions: 'Quick actions',
+        stack: 'Laravel 13 + Nuxt 4 + Pinia 3',
+        title: 'Home page',
+        userStatusTitle: 'User status',
+        welcome: 'Welcome'
+    },
+
     nav: {
         about: 'About',
         cart: 'Cart',
@@ -8,73 +78,12 @@ export default {
         dashboard: 'Dashboard',
         info: 'Info',
         login: 'Login',
-        logout: 'Logout',
-    },
-
-    home: {
-        loggedIn: 'You are logged in',
-        newArrivals: 'New arrivals',
-        quickActions: 'Quick actions',
-        title: 'Home page',
-        userStatusTitle: 'User status',
-        welcome: 'Welcome',
-    },
-
-    footer: {
-        allRightsReserved: 'All rights reserved.',
-    },
-
-    auth: {
-        loginTitle: 'Login',
-        registerTitle: 'Register',
-        login: 'Login',
-        register: 'Register',
-        loginLink: 'Login',
-        registerLink: 'Register',
-        password: 'Password',
-        passwordConfirm: 'Confirm password',
-        name: 'Name',
-
-        emailRequired: 'Email is required',
-        passwordRequired: 'Password is required',
-        nameRequired: 'Name is required',
-        passwordMin: 'Minimum 6 characters',
-        passwordMismatch: 'Passwords do not match',
-
-        loggingIn: 'Logging in...',
-        registering: 'Registering...'
-    },
-
-    contact: {
-        title: 'Contacts',
-        formTitle: 'Contact form',
-        retry: 'Next message can be sent in {sec} sec.',
-        name: 'Name',
-        subject: 'Subject',
-        message: 'Message',
-        send: 'Send message',
-        sending: 'Sending...'
-    },
-
-    cart: {
-        title: 'Cart',
-        loading: 'Loading cart...',
-        emptyTitle: 'Cart is empty',
-        emptyText: 'You have not added any items yet',
-        goToCatalog: 'Go to catalog',
-        perItem: 'pc',
-        total: 'Total',
-        items: 'Items',
-        comment: 'Order comment:',
-        commentPlaceholder: 'e.g. call before delivery',
-        checkout: 'Place order',
-        checkoutLoading: 'Processing order...',
-        clear: 'Clear cart'
+        logout: 'Logout'
     },
 
     page: {
         loading: 'Loading page...',
         notFound: 'Page not found.'
-    },
+    }
 
 }
