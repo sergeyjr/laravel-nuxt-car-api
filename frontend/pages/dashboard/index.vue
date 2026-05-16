@@ -72,9 +72,11 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <NuxtLink to="/dashboard/profile" class="text-decoration-none text-dark">
-                                <h5 class="mb-3">Мой профиль</h5>
-                            </NuxtLink>
+                            <h5 class="mb-3">
+                                <NuxtLink to="/dashboard/profile" class="text-decoration-none text-dark">
+                                    Мой профиль
+                                </NuxtLink>
+                            </h5>
 
                             <p>Добро пожаловать, <span class="fw-bold">{{ user?.name || 'пользователь' }}</span></p>
                             <p>Email: <span class="fw-bold">{{ user?.email }}</span></p>
@@ -94,9 +96,11 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <NuxtLink to="/cars" class="text-decoration-none text-dark">
-                                <h5 class="mb-3">Каталог</h5>
-                            </NuxtLink>
+                            <h5 class="mb-3">
+                                <NuxtLink to="/cars" class="text-decoration-none text-dark">
+                                    Каталог
+                                </NuxtLink>
+                            </h5>
 
                             <p class="mb-0">
                                 Машины всего:
@@ -132,9 +136,13 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column justify-content-between">
 
-                            <template v-if="cartTotal === 0">
+                            <h5 class="mb-3">
+                                <NuxtLink to="/cart" class="text-decoration-none text-dark">
+                                    Корзина
+                                </NuxtLink>
+                            </h5>
 
-                                <h5 class="mb-3">Корзина</h5>
+                            <template v-if="cartTotal === 0">
 
                                 <div class="btn btn-outline-secondary w-100 mt-3 disabled">
                                     Корзина пустая
@@ -143,10 +151,6 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                             </template>
 
                             <template v-else>
-
-                                <NuxtLink to="/cart" class="text-decoration-none text-dark">
-                                    <h5 class="mb-3">Корзина</h5>
-                                </NuxtLink>
 
                                 <p class="text-muted">
                                     Товаров:

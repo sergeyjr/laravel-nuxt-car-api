@@ -18,23 +18,18 @@ export const useProfileStore = defineStore('profile', {
             avatar: null as File | null,
             remove_avatar: false
         },
-
         passwordForm: {
             current_password: '',
             password: '',
             password_confirmation: ''
         } as ProfilePasswordForm,
-
         errors: {} as Record<string, string>,
-
         loadingProfile: false,
         loadingAvatar: false,
         loadingDelete: false,
         loadingPassword: false,
         loadingAll: false,
-
         success: false,
-
         showAvatarModal: false
     }),
 

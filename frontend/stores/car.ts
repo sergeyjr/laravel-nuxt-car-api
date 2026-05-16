@@ -38,18 +38,14 @@ export const useCarStore = defineStore('car', {
         cars: [] as Car[],
         meta: null as CarsResponse | null,
         car: null as Car | null,
-
         latest: [] as Car[],
-
         adding: {} as Record<number, boolean>,
-
         listLoading: false,
         carLoading: false,
         latestLoading: false,
-
         force: false,
         latestLoaded: false,
-
+        pages: {} as Record<number, { cars: Car[]; meta: CarsResponse }>,
         form: defaultForm(),
         errors: {} as Record<string, string>,
         submitting: false,
@@ -58,6 +54,7 @@ export const useCarStore = defineStore('car', {
 
     getters: {
         isAdding: (state) => (id: number | string) => !!state.adding[Number(id)],
+        hasPage: (state) => (page: number | string) => !!state.pages[Number(page)],
     },
 
     actions: {
@@ -92,15 +89,27 @@ export const useCarStore = defineStore('car', {
         },
 
         async fetch(page = 1) {
+            const p = Number(page) || 1
+
+            const cached = this.pages[p]
+            if (cached) {
+                this.cars = cached.cars
+                this.meta = cached.meta
+                return cached.meta
+            }
 
             this.listLoading = true
 
             const api = useCarApi()
 
             try {
-                const res = await api.fetchCars(page)
+                const res = await api.fetchCars(p)
                 this.cars = res.data || []
                 this.meta = res
+                this.pages[p] = {
+                    cars: this.cars,
+                    meta: res,
+                }
                 return res
             } catch {
                 this.cars = []

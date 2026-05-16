@@ -34,10 +34,8 @@ export const useCartStore = defineStore('cart', {
 
     state: () => ({
         items: {} as Record<string, any>,
-
         initialized: false,
         loading: false,
-
         loadingFetch: false,
         loadingAdd: false,
         loadingUpdate: false,

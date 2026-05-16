@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {computed, ref, onMounted, watch} from 'vue'
+import {computed, reactive, ref, onMounted, watch} from 'vue'
 
 import {useRoute} from 'vue-router'
 
@@ -31,7 +31,8 @@ const route = useRoute()
 
 const showAuth = ref(false)
 const authLoading = ref(false)
-const initialLoading = ref(true)
+const authErrors = reactive<Record<string, string>>({})
+const initialLoading = ref(false)
 
 /* -----------------------------
    route
@@ -49,6 +50,11 @@ const loadCars = async (p: number) => {
 
 /* initial load (first visit) */
 onMounted(async () => {
+
+    if (carStore.hasPage(page.value)) {
+        return
+    }
+
     try {
         initialLoading.value = true
         await loadCars(page.value)
@@ -81,8 +87,12 @@ const pageLoading = computed(() =>
 
 // open auth modal
 const openAuthModal = (event?: Event) => {
+
     event?.stopPropagation()
     event?.preventDefault()
+
+    Object.keys(authErrors).forEach(k => delete authErrors[k])
+
     showAuth.value = true
 }
 
@@ -111,12 +121,40 @@ const isAdding = (id: number | string) =>
 ------------------------------*/
 
 const confirmLogin = async (payload: LoginPayload) => {
+
+    Object.keys(authErrors).forEach(k => delete authErrors[k])
+
     const {email, password} = payload
 
+    if (!email) {
+        authErrors.email = 'Email обязателен'
+    }
+
+    if (!password) {
+        authErrors.password = 'Пароль обязателен'
+    }
+
+    if (Object.keys(authErrors).length) {
+        return
+    }
+
     authLoading.value = true
+
     try {
+
         const ok = await authStore.login(email, password)
-        if (ok) showAuth.value = false
+
+        if (ok) {
+            showAuth.value = false
+            return
+        }
+
+        Object.assign(authErrors, authStore.errors)
+
+        if (!Object.keys(authErrors).length) {
+            authErrors.general = 'Ошибка авторизации.'
+        }
+
     } finally {
         authLoading.value = false
     }
@@ -224,6 +262,7 @@ const confirmLogin = async (payload: LoginPayload) => {
         <LoginModal
             v-model:show="showAuth"
             :loading="authLoading"
+            :errors="authErrors"
             @confirm="confirmLogin"
         />
 

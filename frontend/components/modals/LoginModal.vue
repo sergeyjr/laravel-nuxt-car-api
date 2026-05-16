@@ -2,22 +2,19 @@
 
 import {ref, watch, computed} from 'vue'
 
-import {useAuthStore} from '~/stores/auth'
-
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
 const props = defineProps<{
     show: boolean
     loading?: boolean
+    errors?: Record<string, string>
 }>()
 
 const emit = defineEmits<{
     (e: 'update:show', value: boolean): void
     (e: 'confirm', payload: { email: string; password: string }): void
 }>()
-
-const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
@@ -34,21 +31,6 @@ const close = () => {
 }
 
 const submit = () => {
-    authStore.errors = {}
-
-    let hasError = false
-
-    if (!email.value) {
-        authStore.errors.email = 'Email обязателен'
-        hasError = true
-    }
-
-    if (!password.value) {
-        authStore.errors.password = 'Пароль обязателен'
-        hasError = true
-    }
-
-    if (hasError) return
 
     emit('confirm', {
         email: email.value,
@@ -58,7 +40,6 @@ const submit = () => {
 
 watch(() => props.show, (val) => {
     if (val) {
-        authStore.clearErrors()
         email.value = ''
         password.value = ''
     }
@@ -92,6 +73,14 @@ watch(() => props.show, (val) => {
                 </div>
 
                 <div class="modal-body">
+
+                    <div
+                        v-if="errors?.general"
+                        class="alert alert-danger"
+                    >
+                        {{ errors.general }}
+                    </div>
+
                     <form @submit.prevent="submit">
 
                         <BaseInput
@@ -100,7 +89,7 @@ watch(() => props.show, (val) => {
                             label="Email"
                             required
                             :disabled="isProcessing"
-                            :error="authStore.errors.email"
+                            :error="errors?.email"
                         />
 
                         <BaseInput
@@ -109,7 +98,7 @@ watch(() => props.show, (val) => {
                             label="Пароль"
                             required
                             :disabled="isProcessing"
-                            :error="authStore.errors.password"
+                            :error="errors?.password"
                         />
 
                         <BaseButton

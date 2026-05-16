@@ -35,7 +35,7 @@ const alertClass = (type: string) => {
 
                     <BaseButton
                         variant="link"
-                        class="btn-close alert-close"
+                        class="btn-close"
                         aria-label="Close alert"
                         @click="alertStore.remove(alert.id)"
                     />
@@ -66,36 +66,6 @@ const alertClass = (type: string) => {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.alert-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    color: rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.15s ease;
-}
-
-.alert-close:hover {
-    background: rgba(0, 0, 0, 0.08);
-    color: rgba(0, 0, 0, 0.85);
-}
-
-.alert-close:active {
-    transform: scale(0.95);
-}
-
-.alert-close svg {
-    pointer-events: none;
 }
 
 </style>
