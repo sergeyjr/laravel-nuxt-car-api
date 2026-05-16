@@ -26,10 +26,8 @@ export const formatDate = (date: string | number | Date | null | undefined) => {
 export const formatPhoneRU = (phone?: string | number | null) => {
     if (!phone) return ''
 
-    // 1. Оставляем только цифры
     let digits = String(phone).replace(/\D/g, '')
 
-    // 2. Приводим к формату 10 цифр (без кода страны)
     if (digits.startsWith('8')) {
         digits = '7' + digits.slice(1)
     }
@@ -38,7 +36,6 @@ export const formatPhoneRU = (phone?: string | number | null) => {
         digits = '7' + digits
     }
 
-    // 3. Проверка минимальной валидности
     if (digits.length !== 11) return phone.toString()
 
     const country = '+7'

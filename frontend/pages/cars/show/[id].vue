@@ -169,12 +169,11 @@ watch(carId, (newId) => {
                                 <tbody>
 
                                 <tr v-if="car.description">
-                                    <td class="text-muted fw-semibold w-25">Описание</td>
-                                    <td>{{ car.description }}</td>
+                                    <td colspan="2"><h5>{{ car.description }}</h5></td>
                                 </tr>
 
                                 <tr v-if="car.options?.brand">
-                                    <td class="text-muted fw-semibold">Бренд</td>
+                                    <td class="text-muted fw-semibold w-50">Бренд</td>
                                     <td>{{ car.options.brand }}</td>
                                 </tr>
 

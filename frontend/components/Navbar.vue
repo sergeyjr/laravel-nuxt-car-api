@@ -57,7 +57,7 @@ const langRef = ref<HTMLElement | null>(null)
 
 const languages = [
     {code: 'ru', name: 'Русский', icon: 'fi fi-ru'},
-    {code: 'en', name: 'English', icon: 'fi fi-gb'}
+    {code: 'en', name: 'English', icon: 'fi fi-us'}
 ] as const
 
 type LocaleCode = (typeof languages)[number]['code']

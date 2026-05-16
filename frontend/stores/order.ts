@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {useOrderApi} from '~/services/api/internal/order.api'
+import {useOrderApi} from '~/services/api/order.api'
 
 export const useOrderStore = defineStore('order', {
 

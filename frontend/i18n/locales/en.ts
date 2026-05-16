@@ -35,6 +35,18 @@ export default {
         total: 'Total'
     },
 
+    catalog: {
+        addToCart: 'Add to cart',
+        adding: 'Adding...',
+        inCart: 'In cart',
+        loading: 'Loading catalog...',
+        loginForPrice: 'Log in to see the price',
+        of: 'of',
+        page: 'Page',
+        shown: 'Showing',
+        title: 'Catalog'
+    },
+
     contact: {
         formTitle: 'Contact form',
         message: 'Message',

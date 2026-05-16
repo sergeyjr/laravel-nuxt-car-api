@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {useCartApi} from '~/services/api/internal/cart.api'
+import {useCartApi} from '~/services/api/cart.api'
 
 function cleanItems(payload: any) {
     if (!payload) return {}

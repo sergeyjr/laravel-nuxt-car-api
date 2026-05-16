@@ -3,6 +3,7 @@
 import {computed, reactive, ref, onMounted, watch} from 'vue'
 
 import {useRoute} from 'vue-router'
+import {useI18n} from 'vue-i18n'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
@@ -14,6 +15,12 @@ import type {Car} from '~/types/car'
 import {formatPrice} from '~/utils/formatters'
 
 import LoginModal from '~/components/modals/LoginModal.vue'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
 
 /* -----------------------------
    stores
@@ -127,11 +134,11 @@ const confirmLogin = async (payload: LoginPayload) => {
     const {email, password} = payload
 
     if (!email) {
-        authErrors.email = 'Email обязателен'
+        authErrors.email = t('auth.emailRequired')
     }
 
     if (!password) {
-        authErrors.password = 'Пароль обязателен'
+        authErrors.password = t('auth.passwordRequired')
     }
 
     if (Object.keys(authErrors).length) {
@@ -151,10 +158,6 @@ const confirmLogin = async (payload: LoginPayload) => {
 
         Object.assign(authErrors, authStore.errors)
 
-        if (!Object.keys(authErrors).length) {
-            authErrors.general = 'Ошибка авторизации.'
-        }
-
     } finally {
         authLoading.value = false
     }
@@ -168,11 +171,11 @@ const confirmLogin = async (payload: LoginPayload) => {
         <div v-if="pageLoading" class="loading-overlay">
             <div class="loading-modal">
                 <div class="spinner-border" role="status"></div>
-                <div class="mt-2">Загрузка каталога...</div>
+                <div class="mt-2">{{ t('catalog.loading') }}</div>
             </div>
         </div>
 
-        <h1 class="mb-4">Каталог</h1>
+        <h1 class="mb-4">{{ t('catalog.title') }}</h1>
 
         <div v-if="meta" class="d-flex gap-2 mb-3 align-items-center flex-wrap">
             <Pagination
@@ -213,7 +216,7 @@ const confirmLogin = async (payload: LoginPayload) => {
                             class="btn btn-light"
                             @click.stop.prevent="openAuthModal"
                         >
-                            Авторизуйтесь, чтобы увидеть цену
+                            {{ t('catalog.loginForPrice') }}
                         </BaseButton>
                     </div>
 
@@ -225,7 +228,7 @@ const confirmLogin = async (payload: LoginPayload) => {
                             class="w-100"
                             disabled
                         >
-                            Товар в корзине
+                            {{ t('catalog.inCart') }}
                         </BaseButton>
 
                         <BaseButton
@@ -235,8 +238,13 @@ const confirmLogin = async (payload: LoginPayload) => {
                             :disabled="isAdding(car.id)"
                             @click.stop="addToCart(car)"
                         >
-                            <span v-if="isAdding(car.id)">Добавляется...</span>
-                            <span v-else>В корзину</span>
+                            <span v-if="isAdding(car.id)">
+                                {{ t('catalog.adding') }}
+                            </span>
+
+                            <span v-else>
+                                {{ t('catalog.addToCart') }}
+                            </span>
                         </BaseButton>
 
                     </div>
@@ -254,9 +262,9 @@ const confirmLogin = async (payload: LoginPayload) => {
         </div>
 
         <div v-if="meta" class="mt-2 text-muted small">
-            Страница {{ meta.current_page }} / {{ meta.last_page }}
-            · Показано {{ meta.from }}–{{ meta.to }}
-            из {{ meta.total }}
+            {{ t('catalog.page') }} {{ meta.current_page }} / {{ meta.last_page }}
+            · {{ t('catalog.shown') }} {{ meta.from }}–{{ meta.to }}
+            {{ t('catalog.of') }} {{ meta.total }}
         </div>
 
         <LoginModal

@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
 
 import type {User} from '~/types/auth'
-import {useAuthApi} from '~/services/api/internal/auth.api'
+import {useAuthApi} from '~/services/api/auth.api'
 import {useAlertStore} from './alert'
 
 export const useAuthStore = defineStore('auth', {

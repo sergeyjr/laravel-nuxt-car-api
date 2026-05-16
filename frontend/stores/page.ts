@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {usePageApi} from '~/services/api/internal/page.api'
+import {usePageApi} from '~/services/api/page.api'
 import type {PageResponse} from '~/types/page'
 
 export const usePageStore = defineStore('pages', {

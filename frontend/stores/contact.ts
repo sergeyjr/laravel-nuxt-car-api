@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {useContactApi} from '~/services/api/internal/contact.api'
+import {useContactApi} from '~/services/api/contact.api'
 import {useAlertStore} from '~/stores/alert'
 
 type ContactContext = 'home' | 'contactPage'

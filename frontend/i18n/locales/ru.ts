@@ -35,6 +35,18 @@ export default {
         total: 'Итого'
     },
 
+    catalog: {
+        addToCart: 'В корзину',
+        adding: 'Добавляется...',
+        inCart: 'Товар в корзине',
+        loading: 'Загрузка каталога...',
+        loginForPrice: 'Авторизуйтесь, чтобы увидеть цену',
+        of: 'из',
+        page: 'Страница',
+        shown: 'Показано',
+        title: 'Каталог'
+    },
+
     contact: {
         formTitle: 'Контактная форма',
         message: 'Сообщение',

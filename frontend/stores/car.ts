@@ -1,8 +1,8 @@
 import {defineStore} from 'pinia'
 import type {Car, CarsResponse} from '~/types/car'
 import {useCartStore} from '~/stores/cart'
-import {useCarApi} from '~/services/api/internal/car.api'
-import {useAuthApi} from "~/services/api/internal/auth.api";
+import {useCarApi} from '~/services/api/car.api'
+import {useAuthApi} from "~/services/api/auth.api";
 import {useAlertStore} from './alert'
 import {useAuthStore} from './auth'
 
