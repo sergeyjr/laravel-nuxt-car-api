@@ -46,10 +46,11 @@ const confirmDelete = () => {
                         Удаление аккаунта
                     </h5>
 
-                    <button
-                        type="button"
+                    <BaseButton
+                        variant="link"
                         class="btn-close"
                         :disabled="isProcessing"
+                        aria-label="Close"
                         @click="close"
                     />
                 </div>

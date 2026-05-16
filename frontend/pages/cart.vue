@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-import {computed, ref} from 'vue'
+import { computed, ref } from 'vue'
 
-import {useCartStore} from '~/stores/cart'
-import {useDashboardStore} from '~/stores/dashboard'
+import { useCartStore } from '~/stores/cart'
+import { useDashboardStore } from '~/stores/dashboard'
 
 import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -12,18 +12,12 @@ import CartRemoveItemModal from '~/components/modals/CartRemoveItemModal.vue'
 import CartCheckoutModal from '~/components/modals/CartCheckoutModal.vue'
 import CartClearModal from '~/components/modals/CartClearModal.vue'
 
-import {formatPrice} from '~/utils/formatters'
+import { formatPrice } from '~/utils/formatters'
 
-/* -----------------------------
-   stores
-------------------------------*/
+const { t } = useI18n()
 
 const cart = useCartStore()
 const dashboard = useDashboardStore()
-
-/* -----------------------------
-   state
-------------------------------*/
 
 const isSubmitting = ref(false)
 const comment = ref('')
@@ -34,18 +28,9 @@ const showClearModal = ref(false)
 
 const selectedItemId = ref<number | null>(null)
 
-/* -----------------------------
-   computed
-------------------------------*/
-
 const items = computed(() => cart.items)
 const total = computed(() => cart.total)
 
-/* -----------------------------
-   utils
-------------------------------*/
-
-// normalize qty
 function sanitizeQty(value: unknown) {
     let qty = Number(value)
 
@@ -59,10 +44,6 @@ function sanitizeQty(value: unknown) {
 
     return qty
 }
-
-/* -----------------------------
-   modal openers
-------------------------------*/
 
 function openRemoveModal(id: number | string) {
     if (isSubmitting.value) return
@@ -81,11 +62,6 @@ function openCheckoutModal() {
     showCheckoutModal.value = true
 }
 
-/* -----------------------------
-   actions
-------------------------------*/
-
-// remove item
 const confirmRemoveItem = async () => {
     if (!selectedItemId.value) return
 
@@ -95,13 +71,11 @@ const confirmRemoveItem = async () => {
     selectedItemId.value = null
 }
 
-// clear cart
 const confirmClearCart = async () => {
     await cart.clear()
     showClearModal.value = false
 }
 
-// checkout
 const confirmCheckout = async () => {
     if (isSubmitting.value) return
 
@@ -120,11 +94,8 @@ const confirmCheckout = async () => {
 
         showCheckoutModal.value = false
 
-        await dashboard.fetchDashboard(true)
         await navigateTo(`/order-success/${order.id}`)
 
-    } catch (e) {
-        console.error('Checkout failed:', e)
     } finally {
         isSubmitting.value = false
     }
@@ -136,11 +107,11 @@ const confirmCheckout = async () => {
     <div class="container py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Корзина</h2>
+            <h2 class="mb-0">{{ t('cart.title') }}</h2>
         </div>
 
         <div v-if="cart.loading" class="alert alert-light border text-center py-4">
-            Загрузка корзины...
+            {{ t('cart.loading') }}
         </div>
 
         <div
@@ -148,11 +119,11 @@ const confirmCheckout = async () => {
             class="card border-0 shadow-sm"
         >
             <div class="card-body text-center py-5">
-                <h4 class="mb-2">Корзина пуста</h4>
-                <p class="text-muted mb-4">Вы ещё не добавили товары</p>
+                <h4 class="mb-2">{{ t('cart.emptyTitle') }}</h4>
+                <p class="text-muted mb-4">{{ t('cart.emptyText') }}</p>
 
                 <NuxtLink to="/cars" class="btn btn-primary px-4">
-                    Перейти в каталог
+                    {{ t('cart.goToCatalog') }}
                 </NuxtLink>
             </div>
         </div>
@@ -160,48 +131,55 @@ const confirmCheckout = async () => {
         <div v-else class="row g-4 align-items-start">
 
             <div class="col-12 col-lg-8">
+
                 <div
                     v-for="(itemData, itemId) in items"
                     :key="itemId"
                     class="card border-0 shadow-sm mb-3"
                 >
                     <div class="card-body">
+
                         <div class="row align-items-center g-3">
-                            <!-- IMAGE + INFO -->
+
                             <div class="col-12 col-md-5">
+
                                 <div class="d-flex align-items-center gap-3">
+
                                     <NuxtLink :to="`/cars/show/${itemData.id}`">
                                         <img
                                             :src="itemData.photo_url || '/images/default_car.jpg'"
-                                            alt=""
                                             class="rounded border"
                                             style="width:110px;height:80px;object-fit:contain;"
                                         />
                                     </NuxtLink>
 
                                     <div>
+
                                         <NuxtLink
                                             :to="`/cars/show/${itemData.id}`"
                                             class="text-decoration-none text-dark"
                                         >
-                                            <h5 class="mb-1">
-                                                {{ itemData.name }}
-                                            </h5>
+                                            <h5 class="mb-1">{{ itemData.name }}</h5>
                                         </NuxtLink>
 
                                         <div class="text-muted small">
-                                            {{ formatPrice(itemData.price) }} / шт
+                                            {{ formatPrice(itemData.price) }} / {{ t('cart.perItem') }}
                                         </div>
+
                                     </div>
+
                                 </div>
+
                             </div>
 
-                            <!-- QTY -->
                             <div class="col-12 col-md-3">
+
                                 <div class="d-flex justify-content-center align-items-center gap-2">
+
                                     <button
                                         type="button"
                                         class="btn btn-outline-secondary btn-sm"
+                                        :disabled="itemData.qty <= 1 || cart.loadingUpdate"
                                         @click="cart.update(itemId, itemData.qty - 1)"
                                     >
                                         −
@@ -222,7 +200,9 @@ const confirmCheckout = async () => {
                                     >
                                         +
                                     </button>
+
                                 </div>
+
                             </div>
 
                             <div class="col-8 col-md-3 text-md-end">
@@ -242,75 +222,79 @@ const confirmCheckout = async () => {
                             </div>
 
                         </div>
+
                     </div>
                 </div>
+
             </div>
 
-            <!-- SIDEBAR -->
             <div class="col-12 col-lg-4">
-                <div class="position-lg-sticky" style="top: 1rem;">
-                    <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="text-muted">Итого:</span>
-                                <span class="fs-4 fw-bold text-success">
-                                    {{ formatPrice(total) }}
-                                </span>
-                            </div>
 
-                            <hr>
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body">
 
-                            <div class="d-flex justify-content-between mb-0">
-                                <span class="text-muted">Позиций:</span>
-                                <span class="fw-semibold">{{ Object.keys(items).length }}</span>
-                            </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">{{ t('cart.total') }}:</span>
+                            <span class="fs-4 fw-bold text-success">
+                                {{ formatPrice(total) }}
+                            </span>
                         </div>
-                    </div>
 
-                    <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-body">
-                            <label class="form-label fw-semibold">
-                                Комментарий к заказу:
-                            </label>
+                        <hr>
 
-                            <BaseTextarea
-                                v-model="comment"
-                                :rows="5"
-                                placeholder="Например: позвонить перед доставкой"
-                                :disabled="isSubmitting"
-                            />
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">{{ t('cart.items') }}:</span>
+                            <span class="fw-semibold">{{ Object.keys(items).length }}</span>
                         </div>
+
                     </div>
-
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body d-grid gap-2">
-                            <BaseButton
-                                variant="success"
-                                size="lg"
-                                class="w-100 py-3 fw-semibold"
-                                :loading="isSubmitting"
-                                :disabled="isSubmitting"
-                                @click="openCheckoutModal"
-                            >
-                                Отправить заказ
-                                <template #loading>
-                                    Отправляем заказ...
-                                </template>
-                            </BaseButton>
-
-                            <BaseButton
-                                variant="outline-danger"
-                                class="w-100"
-                                :disabled="isSubmitting || !Object.keys(items).length"
-                                @click="openClearModal"
-                            >
-                                Очистить корзину
-                            </BaseButton>
-                        </div>
-                    </div>
-
                 </div>
+
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body">
+
+                        <BaseTextarea
+                            v-model="comment"
+                            :label="t('cart.comment')"
+                            :rows="5"
+                            :placeholder="t('cart.commentPlaceholder')"
+                            :disabled="isSubmitting"
+                        />
+
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-grid gap-2">
+
+                        <BaseButton
+                            variant="success"
+                            size="lg"
+                            class="w-100 py-3 fw-semibold"
+                            :loading="isSubmitting"
+                            :disabled="isSubmitting"
+                            @click="openCheckoutModal"
+                        >
+                            {{ t('cart.checkout') }}
+                            <template #loading>
+                                {{ t('cart.checkoutLoading') }}
+                            </template>
+                        </BaseButton>
+
+                        <BaseButton
+                            variant="outline-danger"
+                            class="w-100"
+                            :disabled="isSubmitting || !Object.keys(items).length"
+                            @click="openClearModal"
+                        >
+                            {{ t('cart.clear') }}
+                        </BaseButton>
+
+                    </div>
+                </div>
+
             </div>
+
         </div>
 
         <CartRemoveItemModal

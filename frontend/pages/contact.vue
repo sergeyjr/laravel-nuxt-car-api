@@ -7,6 +7,8 @@ import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 import BaseTextarea from '~/components/BaseTextarea.vue'
 
+const {t} = useI18n()
+
 const contactStore = useContactStore()
 
 const onSubmit = async (e: Event) => {
@@ -14,10 +16,6 @@ const onSubmit = async (e: Event) => {
     if (!form.checkValidity()) return
     await contactStore.submit('contactPage')
 }
-
-/* -----------------------------
-   fake contacts (UI only)
-------------------------------*/
 
 const contacts = [
     {
@@ -49,10 +47,9 @@ const contacts = [
     <div class="container mt-4">
         <div class="row g-4">
 
-            <!-- CONTACTS -->
             <div class="col-12 col-md-6">
 
-                <h1 class="mb-4">Контакты</h1>
+                <h1 class="mb-4">{{ t('contact.title') }}</h1>
 
                 <div
                     v-for="c in contacts"
@@ -89,20 +86,19 @@ const contacts = [
 
             </div>
 
-            <!-- FORM -->
             <div class="col-12 col-md-6">
 
-                <h1 class="mb-4">Контактная форма</h1>
+                <h1 class="mb-4">{{ t('contact.formTitle') }}</h1>
 
                 <div v-if="contactStore.retryAfter > 0" class="alert alert-warning mt-4">
-                    Следующее сообщение можно отправить через {{ contactStore.retryAfter }} сек.
+                    {{ t('contact.retry', {sec: contactStore.retryAfter}) }}
                 </div>
 
                 <form @submit.prevent="onSubmit">
 
                     <BaseInput
                         v-model="contactStore.form.name"
-                        label="Имя"
+                        :label="t('contact.name')"
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.name"
@@ -119,7 +115,7 @@ const contacts = [
 
                     <BaseInput
                         v-model="contactStore.form.subject"
-                        label="Тема"
+                        :label="t('contact.subject')"
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.subject"
@@ -127,7 +123,7 @@ const contacts = [
 
                     <BaseTextarea
                         v-model="contactStore.form.body"
-                        label="Сообщение"
+                        :label="t('contact.message')"
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.body"
@@ -140,9 +136,9 @@ const contacts = [
                         :disabled="contactStore.retryAfter > 0"
                     >
                         <template #loading>
-                            Отправляем...
+                            {{ t('contact.sending') }}
                         </template>
-                        Отправить сообщение
+                        {{ t('contact.send') }}
                     </BaseButton>
 
                 </form>

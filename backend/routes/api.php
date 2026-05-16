@@ -24,75 +24,88 @@ use Illuminate\Support\Facades\Route;
  * обычно prefix /api
  */
 
-/*
-|--------------------------------------------------------------------------
-| AUT LOGIN, REGISTER
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+// Это нужно Nuxt‑сайду, чтобы синхронизировать локаль с бэком
+Route::get('/locale-info', function () {
+    return [
+        'locale'     => app()->getLocale(),
+        'fallback'   => 'ru',
+        'available'  => ['ru', 'en'],
+    ];
 });
 
-/*
-|--------------------------------------------------------------------------
-| PUBLIC API (без авторизации)
-|--------------------------------------------------------------------------
-*/
+Route::middleware('locale')->group(function () {
 
-Route::get('/cars', [CarController::class, 'list']);
-Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
-Route::get('/cars/latest', [CarController::class, 'latest']);
+    /*
+    |--------------------------------------------------------------------------
+    | AUT LOGIN, REGISTER
+    |--------------------------------------------------------------------------
+    */
 
-Route::get('/page/{code}', [SiteController::class, 'page']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/contact', [SiteController::class, 'sendContact'])
-    ->middleware('throttle:contact_form');
-
-/*
-|--------------------------------------------------------------------------
-| AUTHENTICATED SPA AREA (Sanctum)
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth:sanctum'])->group(function () {
-
-    // Car
-    Route::prefix('car')->group(function () {
-        Route::post('create', [ApiCarController::class, 'create']); // метод из api V1
-        Route::get('generate', [CarController::class, 'generateMock']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/logout', [AuthController::class, 'logout']);
     });
 
-    // Cart
-    Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index']);
-        Route::post('/add', [CartController::class, 'add']);
-        Route::post('/remove', [CartController::class, 'remove']);
-        Route::post('/update', [CartController::class, 'update']);
-        Route::post('/clear', [CartController::class, 'clear']);
-    });
+    /*
+    |--------------------------------------------------------------------------
+    | PUBLIC API (без авторизации)
+    |--------------------------------------------------------------------------
+    */
 
-    // Dashboard
-    Route::prefix('dashboard')->group(function () {
-        Route::get('/', [DashboardController::class, 'index']);
-    });
+    Route::get('/cars', [CarController::class, 'list']);
+    Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
+    Route::get('/cars/latest', [CarController::class, 'latest']);
 
-    // Orders
-    Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index']);
-        Route::post('/checkout', [OrderController::class, 'checkout']);
-        Route::get('/{id}', [OrderController::class, 'show']);
-    });
+    Route::get('/page/{code}', [SiteController::class, 'page']);
 
-    // Profile
-    Route::prefix('profile')->group(function () {
-        Route::delete('/', [ProfileController::class, 'destroy']);
-        Route::post('/password', [ProfileController::class, 'password']);
-        Route::post('/update', [ProfileController::class, 'update']);
+    Route::post('/contact', [SiteController::class, 'sendContact'])
+        ->middleware('throttle:contact_form');
+
+    /*
+    |--------------------------------------------------------------------------
+    | AUTHENTICATED SPA AREA (Sanctum)
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware(['auth:sanctum'])->group(function () {
+
+        // Car
+        Route::prefix('car')->group(function () {
+            Route::post('create', [ApiCarController::class, 'create']); // метод из api V1
+            Route::get('generate', [CarController::class, 'generateMock']);
+        });
+
+        // Cart
+        Route::prefix('cart')->group(function () {
+            Route::get('/', [CartController::class, 'index']);
+            Route::post('/add', [CartController::class, 'add']);
+            Route::post('/remove', [CartController::class, 'remove']);
+            Route::post('/update', [CartController::class, 'update']);
+            Route::post('/clear', [CartController::class, 'clear']);
+        });
+
+        // Dashboard
+        Route::prefix('dashboard')->group(function () {
+            Route::get('/', [DashboardController::class, 'index']);
+        });
+
+        // Orders
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [OrderController::class, 'index']);
+            Route::post('/checkout', [OrderController::class, 'checkout']);
+            Route::get('/{id}', [OrderController::class, 'show']);
+        });
+
+        // Profile
+        Route::prefix('profile')->group(function () {
+            Route::delete('/', [ProfileController::class, 'destroy']);
+            Route::post('/password', [ProfileController::class, 'password']);
+            Route::post('/update', [ProfileController::class, 'update']);
+        });
+
     });
 
 });

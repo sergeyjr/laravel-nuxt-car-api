@@ -64,15 +64,16 @@ export const useCartStore = defineStore('cart', {
             this.initialized = false
         },
 
-        async fetch(force = false) {
-
+        async fetch(force = false, silent = false) {
             if (this.initialized && !force) {
                 return
             }
 
             const cartApi = useCartApi()
 
-            this.loading = true
+            if (!silent) {
+                this.loading = true
+            }
             this.loadingFetch = true
 
             try {
@@ -82,15 +83,16 @@ export const useCartStore = defineStore('cart', {
                 console.error(e)
                 this.items = {}
             } finally {
-                this.loading = false
+                if (!silent) {
+                    this.loading = false
+                }
                 this.loadingFetch = false
                 this.initialized = true
             }
-
         },
 
         async refresh() {
-            await this.fetch(true)
+            await this.fetch(true, true) // фон
         },
 
         async add(payload: any) {
@@ -177,7 +179,8 @@ export const useCartStore = defineStore('cart', {
                 const data = await cartApi.checkout({
                     comment: payload.comment || null
                 })
-                this.items = {}
+                // корзину не очищаем, тк потом все-равно идет редирект
+                // this.items = {}
                 return data
             } catch (e) {
                 console.error(e)

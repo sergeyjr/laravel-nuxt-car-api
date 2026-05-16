@@ -106,23 +106,18 @@ const goBack = () => {
                 Заказ #{{ order.id }}
             </h2>
 
-            <button class="btn btn-outline-secondary" @click="goBack">
+            <button v-if="!loadingOrder" class="btn btn-outline-secondary" @click="goBack">
                 ← Назад
             </button>
         </div>
 
-        <div
-            v-if="loadingOrder && !order"
-            class="alert alert-light border text-center py-4"
-        >
+        <div v-if="loadingOrder && !order" class="alert alert-light border text-center py-4">
             Загрузка заказа...
         </div>
 
-        <div
-            v-else-if="!loadingOrder && !order"
-            class="alert alert-warning border text-center py-5"
-        >
+        <div v-else-if="!loadingOrder && !order" class="alert alert-warning border text-center py-5">
             <h4 class="mb-2">Заказ не найден</h4>
+
             <div class="text-muted mb-3">
                 Возможно, он был удалён или у вас нет доступа
             </div>

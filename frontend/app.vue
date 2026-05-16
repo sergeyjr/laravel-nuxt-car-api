@@ -1,5 +1,3 @@
-<!-- app.vue -->
-
 <script setup lang="ts">
 
 import {watch} from 'vue'
@@ -11,15 +9,11 @@ const auth = useAuthStore()
 const cart = useCartStore()
 
 await callOnce(async () => {
-
-    // ГОСТЬ
     if (!auth.isAuth) {
         cart.items = {}
         cart.initialized = true
         return
     }
-
-    // AUTH USER
     try {
         await cart.fetch(true)
     } catch (e) {

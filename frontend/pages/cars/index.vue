@@ -13,7 +13,7 @@ import type {Car} from '~/types/car'
 
 import {formatPrice} from '~/utils/formatters'
 
-import AuthModal from '~/components/modals/AuthModal.vue'
+import LoginModal from '~/components/modals/LoginModal.vue'
 
 /* -----------------------------
    stores
@@ -221,7 +221,7 @@ const confirmLogin = async (payload: LoginPayload) => {
             из {{ meta.total }}
         </div>
 
-        <AuthModal
+        <LoginModal
             v-model:show="showAuth"
             :loading="authLoading"
             @confirm="confirmLogin"
@@ -235,8 +235,8 @@ const confirmLogin = async (payload: LoginPayload) => {
 .loading-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(2px);
+    background: rgba(55, 55, 55, 0.6);
+    /* backdrop-filter: blur(2px); */
     display: flex;
     align-items: center;
     justify-content: center;

@@ -92,10 +92,23 @@ class SiteController extends Controller
         $content = str_replace(['[md]', '[/md]'], '', $content);
 
         return match ($format) {
-            'markdown' => '<article class="markdown-body">' . Str::markdown($content) . '</article>',
+            'markdown' => $this->renderMarkdown($content),
             'html' => $content,
             default => nl2br(e($content)),
         };
+    }
+
+    /**
+     * Рендеринг контента
+     */
+    protected function renderMarkdown(string $content): string
+    {
+        $content = preg_replace('#\./frontend/public/#', '/', $content);
+        $content = str_replace('\\', '/', $content);
+
+        $html = Str::markdown($content);
+
+        return '<article class="markdown-body">' . $html . '</article>';
     }
 
     /**

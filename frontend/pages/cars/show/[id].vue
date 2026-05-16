@@ -12,7 +12,7 @@ import type {Car} from '~/types/car'
 
 import {formatPrice} from '~/utils/formatters'
 
-import AuthModal from '~/components/modals/AuthModal.vue'
+import LoginModal from '~/components/modals/LoginModal.vue'
 
 /* -----------------------------
    stores
@@ -256,7 +256,7 @@ watch(carId, (newId) => {
                     </NuxtLink>
                 </div>
 
-                <AuthModal
+                <LoginModal
                     v-model:show="showAuth"
                     :loading="authLoading"
                     @confirm="confirmLogin"

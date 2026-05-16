@@ -47,14 +47,15 @@ const confirmOrder = () => {
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title text-primary">
+                    <h5 class="modal-title text-success">
                         Оформление заказа
                     </h5>
 
-                    <button
-                        type="button"
+                    <BaseButton
+                        variant="link"
                         class="btn-close"
                         :disabled="isProcessing"
+                        aria-label="Close"
                         @click="close"
                     />
                 </div>
@@ -69,7 +70,7 @@ const confirmOrder = () => {
                 <div class="modal-footer">
 
                     <BaseButton
-                        variant="primary"
+                        variant="success"
                         :disabled="isProcessing"
                         @click="confirmOrder"
                     >

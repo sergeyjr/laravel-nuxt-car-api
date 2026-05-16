@@ -2,7 +2,7 @@
 
 const props = defineProps<{
     show: boolean
-    processing?: boolean
+    isProcessing?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -11,14 +11,14 @@ const emit = defineEmits<{
 }>()
 
 const close = () => {
-    if (props.processing) {
+    if (props.isProcessing) {
         return
     }
     emit('close')
 }
 
 const confirm = () => {
-    if (props.processing) {
+    if (props.isProcessing) {
         return
     }
     emit('confirm')
@@ -42,10 +42,11 @@ const confirm = () => {
                         Удаление товара
                     </h5>
 
-                    <button
-                        type="button"
+                    <BaseButton
+                        variant="link"
                         class="btn-close"
-                        :disabled="processing"
+                        :disabled="isProcessing"
+                        aria-label="Close"
                         @click="close"
                     />
                 </div>

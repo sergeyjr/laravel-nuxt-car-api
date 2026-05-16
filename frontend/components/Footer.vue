@@ -18,12 +18,14 @@ const appName = config.public.appName
 
 const year = new Date().getFullYear()
 
-const publicLinks = [
-    {to: '/cars', label: 'Каталог'},
-    {to: '/contact', label: 'Контакты'},
-    {to: '/page/about', label: 'О проекте'},
-    {to: '/page/info', label: 'Инфо'}
-]
+const {t} = useI18n()
+
+const publicLinks = computed(() => [
+    {to: '/cars', label: t('nav.catalog')},
+    {to: '/contact', label: t('nav.contacts')},
+    {to: '/page/about', label: t('nav.about')},
+    {to: '/page/info', label: t('nav.info')}
+])
 
 </script>
 
@@ -36,6 +38,7 @@ const publicLinks = [
             </div>
 
             <div class="d-flex gap-3 mt-2 mt-md-0">
+
                 <NuxtLink
                     v-for="link in publicLinks"
                     :key="link.to"
@@ -45,6 +48,7 @@ const publicLinks = [
                 >
                     {{ link.label }}
                 </NuxtLink>
+
             </div>
 
         </div>

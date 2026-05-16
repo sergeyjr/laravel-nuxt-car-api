@@ -1,11 +1,12 @@
 <script setup lang="ts">
 
-import {computed, ref} from 'vue'
+import {computed, ref, onMounted, onBeforeUnmount} from 'vue'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
 import {useLogout} from '~/composables/useLogout'
+
 import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
 
 /* -----------------------------
@@ -16,6 +17,14 @@ const auth = useAuthStore()
 const cart = useCartStore()
 
 const route = useRoute()
+
+/* -----------------------------
+   NUXT i18n
+------------------------------*/
+
+const {t, locale, setLocale} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    logout composable
@@ -38,6 +47,28 @@ const appName = config.public.appName
 const showLogoutModal = ref(false)
 const isLogoutLoading = ref(false)
 
+const isLangOpen = ref(false)
+
+const langRef = ref<HTMLElement | null>(null)
+
+/* -----------------------------
+   languages
+------------------------------*/
+
+const languages = [
+    {code: 'ru', name: 'Русский', icon: 'fi fi-ru'},
+    {code: 'en', name: 'English', icon: 'fi fi-gb'}
+] as const
+
+type LocaleCode = (typeof languages)[number]['code']
+
+const currentLanguage = computed(() => {
+    return (
+        languages.find(l => l.code === locale.value) ??
+        languages[0]
+    )
+})
+
 /* -----------------------------
    computed
 ------------------------------*/
@@ -55,12 +86,43 @@ const cartCount = computed(() => {
 ------------------------------*/
 
 const isActive = (path: string) => {
-    if (path === '/') {
-        return route.path === '/'
+    const target = localePath(path)
+    return route.path === target || route.path.startsWith(target + '/')
+}
+
+const toggleLangMenu = () => {
+    isLangOpen.value = !isLangOpen.value
+}
+
+const chooseLanguage = async (code: LocaleCode) => {
+    if (code === locale.value) {
+        isLangOpen.value = false
+        return
     }
 
-    return route.path === path || route.path.startsWith(path + '/')
+    await setLocale(code)
+    isLangOpen.value = false
 }
+
+const handleClickOutside = (event: MouseEvent) => {
+    if (!langRef.value) return
+
+    if (!langRef.value.contains(event.target as Node)) {
+        isLangOpen.value = false
+    }
+}
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside)
+})
 
 /* -----------------------------
    logout handler
@@ -68,10 +130,14 @@ const isActive = (path: string) => {
 
 const onLogout = async () => {
     if (isLogoutLoading.value) return
+
     isLogoutLoading.value = true
+
     try {
         const ok = await logout(route.path)
+
         if (!ok) return
+
         showLogoutModal.value = false
     } finally {
         isLogoutLoading.value = false
@@ -81,64 +147,88 @@ const onLogout = async () => {
 </script>
 
 <template>
+
     <nav class="nav-bar">
+
         <div class="container nav-inner">
 
-            <NuxtLink to="/" class="logo">
+            <NuxtLink :to="localePath('/')" class="logo">
                 {{ appName }}
             </NuxtLink>
 
             <div class="nav-links">
 
-                <NuxtLink to="/cars" class="nav-link" :class="{ active: isActive('/cars') }">
-                    Каталог
+                <NuxtLink :to="localePath('/cars')" class="nav-link" :class="{ active: isActive('/cars') }">
+                    {{ t('nav.catalog') }}
                 </NuxtLink>
 
-                <NuxtLink to="/contact" class="nav-link" :class="{ active: isActive('/contact') }">
-                    Контакты
+                <NuxtLink :to="localePath('/contact')" class="nav-link" :class="{ active: isActive('/contact') }">
+                    {{ t('nav.contacts') }}
                 </NuxtLink>
 
-                <NuxtLink to="/page/about" class="nav-link" :class="{ active: isActive('/page/about') }">
-                    О проекте
+                <NuxtLink :to="localePath('/page/about')" class="nav-link" :class="{ active: isActive('/page/about') }">
+                    {{ t('nav.about') }}
                 </NuxtLink>
 
-                <NuxtLink to="/page/info" class="nav-link" :class="{ active: isActive('/page/info') }">
-                    Инфо
+                <NuxtLink :to="localePath('/page/info')" class="nav-link" :class="{ active: isActive('/page/info') }">
+                    {{ t('nav.info') }}
                 </NuxtLink>
 
                 <template v-if="auth.isAuth">
 
-                    <NuxtLink to="/dashboard" class="nav-link" :class="{ active: isActive('/dashboard') }">
-                        Кабинет
+                    <NuxtLink :to="localePath('/dashboard')" class="nav-link"
+                              :class="{ active: isActive('/dashboard') }">
+                        {{ t('nav.dashboard') }}
                     </NuxtLink>
 
-                    <NuxtLink
-                        to="/cart"
-                        class="nav-link cart-link"
-                        :class="{ active: isActive('/cart') }"
-                    >
-                        Корзина
-                        <span
-                            class="badge rounded-pill"
-                            :class="cartCount > 0 ? 'bg-danger' : 'bg-secondary'"
-                        >
-                            {{ cartCount }}
-                        </span>
+                    <NuxtLink :to="localePath('/cart')" class="nav-link cart-link"
+                              :class="{ active: isActive('/cart') }">
+                        {{ t('nav.cart') }}
+
+                        <span class="badge rounded-pill"
+                              :class="cartCount > 0 ? 'bg-danger' : 'bg-secondary'">
+                        {{ cartCount }}
+                    </span>
                     </NuxtLink>
 
-                    <button class="nav-link logout" @click="showLogoutModal = true">
-                        Выход
-                    </button>
+                    <BaseButton class="nav-link logout" @click="showLogoutModal = true">
+                        {{ t('nav.logout') }}
+                    </BaseButton>
 
                 </template>
 
                 <template v-else>
 
-                    <NuxtLink to="/login" class="nav-link" :class="{ active: isActive('/login') }">
-                        Вход
+                    <NuxtLink :to="localePath('/login')" class="nav-link" :class="{ active: isActive('/login') }">
+                        {{ t('nav.login') }}
                     </NuxtLink>
 
                 </template>
+
+                <!-- LANGUAGE -->
+
+                <div ref="langRef" class="language-switcher">
+
+                    <button type="button" class="language-button" @click="toggleLangMenu">
+                        <i :class="currentLanguage.icon"></i>
+                    </button>
+
+                    <div v-if="isLangOpen" class="language-dropdown">
+
+                        <button v-for="language in languages"
+                                :key="language.code"
+                                type="button"
+                                class="language-item"
+                                @click="chooseLanguage(language.code)">
+
+                            <i :class="language.icon" class="language-icon"></i>
+                            <span>{{ language.name }}</span>
+
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -151,6 +241,7 @@ const onLogout = async () => {
         />
 
     </nav>
+
 </template>
 
 <style scoped>
@@ -234,6 +325,73 @@ const onLogout = async () => {
 
 .logout:hover {
     color: #ef4444;
+}
+
+/* LANGUAGE */
+
+.language-switcher {
+    position: relative;
+    margin-left: 8px;
+}
+
+.language-button {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: transparent;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s ease,
+    border-color .2s ease;
+}
+
+.language-button:hover {
+    border-color: #60a5fa;
+    background: #273549;
+}
+
+.language-button i {
+    font-size: 20px;
+    color: #f9fafb;
+}
+
+.language-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 190px;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .35);
+    z-index: 100;
+}
+
+.language-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: transparent;
+    border: none;
+    color: #e5e7eb;
+    cursor: pointer;
+    transition: background .2s ease;
+    font-size: 14px;
+}
+
+.language-item:hover {
+    background: #374151;
+}
+
+.language-icon {
+    font-size: 18px;
+    color: #f9fafb;
 }
 
 </style>

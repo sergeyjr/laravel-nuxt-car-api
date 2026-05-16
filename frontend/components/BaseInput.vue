@@ -40,6 +40,7 @@ const generatedId = useId()
 const inputId = computed(() => {
     return props.id || generatedId
 })
+
 </script>
 
 <template>

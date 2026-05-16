@@ -1,49 +1,35 @@
 <script setup lang="ts">
 
-import {ref, onMounted} from 'vue'
+import { ref, onMounted } from 'vue'
 
-import {useAuthStore} from '~/stores/auth'
-import {navigateTo} from '#app'
+import { useAuthStore } from '~/stores/auth'
+import { navigateTo } from '#app'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
-/* -----------------------------
-   store
-------------------------------*/
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 
-/* -----------------------------
-   form state
-------------------------------*/
-
 const email = ref('')
 const password = ref('')
-
-/* -----------------------------
-   validation
-------------------------------*/
 
 const validate = () => {
     const errors: Record<string, string> = {}
 
     if (!email.value) {
-        errors.email = 'Email обязателен'
+        errors.email = t('auth.emailRequired')
     }
 
     if (!password.value) {
-        errors.password = 'Пароль обязателен'
+        errors.password = t('auth.passwordRequired')
     }
 
-    authStore.errors = {...errors}
+    authStore.errors = { ...errors }
 
     return Object.keys(errors).length === 0
 }
-
-/* -----------------------------
-   submit
-------------------------------*/
 
 const submit = async () => {
     if (!validate()) return
@@ -54,10 +40,6 @@ const submit = async () => {
         return navigateTo('/dashboard')
     }
 }
-
-/* -----------------------------
-   lifecycle
-------------------------------*/
 
 onMounted(() => {
     authStore.clearErrors()
@@ -70,7 +52,7 @@ onMounted(() => {
         <div class="row justify-content-center">
             <div class="col-md-5">
 
-                <h1 class="mb-4">Авторизация</h1>
+                <h1 class="mb-4">{{ t('auth.loginTitle') }}</h1>
 
                 <p v-if="authStore.success" class="text-success text-center">
                     {{ authStore.success }}
@@ -90,10 +72,9 @@ onMounted(() => {
                     <BaseInput
                         v-model="password"
                         type="password"
-                        label="Пароль"
-                        required
                         :disabled="authStore.loading"
                         :error="authStore.errors.password"
+                        :label="t('auth.password')"
                     />
 
                     <BaseButton
@@ -102,14 +83,14 @@ onMounted(() => {
                         :loading="authStore.loading"
                     >
                         <template #loading>
-                            Входим...
+                            {{ t('auth.loggingIn') }}
                         </template>
-                        Войти
+                        {{ t('auth.login') }}
                     </BaseButton>
 
                     <p class="text-center mt-3">
                         <NuxtLink to="/register">
-                            Зарегистрироваться
+                            {{ t('auth.registerLink') }}
                         </NuxtLink>
                     </p>
 

@@ -21,14 +21,22 @@ export default defineNuxtConfig({
     css: [
         'bootstrap/dist/css/bootstrap.min.css',
         'bootstrap-icons/font/bootstrap-icons.css',
+        'flag-icons/css/flag-icons.min.css',
         'github-markdown-css/github-markdown.css',
         '@/assets/css/app.css',
     ],
 
     // Pinia (state management)
-    modules: [
-        '@pinia/nuxt'
-    ],
+    modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
+
+    i18n: {
+        defaultLocale: 'ru',
+        strategy: 'prefix_except_default',
+        locales: [
+            {code: 'ru', file: 'ru.ts'},
+            {code: 'en', file: 'en.ts'}
+        ],
+    },
 
     // Конфигурация окружений
     runtimeConfig: {
@@ -36,7 +44,7 @@ export default defineNuxtConfig({
         public: {
             apiBase: 'http://laravel.local', // Браузер (client)
             appName: 'Laravel App',
-            debugApi: true
+            debugApi: true,
         },
     },
 
@@ -88,6 +96,8 @@ export default defineNuxtConfig({
             //     protocol: 'ws',
             //     clientPort: 80
             // },
+
+            allowedHosts: ['laravel.local'],
 
             // следит за файлами внутри docker volume
             watch: {

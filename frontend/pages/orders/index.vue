@@ -25,7 +25,7 @@ const {getLabel} = useOrderStatus()
 ------------------------------*/
 
 onMounted(async () => {
-    await store.fetchOrders()
+    await orderStore.fetchOrders()
 })
 
 /* -----------------------------
@@ -82,7 +82,7 @@ const goBack = () => {
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Мои заказы</h2>
 
-            <button class="btn btn-outline-secondary" @click="goBack">
+            <button v-if="initialized" class="btn btn-outline-secondary" @click="goBack">
                 ← Назад
             </button>
         </div>

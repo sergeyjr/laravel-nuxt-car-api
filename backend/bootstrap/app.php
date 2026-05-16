@@ -4,6 +4,7 @@ use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\DebugRequest;
 use App\Http\Middleware\EnsureApiRole;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,8 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'api.role' => EnsureApiRole::class,
-            'guest' => RedirectIfAuthenticated::class,
             'auth' => Authenticate::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'locale' => SetLocale::class,
         ]);
 
     })
