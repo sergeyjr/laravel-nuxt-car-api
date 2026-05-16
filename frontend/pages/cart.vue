@@ -12,6 +12,8 @@ import CartRemoveItemModal from '~/components/modals/CartRemoveItemModal.vue'
 import CartCheckoutModal from '~/components/modals/CartCheckoutModal.vue'
 import CartClearModal from '~/components/modals/CartClearModal.vue'
 
+import {formatPrice} from '~/utils/formatters'
+
 /* -----------------------------
    stores
 ------------------------------*/
@@ -42,10 +44,6 @@ const total = computed(() => cart.total)
 /* -----------------------------
    utils
 ------------------------------*/
-
-// price format
-const formatPrice = (v: number) =>
-    new Intl.NumberFormat('ru-RU').format(v) + ' ₽'
 
 // normalize qty
 function sanitizeQty(value: unknown) {

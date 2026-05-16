@@ -40,6 +40,10 @@ export const useProfileStore = defineStore('profile', {
 
     actions: {
 
+        showAlert(type: string, message: string) {
+            useAlertStore().add(type, message)
+        },
+
         load(user: any) {
             if (!user) return
 
@@ -83,7 +87,6 @@ export const useProfileStore = defineStore('profile', {
 
         async updateProfile(payload: any): Promise<boolean> {
 
-            const alert = useAlertStore()
             const auth = useAuthStore()
             const profileApi = useProfileApi()
 
@@ -92,28 +95,24 @@ export const useProfileStore = defineStore('profile', {
             this.resetErrors()
 
             try {
-
                 const data: any = await profileApi.updateProfile(payload)
 
                 if (data?.user) {
                     auth.user = data.user
                 }
 
-                alert.add('success', data?.message || 'Профиль обновлён.')
+                this.showAlert('success', data?.message || 'Профиль обновлён.')
 
                 return true
-
             } catch (e: any) {
-
                 if (e?.status === 422) {
                     this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
 
-                alert.add('error', 'Ошибка обновления профиля.')
+                this.showAlert('error', 'Ошибка обновления профиля.')
 
                 return false
-
             } finally {
                 this.loadingAll = false
                 this.loadingProfile = false
@@ -122,7 +121,6 @@ export const useProfileStore = defineStore('profile', {
 
         async changePassword(payload: ProfilePasswordForm): Promise<boolean> {
 
-            const alert = useAlertStore()
             const profileApi = useProfileApi()
 
             this.loadingAll = true
@@ -140,21 +138,19 @@ export const useProfileStore = defineStore('profile', {
 
                 this.success = true
 
-                alert.add('success', data?.message || 'Пароль обновлён.')
+                this.showAlert('success', data?.message || 'Пароль обновлён.')
 
                 return true
 
             } catch (e: any) {
-
                 if (e?.status === 422) {
                     this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
 
-                alert.add('error', 'Ошибка смены пароля.')
+                this.showAlert('error', 'Ошибка смены пароля.')
 
                 return false
-
             } finally {
                 this.loadingAll = false
                 this.loadingPassword = false
@@ -164,7 +160,6 @@ export const useProfileStore = defineStore('profile', {
 
         async deleteAccount(): Promise<boolean> {
 
-            const alert = useAlertStore()
             const auth = useAuthStore()
             const router = useRouter()
             const profileApi = useProfileApi()
@@ -179,23 +174,20 @@ export const useProfileStore = defineStore('profile', {
                 auth.user = null
                 this.success = true
 
-                alert.add('success', data?.message || 'Аккаунт удален.')
+                this.showAlert('success', data?.message || 'Аккаунт удален.')
 
                 await router.push('/')
 
                 return true
-
             } catch (e: any) {
-
                 if (e?.status === 422) {
                     this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
 
-                alert.add('error', 'Ошибка удаления аккаунта')
+                this.showAlert('error', 'Ошибка удаления аккаунта')
 
                 return false
-
             } finally {
                 this.loadingAll = false
                 this.loadingDelete = false

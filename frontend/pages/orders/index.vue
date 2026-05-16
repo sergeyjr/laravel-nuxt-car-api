@@ -6,11 +6,13 @@ import {useOrderStore} from '~/stores/order'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
+import {formatPrice, formatDate} from "~/utils/formatters";
+
 /* -----------------------------
    store
 ------------------------------*/
 
-const store = useOrderStore()
+const orderStore = useOrderStore()
 
 /* -----------------------------
    status helper
@@ -30,28 +32,11 @@ onMounted(async () => {
    state
 ------------------------------*/
 
-const orders = computed(() => store.orders || [])
-const loading = computed(() => store.loadingOrders)
-const initialized = computed(() => store.initialized)
+const orders = computed(() => orderStore.orders || [])
 
-/* -----------------------------
-   formatters
-------------------------------*/
+const loading = computed(() => orderStore.loadingOrders)
 
-// price
-const formatPrice = (price: number | string) =>
-    new Intl.NumberFormat('ru-RU').format(Number(price)) + ' ₽'
-
-// date
-const formatDate = (date: string) => {
-    if (!date) return ''
-
-    return new Intl.DateTimeFormat('ru-RU', {
-        dateStyle: 'short',
-        timeStyle: 'medium',
-        timeZone: 'Europe/Amsterdam'
-    }).format(new Date(date))
-}
+const initialized = computed(() => orderStore.initialized)
 
 /* -----------------------------
    status UI

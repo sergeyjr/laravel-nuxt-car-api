@@ -7,6 +7,8 @@ import {useDashboardStore} from '~/stores/dashboard'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
+import {formatPrice, formatDate} from '~/utils/formatters'
+
 /* -----------------------------
    helpers
 ------------------------------*/
@@ -18,6 +20,7 @@ const {getBadge} = useOrderStatus()
 ------------------------------*/
 
 const auth = useAuthStore()
+
 const dashboard = useDashboardStore()
 
 /* -----------------------------
@@ -49,25 +52,6 @@ const cartCount = computed(() =>
 )
 
 const cartTotal = computed(() => dashboard.cartTotal || 0)
-
-/* -----------------------------
-   formatters
-------------------------------*/
-
-// price
-const formatPrice = (v: number | string | null | undefined) =>
-    new Intl.NumberFormat('ru-RU').format(Number(v || 0)) + ' ₽'
-
-// date
-const formatDate = (date: string | number | Date | null | undefined) => {
-    if (!date) return ''
-
-    return new Intl.DateTimeFormat('ru-RU', {
-        dateStyle: 'short',
-        timeStyle: 'medium',
-        timeZone: 'Europe/Amsterdam'
-    }).format(new Date(date))
-}
 
 </script>
 

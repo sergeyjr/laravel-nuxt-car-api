@@ -11,6 +11,8 @@ import {useCartStore} from '~/stores/cart'
 import type {LoginPayload} from '~/types/auth'
 import type {Car} from '~/types/car'
 
+import {formatPrice} from '~/utils/formatters'
+
 import AuthModal from '~/components/modals/AuthModal.vue'
 
 /* -----------------------------
@@ -84,21 +86,13 @@ const openAuthModal = (event?: Event) => {
     showAuth.value = true
 }
 
-// pagination
+// navigation
 const changePage = (newPage: number) =>
     navigateTo({path: '/cars', query: {page: newPage}})
 
 // image
 const getImage = (car: Car) =>
     car.photo_url || '/images/default_car.jpg'
-
-// price format
-const formatPrice = (price?: number | null) =>
-    new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB',
-        maximumFractionDigits: 0,
-    }).format(price ?? 0)
 
 // cart state
 const isInCart = (id: number | string) =>
@@ -115,6 +109,7 @@ const isAdding = (id: number | string) =>
 /* -----------------------------
    auth
 ------------------------------*/
+
 const confirmLogin = async (payload: LoginPayload) => {
     const {email, password} = payload
 

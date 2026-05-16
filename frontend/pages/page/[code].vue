@@ -10,7 +10,7 @@ import {usePageStore} from '~/stores/page'
    store
 ------------------------------*/
 
-const store = usePageStore()
+const pageStore = usePageStore()
 
 const route = useRoute()
 
@@ -28,7 +28,7 @@ watch(
     code,
     async (newCode) => {
         if (!newCode) return
-        await store.fetch(newCode)
+        await pageStore.fetch(newCode)
     },
     {immediate: true}
 )
@@ -37,7 +37,7 @@ watch(
    state
 ------------------------------*/
 
-const page = computed(() => store.current)
+const page = computed(() => pageStore.current)
 
 </script>
 
@@ -46,19 +46,19 @@ const page = computed(() => store.current)
 
         <h1 class="mb-4">{{ page?.title || '' }}</h1>
 
-        <template v-if="store.loading">
+        <template v-if="pageStore.loading">
             <div class="alert alert-light mb-4">
                 Загрузка страницы...
             </div>
         </template>
 
         <template v-if="page">
-            <div :class="{ 'content-loading': store.loading }">
+            <div :class="{ 'content-loading': pageStore.loading }">
                 <div class="page-content" v-html="page.content"/>
             </div>
         </template>
 
-        <template v-else-if="!store.loading">
+        <template v-else-if="!pageStore.loading">
             <div class="alert alert-light mb-4">
                 Страница не найдена.
             </div>

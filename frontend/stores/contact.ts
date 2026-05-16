@@ -21,6 +21,10 @@ export const useContactStore = defineStore('contact', {
 
     actions: {
 
+        showAlert(type: string, message: string) {
+            useAlertStore().add(type, message)
+        },
+
         stopCountdown() {
             if (this.timer) {
                 clearInterval(this.timer)
@@ -66,7 +70,6 @@ export const useContactStore = defineStore('contact', {
 
         async submit(context: ContactContext = 'home') {
             const contactApi = useContactApi()
-            const alert = useAlertStore()
 
             this.loading = true
             this.resetErrors()
@@ -80,7 +83,7 @@ export const useContactStore = defineStore('contact', {
                 this.contexts[context].successMessage =
                     data?.message || 'Сообщение отправлено.'
 
-                alert.add('success', this.contexts[context].successMessage)
+                this.showAlert('success', this.contexts[context].successMessage)
 
                 this.retryAfter = data?.retry_after ?? 60
                 this.startCountdown()
@@ -97,17 +100,14 @@ export const useContactStore = defineStore('contact', {
                     this.retryAfter = data?.retry_after ?? 60
                     this.startCountdown()
 
-                    alert.add(
-                        'warning',
-                        `Подождите ${this.retryAfter} сек. перед следующим сообщением.`,
-                    )
+                    this.showAlert('warning', `Подождите ${this.retryAfter} сек. перед следующим сообщением.`,)
                     return
                 }
 
                 this.contexts[context].errorMessage =
                     data?.message || 'Ошибка отправки формы.'
 
-                alert.add('error', this.contexts[context].errorMessage)
+                this.showAlert('error', this.contexts[context].errorMessage)
 
                 console.error(e)
             } finally {

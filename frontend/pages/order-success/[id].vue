@@ -8,11 +8,14 @@ import {useOrderStore} from '~/stores/order'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
+import {formatPrice} from "~/utils/formatters";
+
 /* -----------------------------
    stores
 ------------------------------*/
 
-const store = useOrderStore()
+const orderStore = useOrderStore()
+
 const {getLabel, getClass} = useOrderStatus()
 
 const route = useRoute()
@@ -21,7 +24,13 @@ const route = useRoute()
    route params
 ------------------------------*/
 
-const orderId = computed(() => route.params.id)
+const orderId = computed(() => {
+    const id = route.params.id
+
+    return Array.isArray(id)
+        ? id[0]
+        : id
+})
 
 /* -----------------------------
    load order (once)
@@ -33,7 +42,7 @@ await callOnce(async () => {
     }
 
     try {
-        await store.fetchOrder(orderId.value)
+        await orderStore.fetchOrder(orderId.value)
     } catch {
         throw createError({statusCode: 404})
     }
@@ -43,14 +52,7 @@ await callOnce(async () => {
    computed state
 ------------------------------*/
 
-const order = computed(() => store.currentOrder)
-
-/* -----------------------------
-   helpers
-------------------------------*/
-
-const formatPrice = (price: number | string) =>
-    new Intl.NumberFormat('ru-RU').format(Number(price || 0))
+const order = computed(() => orderStore.currentOrder)
 
 </script>
 
@@ -92,14 +94,20 @@ const formatPrice = (price: number | string) =>
                     <div class="d-flex justify-content-between p-3 bg-light rounded mb-3">
 
                         <div>
-                            <div class="text-muted small">Номер</div>
-                            <div class="fw-bold">#{{ order.id }}</div>
+                            <div class="text-muted small">
+                                Номер
+                            </div>
+                            <div class="fw-bold">
+                                #{{ order.id }}
+                            </div>
                         </div>
 
                         <div class="text-end">
-                            <div class="text-muted small">Сумма</div>
+                            <div class="text-muted small">
+                                Сумма
+                            </div>
                             <div class="fw-bold text-primary fs-5">
-                                {{ formatPrice(order.total) }} ₽
+                                {{ formatPrice(order.total) }}
                             </div>
                         </div>
 
@@ -110,7 +118,9 @@ const formatPrice = (price: number | string) =>
                             <span
                                 class="badge fs-6 px-3 py-2"
                                 :class="getClass(order.status)"
-                            >{{ getLabel(order.status) }}</span>
+                            >
+                                {{ getLabel(order.status) }}
+                            </span>
                     </div>
 
                     <!-- ITEMS -->
@@ -142,8 +152,12 @@ const formatPrice = (price: number | string) =>
 
                     <!-- COMMENT -->
                     <div v-if="order.comment" class="mt-4 p-3 bg-light rounded">
-                        <div class="text-muted small mb-1">Комментарий</div>
-                        <div>{{ order.comment }}</div>
+                        <div class="text-muted small mb-1">
+                            Комментарий
+                        </div>
+                        <div>
+                            {{ order.comment }}
+                        </div>
                     </div>
 
                     <!-- ACTIONS -->

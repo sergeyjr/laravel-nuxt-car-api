@@ -11,7 +11,7 @@ import BaseInput from '~/components/BaseInput.vue'
    store
 ------------------------------*/
 
-const store = useAuthStore()
+const authStore = useAuthStore()
 
 /* -----------------------------
    form state
@@ -101,7 +101,8 @@ onMounted(() => {
                         type="text"
                         label="Имя"
                         required
-                        :error="store.errors.name"
+                        :disabled="authStore.loading"
+                        :error="authStore.errors.name"
                     />
 
                     <BaseInput
@@ -109,7 +110,8 @@ onMounted(() => {
                         type="email"
                         label="Email"
                         required
-                        :error="store.errors.email"
+                        :disabled="authStore.loading"
+                        :error="authStore.errors.email"
                     />
 
                     <BaseInput
@@ -117,7 +119,8 @@ onMounted(() => {
                         type="password"
                         label="Пароль"
                         required
-                        :error="store.errors.password"
+                        :disabled="authStore.loading"
+                        :error="authStore.errors.password"
                     />
 
                     <BaseInput
@@ -125,18 +128,18 @@ onMounted(() => {
                         type="password"
                         label="Повтор пароля"
                         required
-                        :error="store.errors.password_confirmation"
+                        :disabled="authStore.loading"
+                        :error="authStore.errors.password_confirmation"
                     />
 
                     <BaseButton
                         type="submit"
                         class="w-100 mt-3"
-                        :loading="store.loading"
+                        :loading="authStore.loading"
                     >
                         <template #loading>
                             Регистрация...
                         </template>
-
                         Зарегистрироваться
                     </BaseButton>
 

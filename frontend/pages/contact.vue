@@ -10,7 +10,7 @@ import BaseTextarea from '~/components/BaseTextarea.vue'
    store
 ------------------------------*/
 
-const store = useContactStore()
+const contactStore = useContactStore()
 
 /* -----------------------------
    submit
@@ -19,7 +19,7 @@ const store = useContactStore()
 const onSubmit = async (e: Event) => {
     const form = e.target as HTMLFormElement
     if (!form.checkValidity()) return
-    await store.submit('contactPage')
+    await contactStore.submit('contactPage')
 }
 
 </script>
@@ -31,53 +31,54 @@ const onSubmit = async (e: Event) => {
 
                 <h1 class="mb-4">Контактная форма</h1>
 
-                <!-- rate limit warning -->
-                <div v-if="store.retryAfter > 0" class="alert alert-warning mt-4">
-                    Следующее сообщение можно отправить через {{ store.retryAfter }} сек.
+                <div v-if="contactStore.retryAfter > 0" class="alert alert-warning mt-4">
+                    Следующее сообщение можно отправить через {{ contactStore.retryAfter }} сек.
                 </div>
 
                 <form @submit.prevent="onSubmit">
 
                     <BaseInput
-                        v-model="store.form.name"
+                        v-model="contactStore.form.name"
                         label="Имя"
                         required
-                        :disabled="store.retryAfter > 0"
-                        :error="store.errors.name"
+                        :disabled="contactStore.retryAfter > 0"
+                        :error="contactStore.errors.name"
                     />
 
                     <BaseInput
-                        v-model="store.form.email"
+                        v-model="contactStore.form.email"
                         type="email"
                         label="Email"
                         required
-                        :disabled="store.retryAfter > 0"
-                        :error="store.errors.email"
+                        :disabled="contactStore.retryAfter > 0"
+                        :error="contactStore.errors.email"
                     />
 
                     <BaseInput
-                        v-model="store.form.subject"
+                        v-model="contactStore.form.subject"
                         label="Тема"
                         required
-                        :disabled="store.retryAfter > 0"
-                        :error="store.errors.subject"
+                        :disabled="contactStore.retryAfter > 0"
+                        :error="contactStore.errors.subject"
                     />
 
                     <BaseTextarea
-                        v-model="store.form.body"
+                        v-model="contactStore.form.body"
                         label="Сообщение"
                         required
-                        :disabled="store.retryAfter > 0"
-                        :error="store.errors.body"
+                        :disabled="contactStore.retryAfter > 0"
+                        :error="contactStore.errors.body"
                     />
 
                     <BaseButton
                         type="submit"
                         class="w-100"
-                        :loading="store.loading"
-                        :disabled="store.retryAfter > 0"
+                        :loading="contactStore.loading"
+                        :disabled="contactStore.retryAfter > 0"
                     >
-                        <template #loading>Отправляем...</template>
+                        <template #loading>
+                            Отправляем...
+                        </template>
                         Отправить сообщение
                     </BaseButton>
 

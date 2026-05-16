@@ -17,6 +17,9 @@ export const useCarStore = defineStore('car', {
         listLoading: false,
         carLoading: false,
         latestLoading: false,
+
+        force: false,
+        latestLoaded: false,
     }),
 
     getters: {
@@ -97,6 +100,10 @@ export const useCarStore = defineStore('car', {
 
         async fetchLatest() {
 
+            if (this.latestLoaded && !this.force) {
+                return this.latest
+            }
+
             this.latestLoading = true
 
             const api = useCarApi()
@@ -104,6 +111,7 @@ export const useCarStore = defineStore('car', {
             try {
                 const res = await api.fetchLatest()
                 this.latest = res.data || []
+                this.latestLoaded = true
                 return this.latest
             } catch {
                 this.latest = []

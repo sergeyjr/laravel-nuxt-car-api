@@ -10,6 +10,8 @@ import {useCarStore} from '~/stores/car'
 import type {LoginPayload} from '~/types/auth'
 import type {Car} from '~/types/car'
 
+import {formatPrice} from '~/utils/formatters'
+
 import AuthModal from '~/components/modals/AuthModal.vue'
 
 /* -----------------------------
@@ -46,14 +48,6 @@ const carImage = computed(() =>
 /* -----------------------------
    helpers
 ------------------------------*/
-
-// цена
-const formatPrice = (price?: number | null) =>
-    new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB',
-        maximumFractionDigits: 0,
-    }).format(price ?? 0)
 
 // корзина
 const isInCart = (id: number | string) =>

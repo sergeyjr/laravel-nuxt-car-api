@@ -1,14 +1,14 @@
 <script setup lang="ts">
 
-import {computed, ref, onMounted} from 'vue'
-
 import {useRouter} from 'vue-router'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
 
 import BaseButton from '~/components/BaseButton.vue'
-import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
+
+import {formatPrice} from '~/utils/formatters'
+import {openCar} from '~/utils/navigation'
 
 /* -----------------------------
    router
@@ -20,14 +20,7 @@ const router = useRouter()
    auth
 ------------------------------*/
 
-const auth = useAuthStore()
-const user = computed(() => auth.user)
-
-/* -----------------------------
-   UI state
-------------------------------*/
-
-const showLogoutModal = ref(false)
+const authStore = useAuthStore()
 
 /* -----------------------------
    swiper
@@ -63,9 +56,10 @@ const swiperOptions = {
 
 const carStore = useCarStore()
 
-onMounted(() => {
-    carStore.fetchLatest()
-})
+await useAsyncData(
+    'latest-cars',
+    () => carStore.fetchLatest()
+)
 
 /* -----------------------------
    helpers
@@ -74,15 +68,6 @@ onMounted(() => {
 // image fallback
 const getImage = (car: any) =>
     car?.photo_url || '/images/default_car.jpg'
-
-// price format
-const formatPrice = (price: number | null | undefined) =>
-    new Intl.NumberFormat('ru-RU').format(price ?? 0) + ' ₽'
-
-// navigation
-const openCar = (id: number | string) => {
-    router.push(`/cars/show/${id}`)
-}
 
 // image fallback handler
 const onImgError = (e: Event) => {
@@ -114,9 +99,9 @@ const onImgError = (e: Event) => {
 
                         <h4 class="mb-4">Статус пользователя</h4>
 
-                        <div v-if="auth.isAuth">
+                        <div v-if="authStore.isAuth">
 
-                            <p class="text-muted">Добро пожаловать, {{ user?.name }}</p>
+                            <p class="text-muted">Добро пожаловать, {{ authStore.user?.name }}</p>
 
                             <p class="text-success mb-0">Вы авторизованы</p>
 
@@ -145,26 +130,20 @@ const onImgError = (e: Event) => {
 
                         <h4 class="mb-4">Быстрые действия</h4>
 
-                        <template v-if="auth.isAuth">
+                        <template v-if="authStore.isAuth">
+
+                            <BaseButton
+                                class="w-100 mb-2"
+                                @click="router.push('/dashboard')"
+                            >
+                                Личный кабинет
+                            </BaseButton>
 
                             <BaseButton
                                 class="w-100 mb-2"
                                 @click="router.push('/dashboard/profile')"
                             >
                                 Профиль
-                            </BaseButton>
-
-                            <BaseButton
-                                variant="danger"
-                                class="w-100"
-                                :loading="auth.loading"
-                                @click="showLogoutModal = true"
-                            >
-                                <template #loading>
-                                    Выход...
-                                </template>
-
-                                Выйти
                             </BaseButton>
 
                         </template>
@@ -220,7 +199,7 @@ const onImgError = (e: Event) => {
                             >
 
                                 <div
-                                    class="card h-100"
+                                    class="card h-100 text-center"
                                     style="cursor:pointer"
                                     @click="openCar(car.id)"
                                 >
@@ -236,8 +215,10 @@ const onImgError = (e: Event) => {
 
                                         <h5>{{ car.title }}</h5>
 
-                                        <p v-if="auth.user">
-                                            {{ formatPrice(car.price) }}
+                                        <p v-if="authStore.user && car.price" class="mb-0">
+                                            <span class="fs-5 fw-bold text-success">
+                                                {{ formatPrice(car.price) }}
+                                            </span>
                                         </p>
 
                                         <p v-else class="text-muted">
@@ -259,12 +240,6 @@ const onImgError = (e: Event) => {
             </div>
 
         </div>
-
-        <!-- LOGOUT MODAL -->
-        <LogoutModal
-            :show="showLogoutModal"
-            @close="showLogoutModal = false"
-        />
 
     </div>
 </template>

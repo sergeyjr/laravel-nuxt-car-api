@@ -6,8 +6,12 @@ import {useAuthStore} from '~/stores/auth'
 import {useProfileStore} from '~/stores/profile'
 
 import BaseButton from '~/components/BaseButton.vue'
+import BaseCheckbox from "~/components/BaseCheckbox.vue";
+import BaseFileInput from "~/components/BaseFileInput.vue";
 import BaseInput from '~/components/BaseInput.vue'
 import DeleteAccountModal from '~/components/modals/DeleteAccountModal.vue'
+
+import {formatDate} from '~/utils/formatters'
 
 /* -----------------------------
    store
@@ -54,20 +58,6 @@ const remove_avatar = ref(false)
 const current_password = ref('')
 const password = ref('')
 const password_confirmation = ref('')
-
-/* -----------------------------
-   utils
-------------------------------*/
-
-const formatDate = (date: any) => {
-    if (!date) return ''
-
-    return new Intl.DateTimeFormat('ru-RU', {
-        dateStyle: 'short',
-        timeStyle: 'medium',
-        timeZone: 'Europe/Amsterdam'
-    }).format(new Date(date))
-}
 
 const goBack = () => {
     navigateTo('/dashboard')
@@ -292,34 +282,19 @@ const confirmDeleteAccount = async () => {
                                 <a href="mailto:admin@laravel.local">admin@laravel.local</a>
                             </small>
 
-                            <div class="mb-3">
-                                <label class="form-label">Аватар</label>
-                                <input
-                                    type="file"
-                                    class="form-control"
-                                    :class="{ 'is-invalid': profile.errors.avatar }"
-                                    @change="profile.onFile"
-                                >
-                                <small v-if="profile.errors.avatar" class="text-danger">
-                                    {{ profile.errors.avatar }}
-                                </small>
-                            </div>
+                            <BaseFileInput
+                                label="Аватар"
+                                :error="profile.errors.avatar"
+                                :disabled="profile.loadingAll"
+                                @change="profile.onFile"
+                            />
 
-                            <div class="form-check mb-3">
-                                <input
-                                    id="remove-avatar"
-                                    type="checkbox"
-                                    class="form-check-input"
-                                    v-model="remove_avatar"
-                                >
-
-                                <label
-                                    for="remove-avatar"
-                                    class="form-check-label"
-                                >
-                                    Удалить аватар
-                                </label>
-                            </div>
+                            <BaseCheckbox
+                                id="remove-avatar"
+                                v-model="remove_avatar"
+                                label="Удалить аватар"
+                                :disabled="profile.loadingAll"
+                            />
 
                             <BaseButton
                                 type="submit"

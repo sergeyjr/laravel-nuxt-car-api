@@ -81,9 +81,7 @@ export default defineNuxtPlugin(() => {
 
                     const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/)
 
-                    const token = match?.[1]
-                        ? decodeURIComponent(match[1])
-                        : null
+                    const token = match?.[1] ? decodeURIComponent(match[1]) : null
 
                     if (token) {
                         headers.set('X-XSRF-TOKEN', token)
@@ -101,19 +99,19 @@ export default defineNuxtPlugin(() => {
 
             const data = response._data
 
-            if (
-                data &&
-                typeof data === 'object' &&
-                data.success === true
-            ) {
+            if (data && typeof data === 'object' && data.success === true) {
                 response._data = data.data
             }
 
         },
 
-        onResponseError({response, request}) {
+        onResponseError({response}) {
 
-            if (!import.meta.client) {
+            if (!import.meta.client || !response) {
+                return
+            }
+
+            if (response.status === 422) {
                 return
             }
 
@@ -121,19 +119,26 @@ export default defineNuxtPlugin(() => {
 
             const data = response._data
 
-            if (data?.errors) {
-                Object.values(data.errors).forEach((arr: any) => {
-                    if (Array.isArray(arr)) {
-                        arr.forEach((msg: string) => {
-                            alert.add('error', msg)
-                        })
-                    }
-                })
-                return
-            }
+            //     if (data?.errors) {
+            //         Object.values(data.errors).forEach((arr: any) => {
+            //             if (Array.isArray(arr)) {
+            //                 arr.forEach((msg: string) => {
+            //                     alert.add('warning', msg)
+            //                 })
+            //             }
+            //         })
+            //         return
+            //     }
 
-            if (data?.message) {
-                alert.add('error', data.message)
+            const message =
+                response.status === 401
+                    ? 'Необходима авторизация.'
+                    : response.status === 419
+                        ? 'Сессия истекла.'
+                        : data?.message
+
+            if (message) {
+                alert.add('error', message)
             }
 
         }

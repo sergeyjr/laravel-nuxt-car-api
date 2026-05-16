@@ -17,7 +17,7 @@ const emit = defineEmits<{
     (e: 'confirm', payload: { email: string; password: string }): void
 }>()
 
-const store = useAuthStore()
+const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
@@ -34,17 +34,17 @@ const close = () => {
 }
 
 const submit = () => {
-    store.errors = {}
+    authStore.errors = {}
 
     let hasError = false
 
     if (!email.value) {
-        store.errors.email = ['Email обязателен']
+        authStore.errors.email = 'Email обязателен'
         hasError = true
     }
 
     if (!password.value) {
-        store.errors.password = ['Пароль обязателен']
+        authStore.errors.password = 'Пароль обязателен'
         hasError = true
     }
 
@@ -58,7 +58,7 @@ const submit = () => {
 
 watch(() => props.show, (val) => {
     if (val) {
-        store.clearErrors()
+        authStore.clearErrors()
         email.value = ''
         password.value = ''
     }
@@ -98,7 +98,8 @@ watch(() => props.show, (val) => {
                             type="email"
                             label="Email"
                             required
-                            :error="store.errors.email"
+                            :disabled="isProcessing"
+                            :error="authStore.errors.email"
                         />
 
                         <BaseInput
@@ -106,7 +107,8 @@ watch(() => props.show, (val) => {
                             type="password"
                             label="Пароль"
                             required
-                            :error="store.errors.password"
+                            :disabled="isProcessing"
+                            :error="authStore.errors.password"
                         />
 
                         <BaseButton

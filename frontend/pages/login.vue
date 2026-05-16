@@ -12,7 +12,7 @@ import BaseInput from '~/components/BaseInput.vue'
    store
 ------------------------------*/
 
-const store = useAuthStore()
+const authStore = useAuthStore()
 
 /* -----------------------------
    form state
@@ -36,7 +36,7 @@ const validate = () => {
         errors.password = 'Пароль обязателен'
     }
 
-    store.errors = {...errors}
+    authStore.errors = {...errors}
 
     return Object.keys(errors).length === 0
 }
@@ -48,7 +48,7 @@ const validate = () => {
 const submit = async () => {
     if (!validate()) return
 
-    const ok = await store.login(email.value, password.value)
+    const ok = await authStore.login(email.value, password.value)
 
     if (ok) {
         return navigateTo('/dashboard')
@@ -60,7 +60,7 @@ const submit = async () => {
 ------------------------------*/
 
 onMounted(() => {
-    store.clearErrors()
+    authStore.clearErrors()
 })
 
 </script>
@@ -72,8 +72,8 @@ onMounted(() => {
 
                 <h1 class="mb-4">Авторизация</h1>
 
-                <p v-if="store.success" class="text-success text-center">
-                    {{ store.success }}
+                <p v-if="authStore.success" class="text-success text-center">
+                    {{ authStore.success }}
                 </p>
 
                 <form @submit.prevent="submit">
@@ -83,7 +83,8 @@ onMounted(() => {
                         type="email"
                         label="Email"
                         required
-                        :error="store.errors.email"
+                        :disabled="authStore.loading"
+                        :error="authStore.errors.email"
                     />
 
                     <BaseInput
@@ -91,13 +92,14 @@ onMounted(() => {
                         type="password"
                         label="Пароль"
                         required
-                        :error="store.errors.password"
+                        :disabled="authStore.loading"
+                        :error="authStore.errors.password"
                     />
 
                     <BaseButton
                         type="submit"
                         class="w-100 mt-3"
-                        :loading="store.loading"
+                        :loading="authStore.loading"
                     >
                         <template #loading>
                             Входим...

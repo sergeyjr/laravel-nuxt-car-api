@@ -4,8 +4,9 @@ import {storeToRefs} from 'pinia'
 
 import {useAlertStore} from '~/stores/alert'
 
-const store = useAlertStore()
-const {alerts} = storeToRefs(store)
+const alertStore = useAlertStore()
+
+const {alerts} = storeToRefs(alertStore)
 
 const alertClass = (type: string) => {
     return {
@@ -33,7 +34,7 @@ const alertClass = (type: string) => {
 
                     <button
                         class="alert-close"
-                        @click="store.remove(alert.id)"
+                        @click="alertStore.remove(alert.id)"
                         aria-label="Close alert"
                     >
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none">

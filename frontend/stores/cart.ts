@@ -59,6 +59,11 @@ export const useCartStore = defineStore('cart', {
 
     actions: {
 
+        reset() {
+            this.items = {}
+            this.initialized = false
+        },
+
         async fetch(force = false) {
 
             if (this.initialized && !force) {
@@ -71,23 +76,15 @@ export const useCartStore = defineStore('cart', {
             this.loadingFetch = true
 
             try {
-
                 const data: any = await cartApi.getCart()
-
                 this.items = cleanItems(data?.items ?? data)
-
             } catch (e) {
-
-                console.error('[cart fetch]', e)
-
+                console.error(e)
                 this.items = {}
-
             } finally {
-
                 this.loading = false
                 this.loadingFetch = false
                 this.initialized = true
-
             }
 
         },
@@ -103,22 +100,15 @@ export const useCartStore = defineStore('cart', {
             this.loadingAdd = true
 
             try {
-
                 await cartApi.addItem({
                     id: Number(payload.id),
                     qty: Number(payload.qty ?? 1)
                 })
-
                 await this.refresh()
-
             } catch (e) {
-
-                console.error('[cart add]', e)
-
+                console.error(e)
             } finally {
-
                 this.loadingAdd = false
-
             }
 
         },
@@ -130,22 +120,15 @@ export const useCartStore = defineStore('cart', {
             this.loadingUpdate = true
 
             try {
-
                 await cartApi.updateItem({
                     id: Number(id),
                     qty: Math.max(1, Number(qty))
                 })
-
                 await this.refresh()
-
             } catch (e) {
-
-                console.error('[cart update]', e)
-
+                console.error(e)
             } finally {
-
                 this.loadingUpdate = false
-
             }
 
         },
@@ -157,19 +140,12 @@ export const useCartStore = defineStore('cart', {
             this.loadingRemove = true
 
             try {
-
                 await cartApi.removeItem(Number(id))
-
                 await this.refresh()
-
             } catch (e) {
-
-                console.error('[cart remove]', e)
-
+                console.error(e)
             } finally {
-
                 this.loadingRemove = false
-
             }
 
         },
@@ -181,19 +157,12 @@ export const useCartStore = defineStore('cart', {
             this.loadingClear = true
 
             try {
-
                 await cartApi.clear()
-
                 this.items = {}
-
             } catch (e) {
-
-                console.error('[cart clear]', e)
-
+                console.error(e)
             } finally {
-
                 this.loadingClear = false
-
             }
 
         },
@@ -205,25 +174,16 @@ export const useCartStore = defineStore('cart', {
             this.loadingCheckout = true
 
             try {
-
                 const data = await cartApi.checkout({
                     comment: payload.comment || null
                 })
-
                 this.items = {}
-
                 return data
-
             } catch (e) {
-
-                console.error('[cart checkout]', e)
-
+                console.error(e)
                 throw e
-
             } finally {
-
                 this.loadingCheckout = false
-
             }
 
         }

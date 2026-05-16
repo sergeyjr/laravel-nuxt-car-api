@@ -49,9 +49,10 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const user = await api.me()
                 this.user = user || null
+
                 return !!user
             } catch (e: any) {
-                if (e?.status === 401) {
+                if ([401, 403, 419].includes(e?.status)) {
                     this.user = null
                 }
                 return false
@@ -68,6 +69,7 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const ok = await this.fetchUser()
                 this.initialized = true
+
                 return ok
             } finally {
                 this.initializing = false
@@ -79,19 +81,17 @@ export const useAuthStore = defineStore('auth', {
             this.clearErrors()
 
             const api = useAuthApi()
-            const alert = useAlertStore()
 
             try {
                 await api.csrf()
-
                 const data: any = await api.login(email, password)
-
-                this.user =
-                    data?.user || (await this.fetchUser() ? this.user : null)
-
+                if (data?.user) {
+                    this.user = data.user
+                } else {
+                    await this.fetchUser()
+                }
                 this.initialized = true
-
-                alert.add('success', data?.message || 'Вы вошли в аккаунт.')
+                this.showAlert('success', data?.message || 'Вы вошли в аккаунт.')
 
                 return true
             } catch (e: any) {
@@ -99,8 +99,6 @@ export const useAuthStore = defineStore('auth', {
                     this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
-
-                alert.add('error', e?.data?.message || 'Ошибка входа')
 
                 return false
             } finally {
@@ -113,17 +111,12 @@ export const useAuthStore = defineStore('auth', {
             this.clearErrors()
 
             const api = useAuthApi()
-            const alert = useAlertStore()
 
             try {
                 await api.csrf()
-
                 const data: any = await api.register(payload)
 
-                alert.add(
-                    'success',
-                    data?.message || 'Регистрация успешно завершена.',
-                )
+                this.showAlert('success', data?.message || 'Регистрация завершена.')
 
                 this.user = null
                 this.initialized = true
@@ -135,11 +128,6 @@ export const useAuthStore = defineStore('auth', {
                     return false
                 }
 
-                alert.add(
-                    'error',
-                    e?.data?.message || 'Регистрация не удалась.',
-                )
-
                 return false
             } finally {
                 this.loading = false
@@ -147,21 +135,22 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async logout() {
+            if (this.loggingOut) {
+                return false
+            }
+
             this.loggingOut = true
 
             const api = useAuthApi()
-            const alert = useAlertStore()
 
             try {
                 const data: any = await api.logout()
-
-                alert.add('success', data?.message || 'Вы вышли из аккаунта.')
-
+                this.showAlert('success', data?.message || 'Вы вышли из аккаунта.')
                 this.logoutLocal()
 
                 return true
             } catch (e: any) {
-                alert.add('error', e?.data?.message || 'Ошибка выхода.')
+                this.showAlert('error', e?.data?.message || 'Ошибка выхода.')
 
                 return false
             } finally {

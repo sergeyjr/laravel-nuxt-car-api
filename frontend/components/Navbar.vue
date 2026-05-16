@@ -43,15 +43,23 @@ const isLogoutLoading = ref(false)
 
 const cartCount = computed(() => {
     if (!auth.isAuth) return 0
-    return Object.keys(cart.items || {}).length
+
+    return Array.isArray(cart.items)
+        ? cart.items.length
+        : Object.keys(cart.items ?? {}).length
 })
 
 /* -----------------------------
    helpers
 ------------------------------*/
 
-const isActive = (path: string) =>
-    route.path === path || route.path.startsWith(path + '/')
+const isActive = (path: string) => {
+    if (path === '/') {
+        return route.path === '/'
+    }
+
+    return route.path === path || route.path.startsWith(path + '/')
+}
 
 /* -----------------------------
    logout handler

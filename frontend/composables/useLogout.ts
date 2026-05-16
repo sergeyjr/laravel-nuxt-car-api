@@ -14,8 +14,7 @@ export const useLogout = () => {
             return false
         }
 
-        cart.items = {}
-        cart.initialized = false
+        cart.reset()
 
         const shouldRedirect =
             routePath.startsWith('/cart') ||

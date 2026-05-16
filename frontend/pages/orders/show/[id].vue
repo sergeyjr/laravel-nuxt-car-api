@@ -7,12 +7,15 @@ import {useOrderStore} from '~/stores/order'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
+import {formatPrice, formatDate} from '~/utils/formatters'
+
 /* -----------------------------
    route / store
 ------------------------------*/
 
 const route = useRoute()
-const store = useOrderStore()
+
+const orderStore = useOrderStore()
 
 /* -----------------------------
    status helper
@@ -41,16 +44,12 @@ await useAsyncData(
     () => `order-${orderId.value}`,
     async () => {
         try {
-            const result = await store.fetchOrder(orderId.value)
-
-            return result ?? store.currentOrder ?? null
-
+            const result = await orderStore.fetchOrder(orderId.value)
+            return result ?? orderStore.currentOrder ?? null
         } catch (err: any) {
-            // soft fallback for not found
             if (err?.statusCode === 404 || err?.status === 404) {
                 return null
             }
-
             throw err
         }
     },
@@ -63,8 +62,8 @@ await useAsyncData(
    state
 ------------------------------*/
 
-const order = computed(() => store.currentOrder)
-const loadingOrder = computed(() => store.loadingOrder)
+const order = computed(() => orderStore.currentOrder)
+const loadingOrder = computed(() => orderStore.loadingOrder)
 
 /* -----------------------------
    derived state
@@ -74,25 +73,6 @@ const hasComment = computed(() => {
     const c = order.value?.comment
     return c != null && String(c).trim() !== ''
 })
-
-/* -----------------------------
-   formatters
-------------------------------*/
-
-// price
-const formatPrice = (v: number | string) =>
-    new Intl.NumberFormat('ru-RU').format(Number(v || 0)) + ' ₽'
-
-// date
-const formatDate = (date: string) => {
-    if (!date) return ''
-
-    return new Intl.DateTimeFormat('ru-RU', {
-        dateStyle: 'short',
-        timeStyle: 'medium',
-        timeZone: 'Europe/Amsterdam'
-    }).format(new Date(date))
-}
 
 /* -----------------------------
    item helpers
