@@ -19,7 +19,7 @@
 
 # Главная страница
 
-![Главная](screenshots/laravel-index.png)
+![Главная](/images/laravel-index.png)
 
 ---
 
@@ -27,7 +27,7 @@
 
 Полноценный каталог автомобилей с карточками, изображениями, характеристиками и переходом к детальной странице автомобиля.
 
-![Каталог](screenshots/laravel-catalog.png)
+![Каталог](/images/laravel-catalog.png)
 
 ---
 
@@ -35,7 +35,7 @@
 
 Защищенная dashboard-зона с навигацией по пользовательским разделам.
 
-![Dashboard](screenshots/laravel-dashboard.png)
+![Dashboard](/images/laravel-dashboard.png)
 
 ---
 
@@ -48,7 +48,7 @@
 * смена пароля;
 * управление аккаунтом.
 
-![Профиль](screenshots/laravel-profile.png)
+![Профиль](/images/laravel-profile.png)
 
 ---
 
@@ -56,7 +56,7 @@
 
 История оформленных заказов пользователя.
 
-![Заказы](screenshots/laravel-orders.png)
+![Заказы](/images/laravel-orders.png)
 
 ---
 
@@ -64,7 +64,7 @@
 
 Страница просмотра конкретного заказа с товарами и общей информацией.
 
-![Информация о заказе](screenshots/laravel-order-info.png)
+![Информация о заказе](/images/laravel-order-info.png)
 
 ---
 
@@ -72,7 +72,7 @@
 
 Контактная форма для обратной связи.
 
-![Контакты](screenshots/laravel-contacts.png)
+![Контакты](/images/laravel-contacts.png)
 
 ---
 
@@ -86,7 +86,7 @@
 * оформление заказа;
 * модальные окна подтверждения действий.
 
-![Корзина](screenshots/laravel-cart.png)
+![Корзина](/images/laravel-cart.png)
 
 ---
 

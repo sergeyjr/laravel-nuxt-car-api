@@ -28,6 +28,7 @@ const {logout} = useLogout()
 ------------------------------*/
 
 const config = useRuntimeConfig()
+
 const appName = config.public.appName
 
 /* -----------------------------

@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     // Глобальные стили проекта
     css: [
         'bootstrap/dist/css/bootstrap.min.css',
+        'bootstrap-icons/font/bootstrap-icons.css',
         'github-markdown-css/github-markdown.css',
         '@/assets/css/app.css',
     ],

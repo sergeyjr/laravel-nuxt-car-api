@@ -21,6 +21,31 @@ export const formatDate = (date: string | number | Date | null | undefined) => {
     }).format(new Date(date))
 }
 
-// formatPhone()
+// Phone
 
-// formatNumber()
+export const formatPhoneRU = (phone?: string | number | null) => {
+    if (!phone) return ''
+
+    // 1. Оставляем только цифры
+    let digits = String(phone).replace(/\D/g, '')
+
+    // 2. Приводим к формату 10 цифр (без кода страны)
+    if (digits.startsWith('8')) {
+        digits = '7' + digits.slice(1)
+    }
+
+    if (digits.length === 10) {
+        digits = '7' + digits
+    }
+
+    // 3. Проверка минимальной валидности
+    if (digits.length !== 11) return phone.toString()
+
+    const country = '+7'
+    const area = digits.slice(1, 4)
+    const first = digits.slice(4, 7)
+    const second = digits.slice(7, 9)
+    const third = digits.slice(9, 11)
+
+    return `${country} (${area}) ${first}-${second}-${third}`
+}
