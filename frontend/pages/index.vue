@@ -56,10 +56,14 @@ const swiperOptions = {
 
 const carStore = useCarStore()
 
-await useAsyncData(
-    'latest-cars',
-    () => carStore.fetchLatest()
-)
+// await useAsyncData(
+//     'latest-cars',
+//     () => carStore.fetchLatest()
+// )
+
+onMounted(() => {
+    carStore.fetchLatest()
+})
 
 /* -----------------------------
    helpers
@@ -84,7 +88,7 @@ const onImgError = (e: Event) => {
 
             <h1 class="display-5 fw-bold">Главная страница</h1>
 
-            <p class="text-muted">Nuxt 4 + Pinia 3</p>
+            <p class="text-muted">Laravel 13 + Nuxt 4 + Pinia 3</p>
 
         </div>
 

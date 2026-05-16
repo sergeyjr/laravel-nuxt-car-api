@@ -30,6 +30,7 @@ const alertClass = (type: string) => {
                     :key="alert.id"
                     :class="['alert', alertClass(alert.type)]"
                 >
+
                     {{ alert.message }}
 
                     <button

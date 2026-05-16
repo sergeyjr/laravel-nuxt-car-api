@@ -21,8 +21,17 @@ export const useCarApi = () => {
         fetchLatest() {
             console.log('[CarAPI] fetchLatest → request')
             return api.get<CarsResponse>('/api/cars/latest')
-        }
+        },
 
+        createCar(payload: any) {
+            console.log('[CarAPI] create → request')
+            return api.post('/api/car/create', payload)
+        },
+
+        generateCar() {
+            console.log('[CarAPI] generateMock → request')
+            return api.get('/api/car/generate')
+        }
     }
 
 }

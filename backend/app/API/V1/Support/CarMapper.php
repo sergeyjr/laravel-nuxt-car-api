@@ -29,8 +29,8 @@ class CarMapper
         // Опции автомобиля (hasOne relation)
         $dto->options = null;
 
-        if (!empty($car['option'])) {
-            $dto->options = CarOptionResponse::fromArray($car['option']);
+        if (!empty($car['options'])) {
+            $dto->options = CarOptionResponse::fromArray($car['options']);
         }
 
         return $dto;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\API\V1\DTO\Request\PaginationRequest;
 use App\API\V1\Services\CarService;
+use Database\Seeders\CarSeeder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -66,6 +67,33 @@ class CarController extends Controller
         $cars = $this->service->getCars($pagination);
 
         return $this->success($cars);
+    }
+
+    public function generateMock(): JsonResponse
+    {
+        $seeder = new CarSeeder();
+        $cars = $seeder->cars;
+
+        $car = $cars[array_rand($cars)];
+
+        [$brand, $model] = explode(' ', $car[0]) + [null, null];
+
+        return $this->success([
+            'data' => [
+                'title' => $car[0],
+                'description' => $car[1],
+                'price' => $car[2],
+                'photo_url' => $seeder->photoUrlDefault,
+                'contacts' => $seeder->emailDefault,
+                'options' => [
+                    'brand' => $brand,
+                    'model' => $model,
+                    'year' => 2020,
+                    'body' => $car[3],
+                    'mileage' => 50000,
+                ]
+            ]
+        ]);
     }
 
 }

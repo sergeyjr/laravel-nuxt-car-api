@@ -7,7 +7,6 @@
 
 class ProjectTreeGenerator
 {
-
     private string $rootPath;
     private array $excludePaths;
     private bool $showFiles;
@@ -35,6 +34,17 @@ class ProjectTreeGenerator
         return $tree;
     }
 
+    public function save(string $content, string $path): void
+    {
+        $dir = dirname($path);
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        file_put_contents($path, $content);
+    }
+
     private function scan(string $directory, string $prefix = ''): string
     {
         $output = '';
@@ -45,10 +55,8 @@ class ProjectTreeGenerator
             return $output;
         }
 
-        // Убираем . и ..
         $items = array_values(array_diff($items, ['.', '..']));
 
-        // Сортировка: сначала папки, потом файлы
         usort($items, function ($a, $b) use ($directory) {
             $pathA = $directory . DIRECTORY_SEPARATOR . $a;
             $pathB = $directory . DIRECTORY_SEPARATOR . $b;
@@ -105,7 +113,6 @@ class ProjectTreeGenerator
         foreach ($this->excludePaths as $exclude) {
             $exclude = trim($exclude, '/');
 
-            // 1. Глобальное исключение по имени директории/файла
             if (!str_contains($exclude, '/')) {
                 if (in_array($exclude, $segments, true)) {
                     return true;
@@ -113,7 +120,6 @@ class ProjectTreeGenerator
                 continue;
             }
 
-            // 2. Точное относительное совпадение или поддерево
             if (
                 $normalizedPath === $exclude ||
                 str_starts_with($normalizedPath, $exclude . '/')
@@ -124,7 +130,6 @@ class ProjectTreeGenerator
 
         return false;
     }
-
 }
 
 /*
@@ -135,10 +140,8 @@ class ProjectTreeGenerator
 
 $config = [
 
-    // Стартовая папка проекта
     'root_path' => dirname(dirname(__DIR__)),
 
-    // Исключения
     'exclude' => [
         '.git',
         '.idea',
@@ -153,9 +156,7 @@ $config = [
         'vendor',
     ],
 
-    // Показывать файлы
     'show_files' => true,
-
 ];
 
 /*
@@ -166,6 +167,16 @@ $config = [
 
 $generator = new ProjectTreeGenerator($config);
 
+$content = $generator->generate();
+
+/**
+ * путь к файлу docs/tree.md
+ * (2 уровня вверх от текущего файла)
+ */
+$outputPath = dirname(__DIR__, 2) . '/docs/tree.md';
+
+$generator->save($content, $outputPath);
+
 header('Content-Type: text/plain; charset=utf-8');
 
-echo $generator->generate();
+echo $content;

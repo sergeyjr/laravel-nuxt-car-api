@@ -1,6 +1,7 @@
 export default defineNuxtPlugin(async () => {
 
     const auth = useAuthStore()
+
     const route = useRoute()
 
     if (!auth.initialized) {

@@ -34,8 +34,8 @@ class AuthController extends Controller
         // $request->session()->regenerate();
 
         return $this->success([
-            'user' => $user,
             'message' => 'Регистрация успешно завершена! Теперь вы можете войти.',
+            'user' => $user,
             // 'redirect' => '/dashboard',
         ]);
     }

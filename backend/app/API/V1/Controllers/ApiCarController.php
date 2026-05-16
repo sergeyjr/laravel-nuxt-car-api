@@ -164,29 +164,4 @@ class ApiCarController extends Controller
         ]);
     }
 
-    public function generateMock(): JsonResponse
-    {
-        $seeder = new CarSeeder();
-        $cars = $seeder->cars;
-
-        $car = $cars[array_rand($cars)];
-
-        [$brand, $model] = explode(' ', $car[0]) + [null, null];
-
-        return $this->success([
-            'title' => $car[0],
-            'description' => $car[1],
-            'price' => $car[2],
-            'photo_url' => $seeder->photoUrlDefault,
-            'contacts' => $seeder->emailDefault,
-            'options' => [
-                'brand' => $brand,
-                'model' => $model,
-                'year' => 2020,
-                'body' => $car[3],
-                'mileage' => 50000,
-            ]
-        ]);
-    }
-
 }

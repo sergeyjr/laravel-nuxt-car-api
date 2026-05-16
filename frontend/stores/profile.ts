@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia'
-import { useAuthStore } from './auth'
-import { useAlertStore } from './alert'
-import { useProfileApi } from '~/services/api/internal/profile.api'
+import {defineStore} from 'pinia'
+import {useAuthStore} from './auth'
+import {useAlertStore} from './alert'
+import {useProfileApi} from '~/services/api/internal/profile.api'
 
 type ProfilePasswordForm = {
     current_password: string

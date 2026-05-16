@@ -46,7 +46,7 @@ class CarRepository implements CarRepositoryInterface
                 $this->optionRepository->saveOptions($car->id, $data['options']);
             }
 
-            return $car->load('option')->toArray();
+            return $car->load('options')->toArray();
         });
     }
 
@@ -82,7 +82,7 @@ class CarRepository implements CarRepositoryInterface
                 $this->optionRepository->saveOptions($car->id, $data['options']);
             }
 
-            return $car->load('option')->toArray();
+            return $car->load('options')->toArray();
         });
     }
 
@@ -123,7 +123,7 @@ class CarRepository implements CarRepositoryInterface
                 );
             }
 
-            return $car->load('option')->toArray();
+            return $car->load('options')->toArray();
         });
     }
 

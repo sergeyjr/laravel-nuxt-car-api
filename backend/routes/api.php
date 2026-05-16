@@ -10,6 +10,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SiteController;
 use App\Http\Middleware\FixJsonMiddleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -60,16 +61,10 @@ Route::post('/contact', [SiteController::class, 'sendContact'])
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    // Dashboard
-    Route::prefix('dashboard')->group(function () {
-        Route::get('/', [DashboardController::class, 'index']);
-    });
-
-    // Profile
-    Route::prefix('profile')->group(function () {
-        Route::delete('/', [ProfileController::class, 'destroy']);
-        Route::post('/password', [ProfileController::class, 'password']);
-        Route::post('/update', [ProfileController::class, 'update']);
+    // Car
+    Route::prefix('car')->group(function () {
+        Route::post('create', [ApiCarController::class, 'create']); // метод из api V1
+        Route::get('generate', [CarController::class, 'generateMock']);
     });
 
     // Cart
@@ -81,11 +76,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/clear', [CartController::class, 'clear']);
     });
 
+    // Dashboard
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'index']);
+    });
+
     // Orders
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index']);
         Route::post('/checkout', [OrderController::class, 'checkout']);
         Route::get('/{id}', [OrderController::class, 'show']);
+    });
+
+    // Profile
+    Route::prefix('profile')->group(function () {
+        Route::delete('/', [ProfileController::class, 'destroy']);
+        Route::post('/password', [ProfileController::class, 'password']);
+        Route::post('/update', [ProfileController::class, 'update']);
     });
 
 });
@@ -105,6 +112,9 @@ Route::prefix('v1')->group(function () {
 
     // Доступ только для API пользователей
     Route::middleware(['auth:sanctum', 'api.role'])->group(function () {
+
+        // Получение токена с фронта сайта
+        // Route::get('token', [ApiAuthController::class, 'token']);
 
         Route::prefix('car')->group(function () {
 
@@ -132,7 +142,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('delete/{id}', [ApiCarController::class, 'destroy'])->whereNumber('id');
 
             // Генерация тестовых данных
-            Route::get('generate-mock', [ApiCarController::class, 'generateMock']);
+            // Route::get('generate-mock', [ApiCarController::class, 'generateMock']);
 
         });
 

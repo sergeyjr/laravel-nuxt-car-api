@@ -293,7 +293,6 @@ const confirmCheckout = async () => {
                                 @click="openCheckoutModal"
                             >
                                 Отправить заказ
-
                                 <template #loading>
                                     Отправляем заказ...
                                 </template>

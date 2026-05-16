@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {useCarV1Store} from '~/stores/car.v1'
+import {useCarStore} from '~/stores/car'
 
 import BaseInput from '~/components/BaseInput.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -9,13 +9,13 @@ import BaseButton from '~/components/BaseButton.vue'
    store
 ------------------------------*/
 
-const store = useCarV1Store()
+const carStore = useCarStore()
 
 /* -----------------------------
    init
 ------------------------------*/
 
-store.reset()
+carStore.reset()
 
 /* -----------------------------
    actions
@@ -23,10 +23,10 @@ store.reset()
 
 const submit = async () => {
     try {
-        const result = await store.submit()
-        if (result?.id) {
-            await navigateTo(`/cars/show/${result.id}`)
-        }
+        const result = await carStore.submitCreateCarForm()
+        // if (result?.id) {
+        //     await navigateTo(`/cars/show/${result.id}`)
+        // }
     } catch (e) {
         console.error(e)
     }
@@ -34,7 +34,7 @@ const submit = async () => {
 
 const generate = async () => {
     try {
-        await store.generate()
+        await carStore.generateCarForm()
     } catch (e) {
         console.error(e)
     }
@@ -54,35 +54,40 @@ const generate = async () => {
                 <div class="col-6">
 
                     <BaseInput
-                        v-model="store.form.title"
+                        v-model="carStore.form.title"
                         label="Заголовок"
-                        :error="store.errors.title"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.title"
                     />
 
                     <BaseInput
-                        v-model="store.form.description"
+                        v-model="carStore.form.description"
                         label="Описание"
-                        :error="store.errors.description"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.description"
                     />
 
                     <BaseInput
-                        :model-value="store.form.price ?? ''"
-                        @update:modelValue="val => store.form.price = val === '' ? '' : Number(val)"
+                        :model-value="carStore.form.price ?? ''"
+                        @update:modelValue="val => carStore.form.price = val === '' ? '' : Number(val)"
                         type="number"
                         label="Цена"
-                        :error="store.errors.price"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.price"
                     />
 
                     <BaseInput
-                        v-model="store.form.photo_url"
+                        v-model="carStore.form.photo_url"
                         label="Фото"
-                        :error="store.errors.photo_url"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.photo_url"
                     />
 
                     <BaseInput
-                        v-model="store.form.contacts"
+                        v-model="carStore.form.contacts"
                         label="Контакты"
-                        :error="store.errors.contacts"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.contacts"
                     />
 
                 </div>
@@ -90,35 +95,40 @@ const generate = async () => {
                 <div class="col-6">
 
                     <BaseInput
-                        v-model="store.form.brand"
+                        v-model="carStore.form.brand"
                         label="Марка"
-                        :error="store.errors.brand"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.brand"
                     />
 
                     <BaseInput
-                        v-model="store.form.model"
+                        v-model="carStore.form.model"
                         label="Модель"
-                        :error="store.errors.model"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.model"
                     />
 
                     <BaseInput
-                        v-model="store.form.year"
+                        v-model="carStore.form.year"
                         type="number"
                         label="Год"
-                        :error="store.errors.year"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.year"
                     />
 
                     <BaseInput
-                        v-model="store.form.body"
+                        v-model="carStore.form.body"
                         label="Кузов"
-                        :error="store.errors.body"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.body"
                     />
 
                     <BaseInput
-                        v-model="store.form.mileage"
+                        v-model="carStore.form.mileage"
                         type="number"
                         label="Пробег"
-                        :error="store.errors.mileage"
+                        :disabled="carStore.submitting || carStore.generating"
+                        :error="carStore.errors.mileage"
                     />
 
                 </div>
@@ -130,13 +140,12 @@ const generate = async () => {
                 <BaseButton
                     type="submit"
                     variant="primary"
-                    :disabled="store.submitting || store.generating"
-                    :loading="store.submitting"
+                    :disabled="carStore.submitting || carStore.generating"
+                    :loading="carStore.submitting"
                 >
                     <template #loading>
                         Отправляем...
                     </template>
-
                     Отправить
                 </BaseButton>
 
@@ -144,14 +153,13 @@ const generate = async () => {
                     type="button"
                     variant="secondary"
                     class="ms-2"
-                    :disabled="store.submitting || store.generating"
-                    :loading="store.generating"
+                    :disabled="carStore.submitting || carStore.generating"
+                    :loading="carStore.generating"
                     @click="generate"
                 >
                     <template #loading>
                         Получаем данные...
                     </template>
-
                     Сгенерировать
                 </BaseButton>
 

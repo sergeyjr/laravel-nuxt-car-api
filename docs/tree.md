@@ -163,6 +163,8 @@ laravel/
 │   │   │   └── LogoutConfirmModal.vue
 │   │   ├── Alerts.vue
 │   │   ├── BaseButton.vue
+│   │   ├── BaseCheckbox.vue
+│   │   ├── BaseFileInput.vue
 │   │   ├── BaseInput.vue
 │   │   ├── BaseTextarea.vue
 │   │   ├── Navbar.vue
@@ -170,7 +172,7 @@ laravel/
 │   ├── composables/
 │   │   ├── useApi.ts
 │   │   ├── useApiToken.ts
-│   │   ├── useAuthActions.ts
+│   │   ├── useLogout.ts
 │   │   ├── useModal.ts
 │   │   ├── useOrderStatus.ts
 │   │   └── useProtected.ts
@@ -246,7 +248,9 @@ laravel/
 │   │   ├── order.ts
 │   │   └── page.ts
 │   ├── utils/
-│   │   └── debug.ts
+│   │   ├── debug.ts
+│   │   ├── formatters.ts
+│   │   └── navigation.ts
 │   ├── .gitignore
 │   ├── app.vue
 │   ├── error.vue

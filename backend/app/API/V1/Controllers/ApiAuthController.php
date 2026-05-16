@@ -41,6 +41,7 @@ class ApiAuthController extends Controller
         $token = $user->createToken('api_token')->plainTextToken;
 
         return $this->success([
+            'message' => 'Токен успешно получен.',
             'user' => $user,
             'token' => $token,
         ]);
@@ -62,9 +63,39 @@ class ApiAuthController extends Controller
         ]);
     }
 
-    public function tokens(Request $request)
-    {
-        return $this->success($request->user()->tokens);
-    }
+//    public function token(Request $request)
+//    {
+//        $user = $request->user();
+//
+//        if (!$user) {
+//            return $this->error(
+//                'Требуется авторизация.',
+//                401
+//            );
+//        }
+//
+//        if (!$user->isAdmin() && !$user->isApiUser()) {
+//            return $this->error(
+//                'Доступ запрещен.',
+//                403);
+//        }
+//
+//        $token = $user->tokens()
+//            ->where('name', 'api_token')
+//            ->latest()
+//            ->first();
+//
+//        if ($token) {
+//            return $this->success([
+//                'token' => $token->token
+//            ]);
+//        }
+//
+//        $plain = $user->createToken('api_token')->plainTextToken;
+//
+//        return $this->success([
+//            'token' => $plain,
+//        ]);
+//    }
 
 }
