@@ -14,18 +14,22 @@ const emit = defineEmits<{
     (e: 'confirm'): void
 }>()
 
-const isProcessing = computed(() => props.loading)
+const isProcessing = computed(() => !!props.loading)
 
 const close = () => {
-    if (!isProcessing.value) {
-        emit('close')
+    if (isProcessing.value) {
+        return
     }
+
+    emit('close')
 }
 
 const confirmDelete = () => {
-    if (!isProcessing.value) {
-        emit('confirm')
+    if (isProcessing.value) {
+        return
     }
+
+    emit('confirm')
 }
 
 </script>
@@ -47,6 +51,7 @@ const confirmDelete = () => {
                     </h5>
 
                     <BaseButton
+                        type="button"
                         variant="link"
                         class="btn-close"
                         :disabled="isProcessing"
@@ -65,6 +70,7 @@ const confirmDelete = () => {
                 <div class="modal-footer">
 
                     <BaseButton
+                        type="button"
                         variant="danger"
                         :disabled="isProcessing"
                         @click="confirmDelete"
@@ -78,6 +84,7 @@ const confirmDelete = () => {
                     </BaseButton>
 
                     <BaseButton
+                        type="button"
                         variant="secondary"
                         :disabled="isProcessing"
                         @click="close"

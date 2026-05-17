@@ -76,7 +76,6 @@ export default {
         newArrivals: 'New arrivals',
         priceHint: 'Log in to see price',
         quickActions: 'Quick actions',
-        stack: 'Laravel 13 + Nuxt 4 + Pinia 3',
         title: 'Home page',
         userStatusTitle: 'User status',
         welcome: 'Welcome'

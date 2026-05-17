@@ -38,7 +38,7 @@ const confirm = () => {
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title text-warning">
+                    <h5 class="modal-title text-danger">
                         Очистка корзины
                     </h5>
 
@@ -61,11 +61,11 @@ const confirm = () => {
                 <div class="modal-footer">
 
                     <BaseButton
-                        variant="warning"
-                        :disabled="processing"
+                        variant="danger"
+                        :disabled="isProcessing"
                         @click="confirm"
                     >
-                        <span v-if="processing">
+                        <span v-if="isProcessing">
                             Очищаем...
                         </span>
 
@@ -76,7 +76,7 @@ const confirm = () => {
 
                     <BaseButton
                         variant="secondary"
-                        :disabled="processing"
+                        :disabled="isProcessing"
                         @click="close"
                     >
                         Отмена

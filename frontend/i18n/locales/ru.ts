@@ -76,7 +76,6 @@ export default {
         newArrivals: 'Новинки',
         priceHint: 'Авторизуйтесь, чтобы увидеть цену',
         quickActions: 'Быстрые действия',
-        stack: 'Laravel 13 + Nuxt 4 + Pinia 3',
         title: 'Главная страница',
         userStatusTitle: 'Статус пользователя',
         welcome: 'Добро пожаловать'

@@ -205,7 +205,7 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
 
                 </div>
 
-                <div v-if="!recentOrders.length" class="alert alert-light">
+                <div v-if="!recentOrders.length" class="alert alert-light border text-center py-4">
                     У вас пока нет заказов
                 </div>
 

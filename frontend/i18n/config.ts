@@ -1,5 +1,8 @@
 export default defineI18nConfig(() => ({
 
-    fallbackLocale: 'ru'
+    legacy: false,
+    locale: 'ru',
+    fallbackLocale: 'ru',
+    warnHtmlMessage: false,
 
 }))

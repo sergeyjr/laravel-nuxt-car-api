@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-import { computed, ref } from 'vue'
+import {computed, ref} from 'vue'
 
-import { useCartStore } from '~/stores/cart'
-import { useDashboardStore } from '~/stores/dashboard'
+import {useCartStore} from '~/stores/cart'
+import {useDashboardStore} from '~/stores/dashboard'
 
 import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -12,9 +12,9 @@ import CartRemoveItemModal from '~/components/modals/CartRemoveItemModal.vue'
 import CartCheckoutModal from '~/components/modals/CartCheckoutModal.vue'
 import CartClearModal from '~/components/modals/CartClearModal.vue'
 
-import { formatPrice } from '~/utils/formatters'
+import {formatPrice} from '~/utils/formatters'
 
-const { t } = useI18n()
+const {t} = useI18n()
 
 const cart = useCartStore()
 const dashboard = useDashboardStore()

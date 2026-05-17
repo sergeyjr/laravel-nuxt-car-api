@@ -39,21 +39,40 @@ const authLoading = ref(false)
 
 const carId = computed(() => Number(route.params.id))
 
-const car = computed(() => carStore.car)
+const car = computed(() =>
+    carStore.getCar(carId.value)
+)
+
+const carLoading = computed(() =>
+    carStore.isCarLoading(carId.value)
+)
 
 const carImage = computed(() =>
     car.value?.photo_url || '/images/default_car.jpg'
 )
 
 /* -----------------------------
+   async data
+------------------------------*/
+
+// await useAsyncData(
+//     `car-${carId.value}`,
+//     () => carStore.fetchCar(carId.value),
+//     {
+//         watch: [carId],
+//         immediate: true,
+//         lazy: false,
+//         deep: false,
+//     }
+// )
+
+/* -----------------------------
    helpers
 ------------------------------*/
 
-// корзина
 const isInCart = (id: number | string) =>
     !!cartStore.items[String(id)]
 
-// загрузка добавления
 const isAdding = (id: number | string) =>
     carStore.isAdding(id)
 
@@ -61,43 +80,41 @@ const isAdding = (id: number | string) =>
    actions
 ------------------------------*/
 
-// открыть модалку логина
 const openAuthModal = (event?: Event) => {
     event?.stopPropagation()
     event?.preventDefault()
     showAuth.value = true
 }
 
-// загрузка авто
 const loadCar = async (id: number) => {
     await carStore.fetchCar(id)
 }
 
-// картинка
 const openImage = () => showImage.value = true
+
 const closeImage = () => showImage.value = false
 
-// назад
 const goBack = () => {
     if (import.meta.client && window.history.length > 1) {
         window.history.back()
-    } else {
-        navigateTo('/cars')
+        return
     }
+    navigateTo('/cars')
 }
 
-// добавить в корзину
 const addToCart = (carItem: Car) =>
     carStore.addToCart(carItem)
 
-// логин из модалки
 const confirmLogin = async (payload: LoginPayload) => {
-    const {email, password} = payload
-
     authLoading.value = true
     try {
-        const ok = await authStore.login(email, password)
-        if (ok) showAuth.value = false
+        const ok = await authStore.login(
+            payload.email,
+            payload.password
+        )
+        if (ok) {
+            showAuth.value = false
+        }
     } finally {
         authLoading.value = false
     }
@@ -107,171 +124,234 @@ const confirmLogin = async (payload: LoginPayload) => {
    lifecycle
 ------------------------------*/
 
-// initial load
-onMounted(() => {
-    loadCar(carId.value)
+onMounted(async () => {
+    loaded.value = false
+    await loadCar(carId.value)
     loaded.value = true
 })
 
-// react to route change
-watch(carId, (newId) => {
-    if (newId) loadCar(newId)
+watch(carId, async (newId, oldId) => {
+    if (!newId || newId === oldId) {
+        return
+    }
+
+    loaded.value = false
+    await loadCar(newId)
+    loaded.value = true
 })
 
 </script>
 
 <template>
+
     <div class="container mt-4">
 
-        <template v-if="carStore.carLoading">
+        <template v-if="carLoading || !loaded">
+
             <div class="alert alert-light mb-4">
                 Загрузка страницы...
             </div>
+
         </template>
 
-        <template v-else>
-            <template v-if="car">
+        <template v-else-if="car">
 
-                <div class="row">
+            <div class="row">
 
-                    <div class="col-12">
-                        <h1 class="mb-4">{{ car.title }} [id: {{ car.id }}]</h1>
-                    </div>
+                <div class="col-12">
+                    <h1 class="mb-4">
+                        {{ car.title }} [id: {{ car.id }}]
+                    </h1>
+                </div>
 
-                    <div class="col-md-5">
+                <div class="col-md-5">
 
-                        <div class="car-image-wrapper">
-                            <img
-                                :src="carImage"
-                                class="img-fluid rounded car-image"
-                                style="max-height:400px;object-fit:contain;"
-                                alt=""
-                                @click="openImage"
-                            >
-                        </div>
+                    <div class="car-image-wrapper">
 
-                        <div v-if="showImage" class="image-modal" @click="closeImage">
-                            <img
-                                :src="carImage"
-                                class="image-full"
-                                @click.stop
-                                alt=""
-                            >
-                        </div>
+                        <img
+                            :src="carImage"
+                            class="img-fluid rounded car-image"
+                            style="max-height:400px;object-fit:contain;"
+                            alt=""
+                            @click="openImage"
+                        >
 
                     </div>
 
-                    <div class="col-md-7">
+                    <div
+                        v-if="showImage"
+                        class="image-modal"
+                        @click="closeImage"
+                    >
 
-                        <div class="table-responsive mb-3">
+                        <img
+                            :src="carImage"
+                            class="image-full"
+                            @click.stop
+                            alt=""
+                        >
 
-                            <table class="table table-sm align-middle mb-0 description-table">
-                                <tbody>
+                    </div>
 
-                                <tr v-if="car.description">
-                                    <td colspan="2"><h5>{{ car.description }}</h5></td>
-                                </tr>
+                </div>
 
-                                <tr v-if="car.options?.brand">
-                                    <td class="text-muted fw-semibold w-50">Бренд</td>
-                                    <td>{{ car.options.brand }}</td>
-                                </tr>
+                <div class="col-md-7">
 
-                                <tr v-if="car.options?.model">
-                                    <td class="text-muted fw-semibold">Модель</td>
-                                    <td>{{ car.options.model }}</td>
-                                </tr>
+                    <div class="table-responsive mb-3">
 
-                                <tr v-if="car.options?.year">
-                                    <td class="text-muted fw-semibold">Год</td>
-                                    <td>{{ car.options.year }}</td>
-                                </tr>
+                        <table class="table table-sm align-middle mb-0 description-table">
 
-                                <tr v-if="car.options?.mileage">
-                                    <td class="text-muted fw-semibold">Пробег</td>
-                                    <td>{{ car.options.mileage }}</td>
-                                </tr>
+                            <tbody>
 
-                                <tr>
-                                    <td class="text-muted fw-semibold">Цена</td>
-                                    <td>
-                                        <p v-if="authStore.user && car.price" class="mb-0">
+                            <tr v-if="car.description">
+                                <td colspan="2">
+                                    <h5>{{ car.description }}</h5>
+                                </td>
+                            </tr>
+
+                            <tr v-if="car.options?.brand">
+                                <td class="text-muted fw-semibold w-50">
+                                    Бренд
+                                </td>
+                                <td>{{ car.options.brand }}</td>
+                            </tr>
+
+                            <tr v-if="car.options?.model">
+                                <td class="text-muted fw-semibold">
+                                    Модель
+                                </td>
+                                <td>{{ car.options.model }}</td>
+                            </tr>
+
+                            <tr v-if="car.options?.year">
+                                <td class="text-muted fw-semibold">
+                                    Год
+                                </td>
+                                <td>{{ car.options.year }}</td>
+                            </tr>
+
+                            <tr v-if="car.options?.mileage">
+                                <td class="text-muted fw-semibold">
+                                    Пробег
+                                </td>
+                                <td>{{ car.options.mileage }}</td>
+                            </tr>
+
+                            <tr>
+
+                                <td class="text-muted fw-semibold">
+                                    Цена
+                                </td>
+
+                                <td>
+
+                                    <p
+                                        v-if="authStore.user && car.price"
+                                        class="mb-0"
+                                    >
+
                                         <span class="fs-5 fw-bold text-success">
                                             {{ formatPrice(car.price) }}
                                         </span>
-                                        </p>
 
-                                        <BaseButton
-                                            v-else
-                                            type="button"
-                                            class="btn btn-light"
-                                            @click.stop.prevent="openAuthModal"
-                                        >
-                                            Авторизуйтесь, чтобы увидеть цену
-                                        </BaseButton>
-                                    </td>
-                                </tr>
+                                    </p>
 
-                                </tbody>
-                            </table>
+                                    <BaseButton
+                                        v-else
+                                        type="button"
+                                        class="btn btn-light"
+                                        @click.stop.prevent="openAuthModal"
+                                    >
+                                        Авторизуйтесь, чтобы увидеть цену
+                                    </BaseButton>
 
-                        </div>
+                                </td>
 
-                        <div v-if="authStore.user">
+                            </tr>
 
-                            <BaseButton
-                                v-if="isInCart(car.id)"
-                                variant="light"
-                                class="w-100"
-                                disabled
-                            >
-                                Товар в корзине
-                            </BaseButton>
+                            </tbody>
 
-                            <BaseButton
-                                v-else
-                                variant="success"
-                                class="w-100"
-                                :disabled="isAdding(car.id)"
-                                @click="addToCart(car)"
-                            >
-                                <span v-if="isAdding(car.id)">Добавляется...</span>
-                                <span v-else>В корзину</span>
-                            </BaseButton>
+                        </table>
 
-                        </div>
+                    </div>
+
+                    <div v-if="authStore.user">
+
+                        <BaseButton
+                            v-if="isInCart(car.id)"
+                            variant="light"
+                            class="w-100"
+                            disabled
+                        >
+                            Товар в корзине
+                        </BaseButton>
+
+                        <BaseButton
+                            v-else
+                            variant="success"
+                            class="w-100"
+                            :disabled="isAdding(car.id)"
+                            @click="addToCart(car)"
+                        >
+
+                            <span v-if="isAdding(car.id)">
+                                Добавляется...
+                            </span>
+
+                            <span v-else>
+                                В корзину
+                            </span>
+
+                        </BaseButton>
 
                     </div>
 
                 </div>
 
-                <hr>
+            </div>
 
-                <div class="d-flex justify-content-between align-items-center">
-                    <BaseButton variant="light" @click="goBack">← Назад</BaseButton>
+            <hr>
 
-                    <NuxtLink to="/cars" class="text-decoration-none">
-                        <BaseButton variant="light">В каталог →</BaseButton>
-                    </NuxtLink>
-                </div>
+            <div class="d-flex justify-content-between align-items-center">
 
-                <LoginModal
-                    v-model:show="showAuth"
-                    :loading="authLoading"
-                    @confirm="confirmLogin"
-                />
+                <BaseButton
+                    variant="light"
+                    @click="goBack"
+                >
+                    ← Назад
+                </BaseButton>
 
-            </template>
+                <NuxtLink
+                    to="/cars"
+                    class="text-decoration-none"
+                >
 
-            <template v-else-if="loaded">
-                <div class="alert alert-light mb-4">
-                    Автомобиль не найден.
-                </div>
-            </template>
+                    <BaseButton variant="light">
+                        В каталог →
+                    </BaseButton>
+
+                </NuxtLink>
+
+            </div>
+
+            <LoginModal
+                v-model:show="showAuth"
+                :loading="authLoading"
+                @confirm="confirmLogin"
+            />
+
+        </template>
+
+        <template v-else>
+
+            <div class="alert alert-light mb-4">
+                Автомобиль не найден.
+            </div>
 
         </template>
 
     </div>
+
 </template>
 
 <style scoped>

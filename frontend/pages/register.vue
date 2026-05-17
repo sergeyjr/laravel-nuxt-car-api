@@ -1,20 +1,32 @@
 <script setup lang="ts">
 
-import { ref, onMounted } from 'vue'
+import {ref, onMounted} from 'vue'
 
-import { useAuthStore } from '~/stores/auth'
+import {useAuthStore} from '~/stores/auth'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
 const { t } = useI18n()
 
+/* -----------------------------
+   store
+------------------------------*/
+
 const authStore = useAuthStore()
+
+/* -----------------------------
+   form state
+------------------------------*/
 
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const password_confirmation = ref('')
+
+/* -----------------------------
+   validation
+------------------------------*/
 
 const validate = () => {
     const errors: Record<string, string> = {}
@@ -39,21 +51,23 @@ const validate = () => {
         errors.password_confirmation = t('auth.passwordMismatch')
     }
 
-    authStore.errors = { ...errors }
+    authStore.errors = {...errors}
 
     return Object.keys(errors).length === 0
 }
 
+/* -----------------------------
+   submit
+------------------------------*/
+
 const submit = async () => {
     if (!validate()) return
-
     const ok = await authStore.register({
         name: name.value,
         email: email.value,
         password: password.value,
         password_confirmation: password_confirmation.value
     })
-
     if (ok) {
         name.value = ''
         email.value = ''
@@ -61,6 +75,10 @@ const submit = async () => {
         password_confirmation.value = ''
     }
 }
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
 
 onMounted(() => {
     authStore.clearErrors()

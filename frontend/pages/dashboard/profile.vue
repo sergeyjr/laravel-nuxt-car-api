@@ -49,12 +49,10 @@ const avatarUrl = computed(() => {
 
 const showDeleteModal = ref(false)
 
-/* profile form */
 const name = ref('')
 const email = ref('')
 const remove_avatar = ref(false)
 
-/* password form */
 const current_password = ref('')
 const password = ref('')
 const password_confirmation = ref('')
@@ -87,14 +85,11 @@ watch(
 
 const validateUpdateProfile = () => {
     profile.resetErrors()
-
     let hasError = false
-
     if (!name.value) {
         profile.errors.name = 'Введите имя'
         hasError = true
     }
-
     return !hasError
 }
 
@@ -104,7 +99,6 @@ const validateUpdateProfile = () => {
 
 const submitUpdateProfile = async () => {
     if (!validateUpdateProfile()) return
-
     await profile.updateProfile({
         name: name.value,
         // email: email.value,
@@ -118,29 +112,23 @@ const submitUpdateProfile = async () => {
 
 const validatePassword = () => {
     profile.resetErrors()
-
     let hasError = false
-
     if (!current_password.value) {
         profile.errors.current_password = 'Введите текущий пароль'
         hasError = true
     }
-
     if (!password.value) {
         profile.errors.password = 'Введите новый пароль'
         hasError = true
     }
-
     if (password.value && password.value.length < 6) {
         profile.errors.password = 'Минимум 6 символов'
         hasError = true
     }
-
     if (password.value !== password_confirmation.value) {
         profile.errors.password_confirmation = 'Пароли не совпадают'
         hasError = true
     }
-
     return !hasError
 }
 
@@ -150,13 +138,11 @@ const validatePassword = () => {
 
 const submitPassword = async () => {
     if (!validatePassword()) return
-
     const ok = await profile.changePassword({
         current_password: current_password.value,
         password: password.value,
         password_confirmation: password_confirmation.value
     })
-
     if (ok) {
         current_password.value = ''
         password.value = ''
@@ -170,7 +156,6 @@ const submitPassword = async () => {
 
 const confirmDeleteAccount = async () => {
     const ok = await profile.deleteAccount()
-
     if (ok) {
         showDeleteModal.value = false
     }
@@ -185,9 +170,12 @@ const confirmDeleteAccount = async () => {
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">Мой профиль</h2>
 
-                <button class="btn btn-outline-secondary" @click="goBack">
+                <BaseButton
+                    variant="outline-secondary"
+                    @click="goBack"
+                >
                     ← В панель управления
-                </button>
+                </BaseButton>
             </div>
 
             <!-- LEFT -->
@@ -368,64 +356,6 @@ const confirmDeleteAccount = async () => {
 
             </div>
 
-        </div>
-    </div>
-
-    <!-- DELETE ACCOUNT MODAL -->
-    <div
-        class="modal fade show d-block"
-        tabindex="-1"
-        v-if="showDeleteModal"
-        style="background: rgba(0,0,0,.6)"
-    >
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        Удаление аккаунта
-                    </h5>
-
-                    <button
-                        type="button"
-                        class="btn-close"
-                        @click="showDeleteModal = false"
-                    ></button>
-                </div>
-
-                <div class="modal-body">
-                    <p class="mb-0">
-                        Вы уверены, что хотите удалить аккаунт?
-                        <br>
-                        Это действие <strong>нельзя отменить</strong>.
-                    </p>
-                </div>
-
-                <div class="modal-footer">
-
-                    <button
-                        class="btn btn-secondary"
-                        @click="showDeleteModal = false"
-                    >
-                        Отмена
-                    </button>
-
-                    <button
-                        class="btn btn-danger"
-                        :disabled="profile.loadingDelete"
-                        @click="confirmDeleteAccount"
-                    >
-                        <span v-if="profile.loadingDelete">
-                            Удаляем...
-                        </span>
-                        <span v-else>
-                            Да, удалить
-                        </span>
-                    </button>
-
-                </div>
-
-            </div>
         </div>
     </div>
 

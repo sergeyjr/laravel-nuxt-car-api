@@ -45,8 +45,10 @@ const swiperOptions = {
     slidesPerView: 3,
     slidesPerGroup: 3,
     spaceBetween: 20,
-    navigation: true,
-    pagination: {clickable: true},
+    navigation: false,
+    pagination: {
+        clickable: true
+    },
     loop: true,
     speed: 600,
     breakpoints: {
@@ -62,10 +64,6 @@ const swiperOptions = {
 
 const carStore = useCarStore()
 
-onMounted(() => {
-    carStore.fetchLatest()
-})
-
 /* -----------------------------
    helpers
 ------------------------------*/
@@ -78,6 +76,14 @@ const onImgError = (e: Event) => {
     target.src = '/images/default_car.jpg'
 }
 
+/* -----------------------------
+   lifecycle
+------------------------------*/
+
+onMounted(() => {
+    carStore.fetchLatest()
+})
+
 </script>
 
 <template>
@@ -87,7 +93,7 @@ const onImgError = (e: Event) => {
 
             <h1 class="display-5 fw-bold">{{ t('home.title') }}</h1>
 
-            <p class="text-muted">{{ t('home.stack') }}</p>
+            <p class="text-muted">Laravel 13 + Nuxt 4 (Nitro 2, Vite 7, Vue 3) + Pinia 3</p>
 
         </div>
 
@@ -256,3 +262,40 @@ const onImgError = (e: Event) => {
 
     </div>
 </template>
+
+<style scoped>
+
+.swiper-custom {
+    padding: 20px 0 40px 0;
+}
+
+.swiper-custom :deep(.swiper-wrapper) {
+    margin: 0;
+}
+
+.swiper-custom :deep(.swiper-slide) {
+    overflow: visible;
+}
+
+.swiper-custom :deep(.swiper-slide) .card {
+    transition: transform .25s ease, box-shadow .25s ease;
+    will-change: transform;
+}
+
+.swiper-custom :deep(.swiper-slide):hover .card {
+    box-shadow: 0 0 8px rgba(0, 0, 0, .18);
+    z-index: 10;
+}
+
+.swiper-custom :deep(.card-img-top) {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    display: block;
+}
+
+.swiper-custom :deep(.swiper-pagination) {
+    bottom: 0 !important;
+}
+
+</style>

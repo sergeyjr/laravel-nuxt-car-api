@@ -10,14 +10,13 @@ class SetLocale
 
     public function handle(Request $request, Closure $next)
     {
-        $locale = $request->segment(1);
+        $locale = $request->header('X-Locale', 'ru');
 
-        if (in_array($locale, ['ru', 'en'])) {
-            app()->setLocale($locale);
-        } else {
-            app()->setLocale('ru');
+        if (!in_array($locale, ['ru', 'en'])) {
+            $locale = 'ru';
         }
 
+        app()->setLocale($locale);
 
         return $next($request);
     }

@@ -37,11 +37,12 @@ export const useCarStore = defineStore('car', {
     state: () => ({
         cars: [] as Car[],
         meta: null as CarsResponse | null,
-        car: null as Car | null,
+        carsById: {} as Record<number, Car>,
+        carLoading: {} as Record<number, boolean>,
         latest: [] as Car[],
         adding: {} as Record<number, boolean>,
         listLoading: false,
-        carLoading: false,
+        //carLoading: false,
         latestLoading: false,
         force: false,
         latestLoaded: false,
@@ -53,8 +54,17 @@ export const useCarStore = defineStore('car', {
     }),
 
     getters: {
+
         isAdding: (state) => (id: number | string) => !!state.adding[Number(id)],
+
         hasPage: (state) => (page: number | string) => !!state.pages[Number(page)],
+
+        getCar: (state) => (id: number | string) =>
+            state.carsById[Number(id)] || null,
+
+        isCarLoading: (state) => (id: number | string) =>
+            !!state.carLoading[Number(id)],
+
     },
 
     actions: {
@@ -120,27 +130,36 @@ export const useCarStore = defineStore('car', {
             }
         },
 
-        async fetchCar(id: number) {
+        async fetchCar(id: number, force = false) {
+
+            id = Number(id)
 
             if (!id) {
-                this.car = null
                 return null
             }
 
-            this.carLoading = true
+            if (this.carsById[id] && !force) {
+                return this.carsById[id]
+            }
+
+            if (this.carLoading[id]) {
+                return this.carsById[id] || null
+            }
+
+            this.carLoading[id] = true
 
             const api = useCarApi()
 
             try {
                 const car = await api.fetchCar(id)
-                this.car = car
+                this.carsById[id] = car
                 return car
             } catch {
-                this.car = null
                 return null
             } finally {
-                this.carLoading = false
+                this.carLoading[id] = false
             }
+
         },
 
         async addToCart(car: Car) {

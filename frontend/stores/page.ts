@@ -12,10 +12,12 @@ export const usePageStore = defineStore('pages', {
     }),
 
     getters: {
+
         current: (state) => {
             if (!state.activeCode) return null
             return state.pages[state.activeCode] || null
         }
+
     },
 
     actions: {

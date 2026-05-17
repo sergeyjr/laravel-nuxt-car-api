@@ -4,6 +4,10 @@ export default defineNuxtPlugin(() => {
 
     const config = useRuntimeConfig()
 
+    const nuxtApp = useNuxtApp()
+
+    const locale = computed(() => nuxtApp.$i18n.locale.value)
+
     const ssrHeaders = import.meta.server
         ? useRequestHeaders(['cookie', 'origin', 'referer'])
         : {}
@@ -17,49 +21,16 @@ export default defineNuxtPlugin(() => {
         credentials: 'include',
 
         headers: {
-            //'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            Accept: 'application/json'
         },
 
         async onRequest({options}) {
 
             const headers = new Headers(options.headers || {})
 
-            if (import.meta.server) {
+            headers.set('X-Locale', locale.value)
 
-                /**
-                 * Почему для SSR + Laravel Sanctum недостаточно только cookie
-                 * Браузер автоматически отправляет:
-                 * - Cookie
-                 * - Origin
-                 * - Referer
-                 * Sanctum через middleware: EnsureFrontendRequestsAreStateful
-                 * определяет, является ли запрос trusted SPA frontend request.
-                 * Внутри Sanctum проверяется: referer ?: origin
-                 * и домен сверяется с: SANCTUM_STATEFUL_DOMAINS
-                 * Только после этого Sanctum включает session auth
-                 * и восстанавливает auth()->user().
-                 * ---
-                 * SSR-запрос делает не браузер, а Nuxt(Node.js): Browser -> Nuxt SSR -> Laravel API
-                 * Node-fetch/ofetch автоматически НЕ отправляют:
-                 * - Origin
-                 * - Referer
-                 * Поэтому запрос только с cookie: { cookie }
-                 * Sanctum считает stateless и auth:sanctum возвращает 401.
-                 * А запрос: { cookie, origin } или: { cookie, referer }
-                 * переводит Sanctum в stateful mode,
-                 * после чего session auth начинает работать.
-                 *
-                 * Внутри middleware: EnsureFrontendRequestsAreStateful есть логика:
-                 * $domain = $request->headers->get('referer') ?: $request->headers->get('origin');
-                 *
-                 * https://laravel.com/docs/13.x/sanctum
-                 * Для аутентификации ваше SPA и API должны использовать один и тот же домен верхнего уровня.
-                 * Однако они могут располагаться на разных поддоменах.
-                 * Кроме того, убедитесь, что вы отправляете заголовок
-                 * Accept: application/json и либо заголовок Referer, либо Origin вместе с вашим запросом.
-                 */
+            if (import.meta.server) {
 
                 if (ssrHeaders.cookie) {
                     headers.set('cookie', ssrHeaders.cookie)
@@ -81,7 +52,9 @@ export default defineNuxtPlugin(() => {
 
                     const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/)
 
-                    const token = match?.[1] ? decodeURIComponent(match[1]) : null
+                    const token = match?.[1]
+                        ? decodeURIComponent(match[1])
+                        : null
 
                     if (token) {
                         headers.set('X-XSRF-TOKEN', token)
@@ -99,7 +72,11 @@ export default defineNuxtPlugin(() => {
 
             const data = response._data
 
-            if (data && typeof data === 'object' && data.success === true) {
+            if (
+                data &&
+                typeof data === 'object' &&
+                data.success === true
+            ) {
                 response._data = data.data
             }
 
@@ -118,17 +95,6 @@ export default defineNuxtPlugin(() => {
             const alert = useAlertStore()
 
             const data = response._data
-
-            //     if (data?.errors) {
-            //         Object.values(data.errors).forEach((arr: any) => {
-            //             if (Array.isArray(arr)) {
-            //                 arr.forEach((msg: string) => {
-            //                     alert.add('warning', msg)
-            //                 })
-            //             }
-            //         })
-            //         return
-            //     }
 
             const message =
                 response.status === 401

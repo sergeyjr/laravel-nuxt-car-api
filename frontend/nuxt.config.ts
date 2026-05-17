@@ -31,12 +31,21 @@ export default defineNuxtConfig({
 
     i18n: {
         defaultLocale: 'ru',
-        // langDir: 'locales/',
-        locales: [
-            {code: 'ru', file: 'ru.ts'},
-            {code: 'en', file: 'en.ts'}
-        ],
         strategy: 'prefix_except_default',
+        locales: [
+            {
+                code: 'ru',
+                file: 'ru.ts',
+                name: 'Русский'
+            },
+            {
+                code: 'en',
+                file: 'en.ts',
+                name: 'English'
+            }
+        ],
+        detectBrowserLanguage: false,
+        vueI18n: './i18n/config.ts'
     },
 
     // Конфигурация окружений

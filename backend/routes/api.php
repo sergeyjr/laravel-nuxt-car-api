@@ -56,8 +56,8 @@ Route::middleware('locale')->group(function () {
     */
 
     Route::get('/cars', [CarController::class, 'list']);
-    Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
     Route::get('/cars/latest', [CarController::class, 'latest']);
+    Route::get('/cars/{id}', [CarController::class, 'show'])->whereNumber('id');
 
     Route::get('/page/{code}', [SiteController::class, 'page']);
 

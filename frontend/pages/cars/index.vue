@@ -55,26 +55,6 @@ const loadCars = async (p: number) => {
     await carStore.fetch(p)
 }
 
-/* initial load (first visit) */
-onMounted(async () => {
-
-    if (carStore.hasPage(page.value)) {
-        return
-    }
-
-    try {
-        initialLoading.value = true
-        await loadCars(page.value)
-    } finally {
-        initialLoading.value = false
-    }
-})
-
-/* pagination change */
-watch(page, async (newPage) => {
-    await loadCars(newPage)
-})
-
 /* -----------------------------
    store bindings
 ------------------------------*/
@@ -83,7 +63,6 @@ const listLoading = computed(() => carStore.listLoading)
 const meta = computed(() => carStore.meta)
 const cars = computed(() => carStore.cars)
 
-/* unified loader */
 const pageLoading = computed(() =>
     initialLoading.value || listLoading.value
 )
@@ -92,34 +71,25 @@ const pageLoading = computed(() =>
    helpers
 ------------------------------*/
 
-// open auth modal
 const openAuthModal = (event?: Event) => {
-
     event?.stopPropagation()
     event?.preventDefault()
-
     Object.keys(authErrors).forEach(k => delete authErrors[k])
-
     showAuth.value = true
 }
 
-// navigation
 const changePage = (newPage: number) =>
     navigateTo({path: '/cars', query: {page: newPage}})
 
-// image
 const getImage = (car: Car) =>
     car.photo_url || '/images/default_car.jpg'
 
-// cart state
 const isInCart = (id: number | string) =>
     !!cartStore.items[String(id)]
 
-// add to cart
 const addToCart = (car: Car) =>
     carStore.addToCart(car)
 
-// adding state
 const isAdding = (id: number | string) =>
     carStore.isAdding(id)
 
@@ -128,40 +98,49 @@ const isAdding = (id: number | string) =>
 ------------------------------*/
 
 const confirmLogin = async (payload: LoginPayload) => {
-
     Object.keys(authErrors).forEach(k => delete authErrors[k])
-
     const {email, password} = payload
-
     if (!email) {
         authErrors.email = t('auth.emailRequired')
     }
-
     if (!password) {
         authErrors.password = t('auth.passwordRequired')
     }
-
     if (Object.keys(authErrors).length) {
         return
     }
-
     authLoading.value = true
-
     try {
-
         const ok = await authStore.login(email, password)
-
         if (ok) {
             showAuth.value = false
             return
         }
-
         Object.assign(authErrors, authStore.errors)
-
     } finally {
         authLoading.value = false
     }
 }
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
+
+onMounted(async () => {
+    if (carStore.hasPage(page.value)) {
+        return
+    }
+    try {
+        initialLoading.value = true
+        await loadCars(page.value)
+    } finally {
+        initialLoading.value = false
+    }
+})
+
+watch(page, async (newPage) => {
+    await loadCars(newPage)
+})
 
 </script>
 

@@ -1,19 +1,31 @@
 <script setup lang="ts">
 
-import { ref, onMounted } from 'vue'
+import {ref, onMounted} from 'vue'
 
-import { useAuthStore } from '~/stores/auth'
-import { navigateTo } from '#app'
+import {useAuthStore} from '~/stores/auth'
+import {navigateTo} from '#app'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
 const { t } = useI18n()
 
+/* -----------------------------
+   store
+------------------------------*/
+
 const authStore = useAuthStore()
+
+/* -----------------------------
+   form state
+------------------------------*/
 
 const email = ref('')
 const password = ref('')
+
+/* -----------------------------
+   validation
+------------------------------*/
 
 const validate = () => {
     const errors: Record<string, string> = {}
@@ -26,10 +38,14 @@ const validate = () => {
         errors.password = t('auth.passwordRequired')
     }
 
-    authStore.errors = { ...errors }
+    authStore.errors = {...errors}
 
     return Object.keys(errors).length === 0
 }
+
+/* -----------------------------
+   submit
+------------------------------*/
 
 const submit = async () => {
     if (!validate()) return
@@ -40,6 +56,10 @@ const submit = async () => {
         return navigateTo('/dashboard')
     }
 }
+
+/* -----------------------------
+   lifecycle
+------------------------------*/
 
 onMounted(() => {
     authStore.clearErrors()
