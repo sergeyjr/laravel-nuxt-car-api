@@ -318,7 +318,7 @@ watch(carId, async (newId, oldId) => {
                     class="text-decoration-none"
                 >
                     <BaseButton variant="light">
-                        {{ t('catalog.title') }}
+                        {{ t('catalog.title') }} →
                     </BaseButton>
                 </NuxtLink>
 

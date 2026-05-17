@@ -211,6 +211,12 @@ export default {
         logout: 'Logout',
     },
 
+    notFound: {
+        description: 'The link may be outdated or the page has been removed.',
+        home: 'Go to homepage',
+        title: 'Page not found',
+    },
+
     order: {
         actions: 'Actions',
         comment: 'Comment',

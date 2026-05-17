@@ -97,7 +97,7 @@ const goBack = () => {
                 variant="outline-secondary"
                 @click="goBack"
             >
-                ← {{ t('common.back') }}
+                ← {{ t('nav.back') }}
             </BaseButton>
         </div>
 

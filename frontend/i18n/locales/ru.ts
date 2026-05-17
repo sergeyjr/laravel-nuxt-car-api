@@ -65,10 +65,11 @@ export default {
         title: 'Каталог',
     },
 
-    notFound: {
-        description: 'Ссылка может быть устаревшей или страница была удалена.',
-        home: 'На главную',
-        title: 'Страница не найдена',
+    common: {
+        back: 'Назад',
+        cancel: 'Отмена',
+        error: 'Ошибка',
+        loading: 'Загружается...',
     },
 
     contact: {
@@ -210,10 +211,10 @@ export default {
         logout: 'Выход',
     },
 
-    motFound: {
-        description: 'The link may be outdated or the page has been removed.',
-        home: 'Go to homepage',
-        title: 'Page not found',
+    notFound: {
+        description: 'Ссылка может быть устаревшей или страница была удалена.',
+        home: 'На главную',
+        title: 'Страница не найдена',
     },
 
     order: {

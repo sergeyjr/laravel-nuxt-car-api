@@ -16,6 +16,31 @@ const appName = config.public.appName
 
 const year = new Date().getFullYear()
 
+/* -----------------------------
+   Scroll To Top
+------------------------------*/
+
+const showScrollTop = ref(false)
+
+const handleScroll = () => {
+    showScrollTop.value = window.scrollY > 300
+}
+
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    })
+}
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', handleScroll)
+})
+
 </script>
 
 <template>
@@ -68,6 +93,17 @@ const year = new Date().getFullYear()
 
         </div>
     </footer>
+
+    <button
+        v-if="showScrollTop"
+        class="scroll-top-btn"
+        type="button"
+        @click="scrollToTop"
+        aria-label="Scroll to top"
+    >
+        ↑
+    </button>
+
 </template>
 
 <style scoped>
@@ -132,6 +168,49 @@ const year = new Date().getFullYear()
     transform: scaleX(1);
     opacity: 1;
     height: 2px;
+}
+
+.scroll-top-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    z-index: 1000;
+}
+
+.scroll-top-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(0, 0, 0, 0.95);
+}
+
+.scroll-top-btn:active {
+    transform: scale(0.95);
+}
+
+.scroll-top-btn {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 </style>

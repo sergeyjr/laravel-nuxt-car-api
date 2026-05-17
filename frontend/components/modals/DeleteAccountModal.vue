@@ -99,7 +99,7 @@ const confirmDelete = () => {
                         :disabled="isProcessing"
                         @click="close"
                     >
-                        {{ t('modals.cancel') }}
+                        {{ t('common.cancel') }}
                     </BaseButton>
 
                 </div>

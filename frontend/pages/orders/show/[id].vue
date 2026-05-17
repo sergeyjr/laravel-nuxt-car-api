@@ -117,7 +117,7 @@ const goBack = () => {
                 class="btn btn-outline-secondary"
                 @click="goBack"
             >
-                ← {{ t('common.back') }}
+                ← {{ t('nav.back') }}
             </button>
         </div>
 
