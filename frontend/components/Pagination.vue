@@ -1,11 +1,27 @@
 <script setup lang="ts">
 
+import {computed} from 'vue'
+
+import {useI18n} from 'vue-i18n'
+
 import BaseButton from '~/components/BaseButton.vue'
 
 type Meta = {
     current_page: number
     last_page: number
 }
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
+
+/* -----------------------------
+   props / emits
+------------------------------*/
 
 const props = defineProps<{
     meta: Meta | null
@@ -15,6 +31,10 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'change', page: number): void
 }>()
+
+/* -----------------------------
+   computed
+------------------------------*/
 
 const pages = computed(() => {
     if (!props.meta) return []
@@ -43,7 +63,7 @@ function change(page: number) {
             :variant="isFirstPage ? 'outline-primary' : 'primary'"
             @click="change(meta!.current_page - 1)"
         >
-            Назад
+            {{ t('pagination.prev') }}
         </BaseButton>
 
         <BaseButton
@@ -61,7 +81,7 @@ function change(page: number) {
             :variant="isLastPage ? 'outline-primary' : 'primary'"
             @click="change(meta!.current_page + 1)"
         >
-            Вперёд
+            {{ t('pagination.next') }}
         </BaseButton>
 
     </div>

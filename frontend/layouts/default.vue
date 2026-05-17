@@ -8,15 +8,11 @@ import AppFooter from '~/components/Footer.vue'
 
 <template>
     <div class="d-flex flex-column min-vh-100">
-
         <Navbar />
         <Alerts />
-
         <main class="flex-grow-1">
             <slot />
         </main>
-
         <AppFooter />
-
     </div>
 </template>

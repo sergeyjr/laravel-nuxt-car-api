@@ -5,6 +5,7 @@ export const useLogout = () => {
 
     const auth = useAuthStore()
     const cart = useCartStore()
+    const localePath = useLocalePath()
 
     const logout = async (routePath: string) => {
 
@@ -22,7 +23,7 @@ export const useLogout = () => {
             routePath.startsWith('/cars/create')
 
         if (shouldRedirect) {
-            await navigateTo('/login')
+            await navigateTo(localePath('/login'))
         }
 
         return true

@@ -22,6 +22,8 @@ import LoginModal from '~/components/modals/LoginModal.vue'
 
 const {t} = useI18n()
 
+const localePath = useLocalePath()
+
 /* -----------------------------
    stores
 ------------------------------*/
@@ -79,7 +81,13 @@ const openAuthModal = (event?: Event) => {
 }
 
 const changePage = (newPage: number) =>
-    navigateTo({path: '/cars', query: {page: newPage}})
+    navigateTo(localePath({
+        path: '/cars',
+        query: {
+            ...route.query,
+            page: newPage
+        }
+    }))
 
 const getImage = (car: Car) =>
     car.photo_url || '/images/default_car.jpg'
@@ -169,7 +177,7 @@ watch(page, async (newPage) => {
                 <div class="card car-card text-center">
 
                     <NuxtLink
-                        :to="`/cars/show/${car.id}`"
+                        :to="localePath(`/cars/show/${car.id}`)"
                         class="text-decoration-none text-dark"
                     >
                         <img

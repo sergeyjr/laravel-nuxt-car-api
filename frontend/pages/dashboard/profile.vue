@@ -1,17 +1,26 @@
 <script setup lang="ts">
 
 import {ref, computed, watch} from 'vue'
+import {useI18n} from 'vue-i18n'
 
 import {useAuthStore} from '~/stores/auth'
 import {useProfileStore} from '~/stores/profile'
 
 import BaseButton from '~/components/BaseButton.vue'
-import BaseCheckbox from "~/components/BaseCheckbox.vue";
-import BaseFileInput from "~/components/BaseFileInput.vue";
+import BaseCheckbox from "~/components/BaseCheckbox.vue"
+import BaseFileInput from "~/components/BaseFileInput.vue"
 import BaseInput from '~/components/BaseInput.vue'
 import DeleteAccountModal from '~/components/modals/DeleteAccountModal.vue'
 
 import {formatDate} from '~/utils/formatters'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    store
@@ -58,7 +67,7 @@ const password = ref('')
 const password_confirmation = ref('')
 
 const goBack = () => {
-    navigateTo('/dashboard')
+    navigateTo(localePath('/dashboard'))
 }
 
 /* -----------------------------
@@ -85,11 +94,14 @@ watch(
 
 const validateUpdateProfile = () => {
     profile.resetErrors()
+
     let hasError = false
+
     if (!name.value) {
-        profile.errors.name = 'Введите имя'
+        profile.errors.name = t('profile.nameRequired')
         hasError = true
     }
+
     return !hasError
 }
 
@@ -99,6 +111,7 @@ const validateUpdateProfile = () => {
 
 const submitUpdateProfile = async () => {
     if (!validateUpdateProfile()) return
+
     await profile.updateProfile({
         name: name.value,
         // email: email.value,
@@ -112,23 +125,29 @@ const submitUpdateProfile = async () => {
 
 const validatePassword = () => {
     profile.resetErrors()
+
     let hasError = false
+
     if (!current_password.value) {
-        profile.errors.current_password = 'Введите текущий пароль'
+        profile.errors.current_password = t('profile.currentPasswordRequired')
         hasError = true
     }
+
     if (!password.value) {
-        profile.errors.password = 'Введите новый пароль'
+        profile.errors.password = t('profile.passwordRequired')
         hasError = true
     }
+
     if (password.value && password.value.length < 6) {
-        profile.errors.password = 'Минимум 6 символов'
+        profile.errors.password = t('profile.passwordMin')
         hasError = true
     }
+
     if (password.value !== password_confirmation.value) {
-        profile.errors.password_confirmation = 'Пароли не совпадают'
+        profile.errors.password_confirmation = t('profile.passwordMismatch')
         hasError = true
     }
+
     return !hasError
 }
 
@@ -138,11 +157,13 @@ const validatePassword = () => {
 
 const submitPassword = async () => {
     if (!validatePassword()) return
+
     const ok = await profile.changePassword({
         current_password: current_password.value,
         password: password.value,
         password_confirmation: password_confirmation.value
     })
+
     if (ok) {
         current_password.value = ''
         password.value = ''
@@ -156,6 +177,7 @@ const submitPassword = async () => {
 
 const confirmDeleteAccount = async () => {
     const ok = await profile.deleteAccount()
+
     if (ok) {
         showDeleteModal.value = false
     }
@@ -168,13 +190,13 @@ const confirmDeleteAccount = async () => {
         <div class="row">
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">Мой профиль</h2>
+                <h2 class="mb-0">{{ t('profile.title') }}</h2>
 
                 <BaseButton
                     variant="outline-secondary"
                     @click="goBack"
                 >
-                    ← В панель управления
+                    ← {{ t('profile.backToDashboard') }}
                 </BaseButton>
             </div>
 
@@ -198,7 +220,7 @@ const confirmDeleteAccount = async () => {
                         <p class="text-muted">{{ user?.email }}</p>
 
                         <small class="text-muted">
-                            Создан: {{ formatDate(user?.created_at) }}
+                            {{ t('profile.createdAt') }}: {{ formatDate(user?.created_at) }}
                         </small>
 
                     </div>
@@ -225,7 +247,7 @@ const confirmDeleteAccount = async () => {
                     :disabled="profile.loadingAll"
                     @click="showDeleteModal = true"
                 >
-                    Удалить аккаунт
+                    {{ t('profile.deleteAccount') }}
                 </BaseButton>
 
             </div>
@@ -237,7 +259,7 @@ const confirmDeleteAccount = async () => {
                 <div class="card mb-3">
 
                     <div class="card-header">
-                        Редактирование профиля
+                        {{ t('profile.editTitle') }}
                     </div>
 
                     <div class="card-body">
@@ -250,7 +272,7 @@ const confirmDeleteAccount = async () => {
 
                             <BaseInput
                                 v-model="name"
-                                label="Имя"
+                                :label="t('profile.name')"
                                 type="text"
                                 required
                                 :error="profile.errors.name"
@@ -265,13 +287,12 @@ const confirmDeleteAccount = async () => {
                             />
 
                             <small class="text-muted d-block mt-1 mb-3">
-                                Email нельзя изменить самостоятельно.
-                                Для смены email отправьте запрос в поддержку:
+                                {{ t('profile.emailHint') }}
                                 <a href="mailto:admin@laravel.local">admin@laravel.local</a>
                             </small>
 
                             <BaseFileInput
-                                label="Аватар"
+                                :label="t('profile.avatar')"
                                 :error="profile.errors.avatar"
                                 :disabled="profile.loadingAll"
                                 @change="profile.onFile"
@@ -280,7 +301,7 @@ const confirmDeleteAccount = async () => {
                             <BaseCheckbox
                                 id="remove-avatar"
                                 v-model="remove_avatar"
-                                label="Удалить аватар"
+                                :label="t('profile.removeAvatar')"
                                 :disabled="profile.loadingAll"
                             />
 
@@ -291,9 +312,9 @@ const confirmDeleteAccount = async () => {
                                 :disabled="profile.loadingAll"
                             >
                                 <template #loading>
-                                    Сохраняем...
+                                    {{ t('profile.saving') }}
                                 </template>
-                                Сохранить
+                                {{ t('profile.save') }}
                             </BaseButton>
 
                         </form>
@@ -302,7 +323,7 @@ const confirmDeleteAccount = async () => {
 
                 <!-- PASSWORD -->
                 <div class="card mb-3">
-                    <div class="card-header">Смена пароля</div>
+                    <div class="card-header">{{ t('profile.passwordTitle') }}</div>
 
                     <div class="card-body">
 
@@ -314,7 +335,7 @@ const confirmDeleteAccount = async () => {
 
                             <BaseInput
                                 v-model="current_password"
-                                label="Текущий пароль"
+                                :label="t('profile.currentPassword')"
                                 type="password"
                                 required
                                 :error="profile.errors.current_password"
@@ -322,7 +343,7 @@ const confirmDeleteAccount = async () => {
 
                             <BaseInput
                                 v-model="password"
-                                label="Новый пароль"
+                                :label="t('profile.newPassword')"
                                 type="password"
                                 required
                                 :error="profile.errors.password"
@@ -330,7 +351,7 @@ const confirmDeleteAccount = async () => {
 
                             <BaseInput
                                 v-model="password_confirmation"
-                                label="Подтверждение"
+                                :label="t('profile.confirmPassword')"
                                 type="password"
                                 required
                                 :error="profile.errors.password_confirmation"
@@ -344,9 +365,9 @@ const confirmDeleteAccount = async () => {
                                 :disabled="profile.loadingAll"
                             >
                                 <template #loading>
-                                    Обновляем...
+                                    {{ t('profile.updating') }}
                                 </template>
-                                Обновить пароль
+                                {{ t('profile.updatePassword') }}
                             </BaseButton>
 
                         </form>

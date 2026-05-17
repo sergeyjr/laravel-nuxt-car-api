@@ -1,5 +1,15 @@
 <script setup lang="ts">
 
+import {useI18n} from 'vue-i18n'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
+
 const props = defineProps<{
     error: {
         statusCode?: number
@@ -19,19 +29,19 @@ const is404 = computed(() => props.error?.statusCode === 404)
         </h1>
 
         <h3 class="mb-3">
-            {{ is404 ? 'Страница не найдена' : 'Ошибка' }}
+            {{ is404 ? t('notFound.title') : t('common.error') }}
         </h3>
 
         <p class="text-muted mb-4">
             {{
                 is404
-                    ? 'Возможно, ссылка устарела или страница была удалена.'
+                    ? t('notFound.description')
                     : props.error?.statusMessage
             }}
         </p>
 
-        <NuxtLink to="/" class="btn btn-primary">
-            На главную
+        <NuxtLink :to="localePath('/')" class="btn btn-primary">
+            {{ t('notFound.home') }}
         </NuxtLink>
 
     </div>

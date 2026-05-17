@@ -16,7 +16,25 @@ export default {
         register: 'Зарегистрироваться',
         registerLink: 'Зарегистрироваться',
         registerTitle: 'Регистрация',
-        registering: 'Регистрация...'
+        registering: 'Регистрация...',
+    },
+
+    car: {
+        body: 'Кузов',
+        brand: 'Бренд',
+        contacts: 'Контакты',
+        createTitle: 'Создание автомобиля',
+        description: 'Описание',
+        generate: 'Сгенерировать',
+        generating: 'Получаем данные...',
+        mileage: 'Пробег',
+        model: 'Модель',
+        photo: 'Фото',
+        price: 'Цена',
+        sending: 'Отправляем...',
+        submit: 'Отправить',
+        title: 'Заголовок',
+        year: 'Год',
     },
 
     cart: {
@@ -32,7 +50,7 @@ export default {
         loading: 'Загрузка корзины...',
         perItem: 'шт',
         title: 'Корзина',
-        total: 'Итого'
+        total: 'Итого',
     },
 
     catalog: {
@@ -44,7 +62,13 @@ export default {
         of: 'из',
         page: 'Страница',
         shown: 'Показано',
-        title: 'Каталог'
+        title: 'Каталог',
+    },
+
+    notFound: {
+        description: 'Ссылка может быть устаревшей или страница была удалена.',
+        home: 'На главную',
+        title: 'Страница не найдена',
     },
 
     contact: {
@@ -55,11 +79,46 @@ export default {
         send: 'Отправить сообщение',
         sending: 'Отправляем...',
         subject: 'Тема',
-        title: 'Контакты'
+        title: 'Контакты',
+    },
+
+    dashboard: {
+        cart: {
+            empty: 'Корзина пустая',
+            items: 'Товаров',
+            total: 'Стоимость',
+            open: 'Перейти в корзину',
+        },
+        catalog: {
+            title: 'Каталог',
+            totalCars: 'Машины всего',
+            myCars: 'Мои машины',
+            addCar: 'Добавить авто',
+            goToCatalog: 'Перейти в каталог',
+        },
+        orders: {
+            title: 'Заказы',
+            all: 'Посмотреть все',
+            total: 'Всего заказов',
+            empty: 'У вас пока нет заказов',
+            date: 'Дата и время',
+            status: 'Статус',
+            amount: 'Сумма',
+            action: 'Действие',
+            open: 'Открыть',
+        },
+        profile: {
+            title: 'Мой профиль',
+            welcome: 'Добро пожаловать,',
+            guest: 'пользователь',
+            email: 'Email',
+            button: 'Мой профиль',
+        },
+        title: 'Панель управления',
     },
 
     footer: {
-        allRightsReserved: 'Все права защищены.'
+        allRightsReserved: 'Все права защищены.',
     },
 
     home: {
@@ -68,7 +127,7 @@ export default {
             dashboard: 'Личный кабинет',
             login: 'Войти',
             profile: 'Профиль',
-            register: 'Регистрация'
+            register: 'Регистрация',
         },
         guest: 'Гость',
         loading: 'Загрузка новинок...',
@@ -78,23 +137,158 @@ export default {
         quickActions: 'Быстрые действия',
         title: 'Главная страница',
         userStatusTitle: 'Статус пользователя',
-        welcome: 'Добро пожаловать'
+        welcome: 'Добро пожаловать',
+    },
+
+    modals: {
+        auth: {
+            email: 'Email',
+            login: 'Войти',
+            loginTitle: 'Вход',
+            loggingIn: 'Входим...',
+            password: 'Пароль'
+        },
+        cartClear: {
+            clearing: 'Очищаем...',
+            confirm: 'Очистить',
+            textLine1: 'Очистить всю корзину?',
+            textLine2: 'Все товары будут удалены без возможности восстановления.',
+            title: 'Очистка корзины'
+        },
+        cartItemDelete: {
+            confirm: 'Удалить',
+            deleting: 'Удаляем...',
+            textLine1: 'Удалить товар из корзины?',
+            textLine2: 'Действие можно отменить только вручную.',
+            title: 'Удаление товара'
+        },
+        checkout: {
+            confirm: 'Подтвердить отправку заказа?',
+            confirmButton: 'Подтвердить',
+            sending: 'Отправка...',
+            title: 'Оформление заказа',
+            warning: 'После отправки корзина будет очищена.',
+        },
+        deleteAccount: {
+            confirm: 'Вы уверены, что хотите удалить аккаунт?',
+            danger: 'Это действие нельзя отменить.',
+            delete: 'Удалить',
+            deleting: 'Удаляем...',
+            title: 'Удаление аккаунта',
+        },
+        logout: {
+            confirm: 'Выйти',
+            loggingOut: 'Выходим...',
+            text: 'Вы уверены, что хотите выйти?',
+            title: 'Выход из аккаунта',
+        },
+        orderCheckout: {
+            confirm: 'Подтвердить',
+            confirming: 'Отправка...',
+            textLine1: 'Подтвердить отправку заказа?',
+            textLine2: 'После отправки корзина будет очищена.',
+            title: 'Оформление заказа'
+        },
+        userDelete: {
+            confirm: 'Удалить',
+            deleting: 'Удаляем...',
+            textLine1: 'Вы уверены, что хотите удалить аккаунт?',
+            textLine2: 'Это действие нельзя отменить.',
+            title: 'Удаление аккаунта'
+        },
     },
 
     nav: {
         about: 'О проекте',
+        back: 'Назад',
         cart: 'Корзина',
         catalog: 'Каталог',
         contacts: 'Контакты',
         dashboard: 'Кабинет',
         info: 'Инфо',
         login: 'Вход',
-        logout: 'Выход'
+        logout: 'Выход',
+    },
+
+    motFound: {
+        description: 'The link may be outdated or the page has been removed.',
+        home: 'Go to homepage',
+        title: 'Page not found',
+    },
+
+    order: {
+        actions: 'Действия',
+        comment: 'Комментарий',
+        continueShopping: 'Продолжить покупки',
+        dateTime: 'Дата и время',
+        emptyList: 'У вас пока нет заказов',
+        itemFallback: 'Товар',
+        items: 'Товаров',
+        loading: 'Загрузка заказа...',
+        loadingList: 'Страница загружается...',
+        myOrders: 'Мои заказы',
+        myOrdersTitle: 'Мои заказы',
+        number: 'Номер',
+        open: 'Открыть',
+        status: 'Статус',
+        successSubtitle: 'Мы начали обработку заказа',
+        successTitle: 'Заказ успешно оформлен',
+        total: 'Сумма',
+    },
+
+    orderDetail: {
+        allOrders: 'Все заказы',
+        backToOrders: 'Вернуться к заказам',
+        comment: 'Комментарий',
+        date: 'Дата',
+        itemsCount: 'Позиций',
+        loading: 'Загрузка заказа...',
+        notFoundSubtitle: 'Возможно, он был удалён или у вас нет доступа',
+        notFoundTitle: 'Заказ не найден',
+        perItem: 'шт',
+        price: 'Цена',
+        qty: 'Кол-во',
+        status: 'Статус',
+        sum: 'Сумма',
+        title: 'Заказ #{id}',
+        total: 'Итого',
     },
 
     page: {
         loading: 'Загрузка страницы...',
-        notFound: 'Страница не найдена.'
-    }
+        notFound: 'Страница не найдена.',
+    },
+
+    pagination: {
+        next: 'Вперёд',
+        prev: 'Назад',
+    },
+
+    profile: {
+        avatar: 'Аватар',
+        backToDashboard: '← В панель управления',
+        confirmPassword: 'Подтверждение',
+        createdAt: 'Создан',
+        currentPassword: 'Текущий пароль',
+        deleteAccount: 'Удалить аккаунт',
+        editTitle: 'Редактирование профиля',
+        emailHint: 'Email нельзя изменить самостоятельно. Для смены email отправьте запрос в поддержку:',
+        errors: {
+            nameRequired: 'Введите имя',
+            currentPasswordRequired: 'Введите текущий пароль',
+            passwordRequired: 'Введите новый пароль',
+            passwordMin: 'Минимум 6 символов',
+            passwordMismatch: 'Пароли не совпадают',
+        },
+        name: 'Имя',
+        newPassword: 'Новый пароль',
+        passwordTitle: 'Смена пароля',
+        removeAvatar: 'Удалить аватар',
+        save: 'Сохранить',
+        saving: 'Сохраняем...',
+        title: 'Мой профиль',
+        updatePassword: 'Обновить пароль',
+        updating: 'Обновляем...',
+    },
 
 }

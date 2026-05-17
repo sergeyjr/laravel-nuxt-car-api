@@ -1,9 +1,14 @@
 <script setup lang="ts">
 
 import {ref, watch, computed} from 'vue'
+import {useI18n} from 'vue-i18n'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 const props = defineProps<{
     show: boolean
@@ -31,7 +36,6 @@ const close = () => {
 }
 
 const submit = () => {
-
     emit('confirm', {
         email: email.value,
         password: password.value,
@@ -60,7 +64,7 @@ watch(() => props.show, (val) => {
 
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        Вход
+                        {{ t('modals.auth.loginTitle') }}
                     </h5>
 
                     <BaseButton
@@ -86,7 +90,7 @@ watch(() => props.show, (val) => {
                         <BaseInput
                             v-model="email"
                             type="email"
-                            label="Email"
+                            :label="t('modals.auth.email')"
                             required
                             :disabled="isProcessing"
                             :error="errors?.email"
@@ -95,7 +99,7 @@ watch(() => props.show, (val) => {
                         <BaseInput
                             v-model="password"
                             type="password"
-                            label="Пароль"
+                            :label="t('modals.auth.password')"
                             required
                             :disabled="isProcessing"
                             :error="errors?.password"
@@ -107,9 +111,9 @@ watch(() => props.show, (val) => {
                             :loading="isProcessing"
                         >
                             <template #loading>
-                                Входим...
+                                {{ t('modals.auth.loggingIn') }}
                             </template>
-                            Войти
+                            {{ t('modals.auth.login') }}
                         </BaseButton>
 
                     </form>

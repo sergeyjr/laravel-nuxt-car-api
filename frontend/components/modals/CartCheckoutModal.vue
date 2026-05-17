@@ -2,7 +2,17 @@
 
 import {computed} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 import {useCartStore} from '~/stores/cart'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 defineProps<{
     show: boolean
@@ -48,7 +58,7 @@ const confirmOrder = () => {
 
                 <div class="modal-header">
                     <h5 class="modal-title text-success">
-                        Оформление заказа
+                        {{ t('modals.checkout.title') }}
                     </h5>
 
                     <BaseButton
@@ -62,8 +72,9 @@ const confirmOrder = () => {
 
                 <div class="modal-body">
                     <p class="mb-0">
-                        Подтвердить отправку заказа?<br>
-                        После отправки корзина будет очищена.
+                        {{ t('modals.checkout.confirm') }}
+                        <br>
+                        {{ t('modals.checkout.warning') }}
                     </p>
                 </div>
 
@@ -75,10 +86,10 @@ const confirmOrder = () => {
                         @click="confirmOrder"
                     >
                         <span v-if="isProcessing">
-                            Отправка...
+                            {{ t('modals.checkout.sending') }}
                         </span>
                         <span v-else>
-                            Подтвердить
+                            {{ t('modals.checkout.confirmButton') }}
                         </span>
                     </BaseButton>
 
@@ -87,7 +98,7 @@ const confirmOrder = () => {
                         :disabled="isProcessing"
                         @click="close"
                     >
-                        Отмена
+                        {{ t('common.cancel') }}
                     </BaseButton>
 
                 </div>

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
+import {useI18n} from 'vue-i18n'
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    props
@@ -53,7 +58,7 @@ const confirmLogout = () => {
 
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        Выход из аккаунта
+                        {{ t('modals.logout.title') }}
                     </h5>
 
                     <BaseButton
@@ -67,7 +72,7 @@ const confirmLogout = () => {
 
                 <div class="modal-body">
                     <p class="mb-0">
-                        Вы уверены, что хотите выйти?
+                        {{ t('modals.logout.text') }}
                     </p>
                 </div>
 
@@ -79,10 +84,10 @@ const confirmLogout = () => {
                         @click="confirmLogout"
                     >
                         <span v-if="isProcessing">
-                            Выходим...
+                            {{ t('modals.logout.loggingOut') }}
                         </span>
                         <span v-else>
-                            Выйти
+                            {{ t('modals.logout.confirm') }}
                         </span>
                     </BaseButton>
 
@@ -91,7 +96,7 @@ const confirmLogout = () => {
                         :disabled="isProcessing"
                         @click="close"
                     >
-                        Отмена
+                        {{ t('common.cancel') }}
                     </BaseButton>
 
                 </div>

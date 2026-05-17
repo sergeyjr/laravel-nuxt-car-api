@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+import {useI18n} from 'vue-i18n'
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
+
 const props = defineProps<{
     show: boolean
     isProcessing?: boolean
@@ -39,7 +45,7 @@ const confirm = () => {
 
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
-                        Очистка корзины
+                        {{ t('modals.cartClear.title') }}
                     </h5>
 
                     <BaseButton
@@ -53,8 +59,8 @@ const confirm = () => {
 
                 <div class="modal-body">
                     <p class="mb-0">
-                        Очистить всю корзину?<br>
-                        Все товары будут удалены без возможности восстановления.
+                        {{ t('modals.cartClear.textLine1') }}<br>
+                        {{ t('modals.cartClear.textLine2') }}
                     </p>
                 </div>
 
@@ -66,11 +72,11 @@ const confirm = () => {
                         @click="confirm"
                     >
                         <span v-if="isProcessing">
-                            Очищаем...
+                            {{ t('modals.cartClear.clearing') }}
                         </span>
 
                         <span v-else>
-                            Очистить
+                            {{ t('modals.cartClear.confirm') }}
                         </span>
                     </BaseButton>
 
@@ -79,7 +85,7 @@ const confirm = () => {
                         :disabled="isProcessing"
                         @click="close"
                     >
-                        Отмена
+                        {{ t('common.cancel') }}
                     </BaseButton>
 
                 </div>

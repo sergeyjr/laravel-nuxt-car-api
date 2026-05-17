@@ -14,6 +14,7 @@ export default defineNuxtRouteMiddleware((to) => {
     const auth = useAuthStore()
     const {requiresAuth} = useProtected()
     const needsAuth = requiresAuth(to.path)
+    const localePath = useLocalePath()
 
     if (!auth.initialized) {
         return
@@ -27,7 +28,7 @@ export default defineNuxtRouteMiddleware((to) => {
     }
 
     if (!auth.isAuth) {
-        return navigateTo('/login', {replace: true})
+        return navigateTo(localePath('/login'), {replace: true})
     }
 
 })

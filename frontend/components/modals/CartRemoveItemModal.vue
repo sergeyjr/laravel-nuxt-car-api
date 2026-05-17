@@ -1,5 +1,12 @@
 <script setup lang="ts">
 
+import {computed} from 'vue'
+import {useI18n} from 'vue-i18n'
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
+
 const props = defineProps<{
     show: boolean
     isProcessing?: boolean
@@ -39,7 +46,7 @@ const confirm = () => {
 
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
-                        Удаление товара
+                        {{ t('modals.cartItemDelete.title') }}
                     </h5>
 
                     <BaseButton
@@ -53,8 +60,8 @@ const confirm = () => {
 
                 <div class="modal-body">
                     <p class="mb-0">
-                        Удалить товар из корзины?<br>
-                        Действие можно отменить только вручную.
+                        {{ t('modals.cartItemDelete.textLine1') }}<br>
+                        {{ t('modals.cartItemDelete.textLine2') }}
                     </p>
                 </div>
 
@@ -62,24 +69,24 @@ const confirm = () => {
 
                     <BaseButton
                         variant="danger"
-                        :disabled="processing"
+                        :disabled="props.isProcessing"
                         @click="confirm"
                     >
-                        <span v-if="processing">
-                            Удаляем...
+                        <span v-if="props.isProcessing">
+                            {{ t('modals.cartItemDelete.deleting') }}
                         </span>
 
                         <span v-else>
-                            Удалить
+                            {{ t('modals.cartItemDelete.confirm') }}
                         </span>
                     </BaseButton>
 
                     <BaseButton
                         variant="secondary"
-                        :disabled="processing"
+                        :disabled="props.isProcessing"
                         @click="close"
                     >
-                        Отмена
+                        {{ t('common.cancel') }}
                     </BaseButton>
 
                 </div>

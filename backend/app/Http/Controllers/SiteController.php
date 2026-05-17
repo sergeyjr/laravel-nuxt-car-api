@@ -103,7 +103,11 @@ class SiteController extends Controller
      */
     protected function renderMarkdown(string $content): string
     {
-        $content = preg_replace('#\./frontend/public/#', '/', $content);
+        // Замена frontend/public/images/screenshots/ на images/screenshots/
+        $pattern = '#frontend/public(/images/screenshots/[^)\s]+)#';
+        $replacement = '$1';
+        $content = preg_replace($pattern, $replacement, $content);
+
         $content = str_replace('\\', '/', $content);
 
         $html = Str::markdown($content);

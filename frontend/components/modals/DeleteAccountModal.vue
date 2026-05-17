@@ -1,8 +1,17 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
+import {useI18n} from 'vue-i18n'
 
 import BaseButton from '~/components/BaseButton.vue'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 const props = defineProps<{
     show: boolean
@@ -47,7 +56,7 @@ const confirmDelete = () => {
 
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
-                        Удаление аккаунта
+                        {{ t('modals.deleteAccount.title') }}
                     </h5>
 
                     <BaseButton
@@ -62,8 +71,9 @@ const confirmDelete = () => {
 
                 <div class="modal-body">
                     <p class="mb-0">
-                        Вы уверены, что хотите удалить аккаунт?<br>
-                        Это действие <strong>нельзя отменить</strong>.
+                        {{ t('modals.deleteAccount.confirm') }}
+                        <br>
+                        {{ t('modals.deleteAccount.danger') }}
                     </p>
                 </div>
 
@@ -76,10 +86,10 @@ const confirmDelete = () => {
                         @click="confirmDelete"
                     >
                         <span v-if="isProcessing">
-                            Удаляем...
+                            {{ t('modals.deleteAccount.deleting') }}
                         </span>
                         <span v-else>
-                            Удалить
+                            {{ t('modals.deleteAccount.delete') }}
                         </span>
                     </BaseButton>
 
@@ -89,7 +99,7 @@ const confirmDelete = () => {
                         :disabled="isProcessing"
                         @click="close"
                     >
-                        Отмена
+                        {{ t('modals.cancel') }}
                     </BaseButton>
 
                 </div>

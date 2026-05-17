@@ -2,13 +2,20 @@
 
 import {ref, onMounted} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 import {useAuthStore} from '~/stores/auth'
-import {navigateTo} from '#app'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
-const { t } = useI18n()
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    store
@@ -53,7 +60,7 @@ const submit = async () => {
     const ok = await authStore.login(email.value, password.value)
 
     if (ok) {
-        return navigateTo('/dashboard')
+        return navigateTo(('/dashboard'))
     }
 }
 
@@ -109,7 +116,7 @@ onMounted(() => {
                     </BaseButton>
 
                     <p class="text-center mt-3">
-                        <NuxtLink to="/register">
+                        <NuxtLink :to="localePath('/register')">
                             {{ t('auth.registerLink') }}
                         </NuxtLink>
                     </p>

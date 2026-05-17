@@ -1,15 +1,17 @@
 export default defineNuxtPlugin(async () => {
 
     const auth = useAuthStore()
-
     const route = useRoute()
+    const localePath = useLocalePath()
 
     if (!auth.initialized) {
         await auth.initAuth()
     }
 
-    if (auth.isAuth && route.path === '/login') {
-        await navigateTo('/dashboard', {replace: true})
+    const loginPath = localePath('/login')
+
+    if (auth.isAuth && route.path === loginPath) {
+        await navigateTo(localePath('/dashboard'), { replace: true })
     }
 
 })

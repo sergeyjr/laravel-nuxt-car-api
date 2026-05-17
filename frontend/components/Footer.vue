@@ -1,31 +1,20 @@
 <script setup lang="ts">
 
-import {useRoute} from 'vue-router'
+import {useI18n} from 'vue-i18n'
 
-const route = useRoute()
+/* -----------------------------
+   i18n
+------------------------------*/
 
-const isActive = (path: string) => {
-    if (path === '/') {
-        return route.path === '/'
-    }
+const {t} = useI18n()
 
-    return route.path === path || route.path.startsWith(path + '/')
-}
+const localePath = useLocalePath()
 
 const config = useRuntimeConfig()
 
 const appName = config.public.appName
 
 const year = new Date().getFullYear()
-
-const {t} = useI18n()
-
-const publicLinks = computed(() => [
-    {to: '/cars', label: t('nav.catalog')},
-    {to: '/contact', label: t('nav.contacts')},
-    {to: '/page/about', label: t('nav.about')},
-    {to: '/page/info', label: t('nav.info')}
-])
 
 </script>
 
@@ -34,19 +23,45 @@ const publicLinks = computed(() => [
         <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
 
             <div class="text-muted small">
-                © {{ year }} {{ appName }}. {{ t('footer.allRightsReserved') }}
+                &copy; {{ year }} {{ appName }}. {{ t('footer.allRightsReserved') }}
             </div>
 
             <div class="d-flex gap-3 mt-2 mt-md-0">
 
                 <NuxtLink
-                    v-for="link in publicLinks"
-                    :key="link.to"
-                    :to="link.to"
+                    :to="localePath('/cars')"
                     class="footer-link"
-                    :class="{ active: isActive(link.to) }"
+                    active-class="active"
+                    exact-active-class="active"
                 >
-                    {{ link.label }}
+                    {{ t('nav.catalog') }}
+                </NuxtLink>
+
+                <NuxtLink
+                    :to="localePath('/contact')"
+                    class="footer-link"
+                    active-class="active"
+                    exact-active-class="active"
+                >
+                    {{ t('nav.contacts') }}
+                </NuxtLink>
+
+                <NuxtLink
+                    :to="localePath('/page/about')"
+                    class="footer-link"
+                    active-class="active"
+                    exact-active-class="active"
+                >
+                    {{ t('nav.about') }}
+                </NuxtLink>
+
+                <NuxtLink
+                    :to="localePath('/page/info')"
+                    class="footer-link"
+                    active-class="active"
+                    exact-active-class="active"
+                >
+                    {{ t('nav.info') }}
                 </NuxtLink>
 
             </div>
@@ -62,14 +77,61 @@ const publicLinks = computed(() => [
 }
 
 .footer-link {
+    position: relative;
     font-size: 14px;
     color: rgba(0, 0, 0, 0.6);
     text-decoration: none;
-    transition: color 0.15s ease;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .footer-link:hover {
-    color: rgba(0, 0, 0, 0.9);
+    color: rgba(0, 0, 0, 0.85);
+    /* transform: translateY(-1px); */
+}
+
+.footer-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+    opacity: 0.6;
+}
+
+.footer-link:hover::after {
+    transform: scaleX(1);
+}
+
+.footer-link.active {
+    color: #000;
+    font-weight: 500;
+    transform: translateY(-1px);
+}
+
+.footer-link.active::after {
+    transform: scaleX(1);
+    opacity: 1;
+    height: 2px;
+}
+
+.footer-link.active {
+    text-shadow: 0 0 0.5px rgba(0,0,0,0.25);
+}
+
+.footer-link:focus-visible {
+    outline: none;
+    color: #000;
+}
+
+.footer-link:focus-visible::after {
+    transform: scaleX(1);
+    opacity: 1;
+    height: 2px;
 }
 
 </style>

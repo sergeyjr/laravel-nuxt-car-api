@@ -1,23 +1,28 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
+import {useI18n} from 'vue-i18n'
 
 import {useRoute} from 'vue-router'
-
 import {useOrderStore} from '~/stores/order'
-
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
 import {formatPrice} from "~/utils/formatters";
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    stores
 ------------------------------*/
 
 const orderStore = useOrderStore()
-
 const {getLabel, getClass} = useOrderStatus()
-
 const route = useRoute()
 
 /* -----------------------------
@@ -38,7 +43,7 @@ const orderId = computed(() => {
 
 await callOnce(async () => {
     if (!orderId.value) {
-        return navigateTo('/')
+        return navigateTo(localePath('/'))
     }
 
     try {
@@ -73,18 +78,18 @@ const order = computed(() => orderStore.currentOrder)
                     </div>
 
                     <h3 class="fw-bold mb-2">
-                        Заказ успешно оформлен
+                        {{ t('order.successTitle') }}
                     </h3>
 
                     <p class="text-muted mb-0">
-                        Мы начали обработку заказа
+                        {{ t('order.successSubtitle') }}
                     </p>
 
                 </div>
 
                 <!-- LOADING -->
                 <div v-if="!order" class="text-center text-muted py-5">
-                    Загрузка заказа...
+                    {{ t('order.loading') }}
                 </div>
 
                 <!-- CONTENT -->
@@ -95,7 +100,7 @@ const order = computed(() => orderStore.currentOrder)
 
                         <div>
                             <div class="text-muted small">
-                                Номер
+                                {{ t('order.number') }}
                             </div>
                             <div class="fw-bold">
                                 #{{ order.id }}
@@ -104,7 +109,7 @@ const order = computed(() => orderStore.currentOrder)
 
                         <div class="text-end">
                             <div class="text-muted small">
-                                Сумма
+                                {{ t('order.total') }}
                             </div>
                             <div class="fw-bold text-primary fs-5">
                                 {{ formatPrice(order.total) }}
@@ -115,12 +120,12 @@ const order = computed(() => orderStore.currentOrder)
 
                     <!-- STATUS -->
                     <div class="text-center mb-4">
-                            <span
-                                class="badge fs-6 px-3 py-2"
-                                :class="getClass(order.status)"
-                            >
-                                {{ getLabel(order.status) }}
-                            </span>
+                        <span
+                            class="badge fs-6 px-3 py-2"
+                            :class="getClass(order.status)"
+                        >
+                            {{ getLabel(order.status) }}
+                        </span>
                     </div>
 
                     <!-- ITEMS -->
@@ -134,7 +139,7 @@ const order = computed(() => orderStore.currentOrder)
 
                             <div>
                                 <div class="fw-semibold">
-                                    {{ item.name || ('Товар #' + item.car_id) }}
+                                    {{ item.name || (t('order.itemFallback') + ' #' + item.car_id) }}
                                 </div>
 
                                 <div class="text-muted small">
@@ -153,7 +158,7 @@ const order = computed(() => orderStore.currentOrder)
                     <!-- COMMENT -->
                     <div v-if="order.comment" class="mt-4 p-3 bg-light rounded">
                         <div class="text-muted small mb-1">
-                            Комментарий
+                            {{ t('order.comment') }}
                         </div>
                         <div>
                             {{ order.comment }}
@@ -163,12 +168,12 @@ const order = computed(() => orderStore.currentOrder)
                     <!-- ACTIONS -->
                     <div class="d-flex justify-content-center gap-2 mt-4">
 
-                        <NuxtLink to="/cars" class="btn btn-outline-secondary">
-                            Продолжить покупки
+                        <NuxtLink :to="localePath('/cars')" class="btn btn-outline-secondary">
+                            {{ t('order.continueShopping') }}
                         </NuxtLink>
 
-                        <NuxtLink to="/orders" class="btn btn-primary">
-                            Мои заказы
+                        <NuxtLink :to="localePath('/orders')" class="btn btn-primary">
+                            {{ t('order.myOrders') }}
                         </NuxtLink>
 
                     </div>

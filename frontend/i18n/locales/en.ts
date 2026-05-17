@@ -16,15 +16,33 @@ export default {
         register: 'Register',
         registerLink: 'Register',
         registerTitle: 'Registration',
-        registering: 'Registering...'
+        registering: 'Registering...',
+    },
+
+    car: {
+        body: 'Body type',
+        brand: 'Brand',
+        contacts: 'Contacts',
+        createTitle: 'Create car',
+        description: 'Description',
+        generate: 'Generate',
+        generating: 'Loading data...',
+        mileage: 'Mileage',
+        model: 'Model',
+        photo: 'Photo',
+        price: 'Price',
+        sending: 'Sending...',
+        submit: 'Submit',
+        title: 'Title',
+        year: 'Year',
     },
 
     cart: {
         checkout: 'Place order',
-        checkoutLoading: 'Processing order...',
+        checkoutLoading: 'Placing order...',
         clear: 'Clear cart',
         comment: 'Order comment:',
-        commentPlaceholder: 'e.g. call before delivery',
+        commentPlaceholder: 'For example: call before delivery',
         emptyText: 'You have not added any items yet',
         emptyTitle: 'Cart is empty',
         goToCatalog: 'Go to catalog',
@@ -32,19 +50,26 @@ export default {
         loading: 'Loading cart...',
         perItem: 'pcs',
         title: 'Cart',
-        total: 'Total'
+        total: 'Total',
     },
 
     catalog: {
         addToCart: 'Add to cart',
         adding: 'Adding...',
-        inCart: 'In cart',
+        inCart: 'Item in cart',
         loading: 'Loading catalog...',
-        loginForPrice: 'Log in to see the price',
+        loginForPrice: 'Log in to see price',
         of: 'of',
         page: 'Page',
-        shown: 'Showing',
-        title: 'Catalog'
+        shown: 'Shown',
+        title: 'Catalog',
+    },
+
+    common: {
+        back: 'Back',
+        cancel: 'Cancel',
+        error: 'Error',
+        loading: 'Loading...',
     },
 
     contact: {
@@ -55,20 +80,55 @@ export default {
         send: 'Send message',
         sending: 'Sending...',
         subject: 'Subject',
-        title: 'Contacts'
+        title: 'Contacts',
+    },
+
+    dashboard: {
+        cart: {
+            empty: 'Cart is empty',
+            items: 'Items',
+            total: 'Total',
+            open: 'Go to cart',
+        },
+        catalog: {
+            title: 'Catalog',
+            totalCars: 'Total cars',
+            myCars: 'My cars',
+            addCar: 'Add car',
+            goToCatalog: 'Go to catalog',
+        },
+        orders: {
+            title: 'Orders',
+            all: 'View all',
+            total: 'Total orders',
+            empty: 'You have no orders yet',
+            date: 'Date and time',
+            status: 'Status',
+            amount: 'Amount',
+            action: 'Action',
+            open: 'Open',
+        },
+        profile: {
+            title: 'My profile',
+            welcome: 'Welcome,',
+            guest: 'user',
+            email: 'Email',
+            button: 'My profile',
+        },
+        title: 'Dashboard',
     },
 
     footer: {
-        allRightsReserved: 'All rights reserved.'
+        allRightsReserved: 'All rights reserved.',
     },
 
     home: {
-        authHint: 'Log in or register',
+        authHint: 'Login or register',
         buttons: {
             dashboard: 'Dashboard',
             login: 'Login',
             profile: 'Profile',
-            register: 'Register'
+            register: 'Register',
         },
         guest: 'Guest',
         loading: 'Loading new arrivals...',
@@ -78,23 +138,152 @@ export default {
         quickActions: 'Quick actions',
         title: 'Home page',
         userStatusTitle: 'User status',
-        welcome: 'Welcome'
+        welcome: 'Welcome',
+    },
+
+    modals: {
+        auth: {
+            email: 'Email',
+            login: 'Login',
+            loginTitle: 'Login',
+            loggingIn: 'Logging in...',
+            password: 'Password',
+        },
+        cartClear: {
+            clearing: 'Clearing...',
+            confirm: 'Clear',
+            textLine1: 'Clear the entire cart?',
+            textLine2: 'All items will be removed permanently.',
+            title: 'Clear cart',
+        },
+        cartItemDelete: {
+            confirm: 'Delete',
+            deleting: 'Deleting...',
+            textLine1: 'Remove item from cart?',
+            textLine2: 'This action can only be undone manually.',
+            title: 'Delete item',
+        },
+        checkout: {
+            confirm: 'Confirm order submission?',
+            confirmButton: 'Confirm',
+            sending: 'Sending...',
+            title: 'Checkout',
+            warning: 'After submission, the cart will be cleared.',
+        },
+        deleteAccount: {
+            confirm: 'Are you sure you want to delete your account?',
+            danger: 'This action cannot be undone.',
+            delete: 'Delete',
+            deleting: 'Deleting...',
+            title: 'Delete account',
+        },
+        logout: {
+            confirm: 'Log out',
+            loggingOut: 'Logging out...',
+            text: 'Are you sure you want to log out?',
+            title: 'Logout',
+        },
+        orderCheckout: {
+            confirm: 'Confirm',
+            confirming: 'Sending...',
+            textLine1: 'Confirm order submission?',
+            textLine2: 'After submission, the cart will be cleared.',
+            title: 'Checkout',
+        },
+        userDelete: {
+            confirm: 'Delete',
+            deleting: 'Deleting...',
+            textLine1: 'Are you sure you want to delete your account?',
+            textLine2: 'This action cannot be undone.',
+            title: 'Delete account',
+        },
     },
 
     nav: {
         about: 'About',
+        back: 'Back',
         cart: 'Cart',
         catalog: 'Catalog',
         contacts: 'Contacts',
         dashboard: 'Dashboard',
         info: 'Info',
         login: 'Login',
-        logout: 'Logout'
+        logout: 'Logout',
+    },
+
+    order: {
+        actions: 'Actions',
+        comment: 'Comment',
+        continueShopping: 'Continue shopping',
+        dateTime: 'Date and time',
+        emptyList: 'You have no orders yet',
+        itemFallback: 'Item',
+        items: 'Items',
+        loading: 'Loading order...',
+        loadingList: 'Page loading...',
+        myOrders: 'My orders',
+        myOrdersTitle: 'My orders',
+        number: 'Number',
+        open: 'Open',
+        status: 'Status',
+        successSubtitle: 'We have started processing your order',
+        successTitle: 'Order successfully placed',
+        total: 'Total',
+    },
+
+    orderDetail: {
+        allOrders: 'All orders',
+        backToOrders: 'Back to orders',
+        comment: 'Comment',
+        date: 'Date',
+        itemsCount: 'Items',
+        loading: 'Loading order...',
+        notFoundSubtitle: 'It may have been deleted or you have no access',
+        notFoundTitle: 'Order not found',
+        perItem: 'pcs',
+        price: 'Price',
+        qty: 'Qty',
+        status: 'Status',
+        sum: 'Sum',
+        title: 'Order #{id}',
+        total: 'Total',
     },
 
     page: {
         loading: 'Loading page...',
-        notFound: 'Page not found.'
-    }
+        notFound: 'Page not found.',
+    },
+
+    pagination: {
+        next: 'Next',
+        prev: 'Back',
+    },
+
+    profile: {
+        avatar: 'Avatar',
+        backToDashboard: '← Back to dashboard',
+        confirmPassword: 'Confirmation',
+        createdAt: 'Created',
+        currentPassword: 'Current password',
+        deleteAccount: 'Delete account',
+        editTitle: 'Edit profile',
+        emailHint: 'Email cannot be changed manually. To change it, contact support:',
+        errors: {
+            nameRequired: 'Enter name',
+            currentPasswordRequired: 'Enter current password',
+            passwordRequired: 'Enter new password',
+            passwordMin: 'Minimum 6 characters',
+            passwordMismatch: 'Passwords do not match',
+        },
+        name: 'Name',
+        newPassword: 'New password',
+        passwordTitle: 'Change password',
+        removeAvatar: 'Remove avatar',
+        save: 'Save',
+        saving: 'Saving...',
+        title: 'My profile',
+        updatePassword: 'Update password',
+        updating: 'Updating...',
+    },
 
 }

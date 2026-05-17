@@ -2,6 +2,8 @@
 
 import {computed, ref, onMounted, onBeforeUnmount} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
@@ -56,8 +58,16 @@ const langRef = ref<HTMLElement | null>(null)
 ------------------------------*/
 
 const languages = [
-    {code: 'ru', name: 'Русский', icon: 'fi fi-ru'},
-    {code: 'en', name: 'English', icon: 'fi fi-us'}
+    {
+        code: 'ru',
+        name: 'Русский',
+        icon: 'fi fi-ru'
+    },
+    {
+        code: 'en',
+        name: 'English',
+        icon: 'fi fi-gb'
+    }
 ] as const
 
 type LocaleCode = (typeof languages)[number]['code']
@@ -75,7 +85,6 @@ const currentLanguage = computed(() => {
 
 const cartCount = computed(() => {
     if (!auth.isAuth) return 0
-
     return Array.isArray(cart.items)
         ? cart.items.length
         : Object.keys(cart.items ?? {}).length
@@ -99,14 +108,12 @@ const chooseLanguage = async (code: LocaleCode) => {
         isLangOpen.value = false
         return
     }
-
     await setLocale(code)
     isLangOpen.value = false
 }
 
 const handleClickOutside = (event: MouseEvent) => {
     if (!langRef.value) return
-
     if (!langRef.value.contains(event.target as Node)) {
         isLangOpen.value = false
     }
@@ -130,14 +137,10 @@ onBeforeUnmount(() => {
 
 const onLogout = async () => {
     if (isLogoutLoading.value) return
-
     isLogoutLoading.value = true
-
     try {
         const ok = await logout(route.path)
-
         if (!ok) return
-
         showLogoutModal.value = false
     } finally {
         isLogoutLoading.value = false

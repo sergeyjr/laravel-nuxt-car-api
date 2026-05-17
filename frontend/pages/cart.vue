@@ -2,8 +2,9 @@
 
 import {computed, ref} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 import {useCartStore} from '~/stores/cart'
-import {useDashboardStore} from '~/stores/dashboard'
 
 import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -14,10 +15,23 @@ import CartClearModal from '~/components/modals/CartClearModal.vue'
 
 import {formatPrice} from '~/utils/formatters'
 
+/* -----------------------------
+   i18n
+------------------------------*/
+
 const {t} = useI18n()
 
-const cart = useCartStore()
-const dashboard = useDashboardStore()
+const localePath = useLocalePath()
+
+/* -----------------------------
+   stores
+------------------------------*/
+
+const cartStore = useCartStore()
+
+/* -----------------------------
+   state
+------------------------------*/
 
 const isSubmitting = ref(false)
 const comment = ref('')
@@ -28,26 +42,34 @@ const showClearModal = ref(false)
 
 const selectedItemId = ref<number | null>(null)
 
-const items = computed(() => cart.items)
-const total = computed(() => cart.total)
+/* -----------------------------
+   computed
+------------------------------*/
+
+const items = computed(() => cartStore.items)
+const total = computed(() => cartStore.total)
+
+/* -----------------------------
+   utils
+------------------------------*/
 
 function sanitizeQty(value: unknown) {
     let qty = Number(value)
-
     if (!Number.isInteger(qty)) {
         qty = Math.floor(qty)
     }
-
     if (Number.isNaN(qty) || qty < 1) {
         qty = 1
     }
-
     return qty
 }
 
+/* -----------------------------
+   modal openers
+------------------------------*/
+
 function openRemoveModal(id: number | string) {
     if (isSubmitting.value) return
-
     selectedItemId.value = Number(id)
     showRemoveModal.value = true
 }
@@ -62,40 +84,35 @@ function openCheckoutModal() {
     showCheckoutModal.value = true
 }
 
+/* -----------------------------
+   actions
+------------------------------*/
+
 const confirmRemoveItem = async () => {
     if (!selectedItemId.value) return
-
-    await cart.remove(selectedItemId.value)
-
+    await cartStore.remove(selectedItemId.value)
     showRemoveModal.value = false
     selectedItemId.value = null
 }
 
 const confirmClearCart = async () => {
-    await cart.clear()
+    await cartStore.clear()
     showClearModal.value = false
 }
 
 const confirmCheckout = async () => {
     if (isSubmitting.value) return
-
     isSubmitting.value = true
-
     try {
-        const res: any = await cart.checkout({
+        const res: any = await cartStore.checkout({
             comment: comment.value
         })
-
         const order = res?.data?.order || res?.order
-
         if (!order?.id) {
             throw new Error('Order ID missing in response')
         }
-
         showCheckoutModal.value = false
-
-        await navigateTo(`/order-success/${order.id}`)
-
+        await navigateTo(localePath(`/order-success/${order.id}`))
     } finally {
         isSubmitting.value = false
     }
@@ -110,7 +127,7 @@ const confirmCheckout = async () => {
             <h2 class="mb-0">{{ t('cart.title') }}</h2>
         </div>
 
-        <div v-if="cart.loading" class="alert alert-light border text-center py-4">
+        <div v-if="cartStore.loading" class="alert alert-light border text-center py-4">
             {{ t('cart.loading') }}
         </div>
 
@@ -122,7 +139,7 @@ const confirmCheckout = async () => {
                 <h4 class="mb-2">{{ t('cart.emptyTitle') }}</h4>
                 <p class="text-muted mb-4">{{ t('cart.emptyText') }}</p>
 
-                <NuxtLink to="/cars" class="btn btn-primary px-4">
+                <NuxtLink :to="localePath('/cars')" class="btn btn-primary px-4">
                     {{ t('cart.goToCatalog') }}
                 </NuxtLink>
             </div>
@@ -145,7 +162,7 @@ const confirmCheckout = async () => {
 
                                 <div class="d-flex align-items-center gap-3">
 
-                                    <NuxtLink :to="`/cars/show/${itemData.id}`">
+                                    <NuxtLink :to="localePath(`/cars/show/${itemData.id}`)">
                                         <img
                                             :src="itemData.photo_url || '/images/default_car.jpg'"
                                             class="rounded border"
@@ -155,10 +172,7 @@ const confirmCheckout = async () => {
 
                                     <div>
 
-                                        <NuxtLink
-                                            :to="`/cars/show/${itemData.id}`"
-                                            class="text-decoration-none text-dark"
-                                        >
+                                        <NuxtLink :to="localePath(`/cars/show/${itemData.id}`)" class="text-decoration-none text-dark">
                                             <h5 class="mb-1">{{ itemData.name }}</h5>
                                         </NuxtLink>
 
@@ -179,8 +193,8 @@ const confirmCheckout = async () => {
                                     <button
                                         type="button"
                                         class="btn btn-outline-secondary btn-sm"
-                                        :disabled="itemData.qty <= 1 || cart.loadingUpdate"
-                                        @click="cart.update(itemId, itemData.qty - 1)"
+                                        :disabled="itemData.qty <= 1 || cartStore.loadingUpdate"
+                                        @click="cartStore.update(itemId, itemData.qty - 1)"
                                     >
                                         −
                                     </button>
@@ -190,13 +204,13 @@ const confirmCheckout = async () => {
                                         class="form-control text-center"
                                         style="width:90px;"
                                         :value="itemData.qty"
-                                        @input="cart.update(itemId, sanitizeQty(($event.target as HTMLInputElement).value))"
+                                        @input="cartStore.update(itemId, sanitizeQty(($event.target as HTMLInputElement).value))"
                                     />
 
                                     <button
                                         type="button"
                                         class="btn btn-outline-secondary btn-sm"
-                                        @click="cart.update(itemId, itemData.qty + 1)"
+                                        @click="cartStore.update(itemId, itemData.qty + 1)"
                                     >
                                         +
                                     </button>
@@ -299,7 +313,7 @@ const confirmCheckout = async () => {
 
         <CartRemoveItemModal
             :show="showRemoveModal"
-            :processing="cart.loadingRemove"
+            :processing="cartStore.loadingRemove"
             @close="showRemoveModal = false"
             @confirm="confirmRemoveItem"
         />
@@ -312,7 +326,7 @@ const confirmCheckout = async () => {
 
         <CartClearModal
             :show="showClearModal"
-            :processing="cart.loadingClear"
+            :processing="cartStore.loadingClear"
             @close="showClearModal = false"
             @confirm="confirmClearCart"
         />

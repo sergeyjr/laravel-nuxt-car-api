@@ -1,7 +1,9 @@
 <script setup lang="ts">
 
 import {computed, ref, onMounted, watch} from 'vue'
+
 import {useRoute} from 'vue-router'
+import {useI18n} from 'vue-i18n'
 
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
@@ -13,6 +15,14 @@ import type {Car} from '~/types/car'
 import {formatPrice} from '~/utils/formatters'
 
 import LoginModal from '~/components/modals/LoginModal.vue'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    stores
@@ -52,21 +62,6 @@ const carImage = computed(() =>
 )
 
 /* -----------------------------
-   async data
-------------------------------*/
-
-// await useAsyncData(
-//     `car-${carId.value}`,
-//     () => carStore.fetchCar(carId.value),
-//     {
-//         watch: [carId],
-//         immediate: true,
-//         lazy: false,
-//         deep: false,
-//     }
-// )
-
-/* -----------------------------
    helpers
 ------------------------------*/
 
@@ -99,7 +94,7 @@ const goBack = () => {
         window.history.back()
         return
     }
-    navigateTo('/cars')
+    navigateTo(localePath('/cars'))
 }
 
 const addToCart = (carItem: Car) =>
@@ -131,10 +126,7 @@ onMounted(async () => {
 })
 
 watch(carId, async (newId, oldId) => {
-    if (!newId || newId === oldId) {
-        return
-    }
-
+    if (!newId || newId === oldId) return
     loaded.value = false
     await loadCar(newId)
     loaded.value = true
@@ -148,8 +140,8 @@ watch(carId, async (newId, oldId) => {
 
         <template v-if="carLoading || !loaded">
 
-            <div class="alert alert-light mb-4">
-                Загрузка страницы...
+            <div class="alert alert-light border text-center py-4">
+                {{ t('page.loading') }}
             </div>
 
         </template>
@@ -211,28 +203,28 @@ watch(carId, async (newId, oldId) => {
 
                             <tr v-if="car.options?.brand">
                                 <td class="text-muted fw-semibold w-50">
-                                    Бренд
+                                    {{ t('car.brand') }}
                                 </td>
                                 <td>{{ car.options.brand }}</td>
                             </tr>
 
                             <tr v-if="car.options?.model">
                                 <td class="text-muted fw-semibold">
-                                    Модель
+                                    {{ t('car.model') }}
                                 </td>
                                 <td>{{ car.options.model }}</td>
                             </tr>
 
                             <tr v-if="car.options?.year">
                                 <td class="text-muted fw-semibold">
-                                    Год
+                                    {{ t('car.year') }}
                                 </td>
                                 <td>{{ car.options.year }}</td>
                             </tr>
 
                             <tr v-if="car.options?.mileage">
                                 <td class="text-muted fw-semibold">
-                                    Пробег
+                                    {{ t('car.mileage') }}
                                 </td>
                                 <td>{{ car.options.mileage }}</td>
                             </tr>
@@ -240,7 +232,7 @@ watch(carId, async (newId, oldId) => {
                             <tr>
 
                                 <td class="text-muted fw-semibold">
-                                    Цена
+                                    {{ t('car.price') }}
                                 </td>
 
                                 <td>
@@ -262,7 +254,7 @@ watch(carId, async (newId, oldId) => {
                                         class="btn btn-light"
                                         @click.stop.prevent="openAuthModal"
                                     >
-                                        Авторизуйтесь, чтобы увидеть цену
+                                        {{ t('catalog.loginForPrice') }}
                                     </BaseButton>
 
                                 </td>
@@ -283,7 +275,7 @@ watch(carId, async (newId, oldId) => {
                             class="w-100"
                             disabled
                         >
-                            Товар в корзине
+                            {{ t('catalog.inCart') }}
                         </BaseButton>
 
                         <BaseButton
@@ -295,11 +287,11 @@ watch(carId, async (newId, oldId) => {
                         >
 
                             <span v-if="isAdding(car.id)">
-                                Добавляется...
+                                {{ t('catalog.adding') }}
                             </span>
 
                             <span v-else>
-                                В корзину
+                                {{ t('catalog.addToCart') }}
                             </span>
 
                         </BaseButton>
@@ -318,18 +310,16 @@ watch(carId, async (newId, oldId) => {
                     variant="light"
                     @click="goBack"
                 >
-                    ← Назад
+                    ← {{ t('nav.back') }}
                 </BaseButton>
 
                 <NuxtLink
                     to="/cars"
                     class="text-decoration-none"
                 >
-
                     <BaseButton variant="light">
-                        В каталог →
+                        {{ t('catalog.title') }}
                     </BaseButton>
-
                 </NuxtLink>
 
             </div>
@@ -344,8 +334,8 @@ watch(carId, async (newId, oldId) => {
 
         <template v-else>
 
-            <div class="alert alert-light mb-4">
-                Автомобиль не найден.
+            <div class="alert alert-light border text-center py-4">
+                {{ t('page.notFound') }}
             </div>
 
         </template>

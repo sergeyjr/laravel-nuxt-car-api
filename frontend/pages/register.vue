@@ -2,13 +2,20 @@
 
 import {ref, onMounted} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 import {useAuthStore} from '~/stores/auth'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 
-const { t } = useI18n()
+/* -----------------------------
+   i18n
+------------------------------*/
 
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 /* -----------------------------
    store
 ------------------------------*/
@@ -143,7 +150,7 @@ onMounted(() => {
                     </BaseButton>
 
                     <p class="text-center mt-3">
-                        <NuxtLink to="/login">
+                        <NuxtLink :to="localePath('/login')">
                             {{ t('auth.loginLink') }}
                         </NuxtLink>
                     </p>

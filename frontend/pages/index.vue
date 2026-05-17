@@ -8,13 +8,14 @@ import {useCarStore} from '~/stores/car'
 import BaseButton from '~/components/BaseButton.vue'
 
 import {formatPrice} from '~/utils/formatters'
-import {openCar} from '~/utils/navigation'
 
 /* -----------------------------
    NUXT i18n
 ------------------------------*/
 
 const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    router
@@ -38,6 +39,7 @@ import {Swiper, SwiperSlide} from 'swiper/vue'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
+import {useI18n} from "vue-i18n";
 
 const modules = [Navigation, Pagination]
 
@@ -75,6 +77,9 @@ const onImgError = (e: Event) => {
     const target = e.target as HTMLImageElement
     target.src = '/images/default_car.jpg'
 }
+
+const openCar = (id: number | string) =>
+    navigateTo(localePath(`/cars/show/${id}`))
 
 /* -----------------------------
    lifecycle

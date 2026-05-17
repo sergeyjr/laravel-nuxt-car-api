@@ -2,12 +2,22 @@
 
 import {computed, onMounted} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 import {useAuthStore} from '~/stores/auth'
 import {useDashboardStore} from '~/stores/dashboard'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
 import {formatPrice, formatDate} from '~/utils/formatters'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    helpers
@@ -20,7 +30,6 @@ const {getBadge} = useOrderStatus()
 ------------------------------*/
 
 const auth = useAuthStore()
-
 const dashboard = useDashboardStore()
 
 /* -----------------------------
@@ -58,10 +67,10 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
 <template>
     <div class="container mt-4">
 
-        <h1 class="mb-4">Панель управления</h1>
+        <h1 class="mb-4">{{ t('dashboard.title') }}</h1>
 
         <div v-if="dashboard.loading" class="alert alert-light border text-center py-4">
-            Загрузка страницы...
+            {{ t('page.loading') }}
         </div>
 
         <template v-else>
@@ -73,19 +82,23 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <h5 class="mb-3">
-                                <NuxtLink to="/dashboard/profile" class="text-decoration-none text-dark">
-                                    Мой профиль
+                                <NuxtLink :to="localePath('/dashboard/profile')" class="text-decoration-none text-dark">
+                                    {{ t('dashboard.profile.title') }}
                                 </NuxtLink>
                             </h5>
 
-                            <p>Добро пожаловать, <span class="fw-bold">{{ user?.name || 'пользователь' }}</span></p>
-                            <p>Email: <span class="fw-bold">{{ user?.email }}</span></p>
+                            <p>
+                                {{ t('dashboard.profile.welcome') }}
+                                <span class="fw-bold">{{ user?.name || t('dashboard.profile.guest') }}</span>
+                            </p>
 
-                            <NuxtLink
-                                to="/dashboard/profile"
-                                class="btn btn-outline-primary w-100 mt-3"
-                            >
-                                Мой профиль
+                            <p>
+                                {{ t('dashboard.profile.email') }}:
+                                <span class="fw-bold">{{ user?.email }}</span>
+                            </p>
+
+                            <NuxtLink :to="localePath('/dashboard/profile')" class="btn btn-outline-primary w-100 mt-3">
+                                {{ t('dashboard.profile.button') }}
                             </NuxtLink>
 
                         </div>
@@ -97,35 +110,27 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <h5 class="mb-3">
-                                <NuxtLink to="/cars" class="text-decoration-none text-dark">
-                                    Каталог
+                                <NuxtLink :to="localePath('/cars')" class="text-decoration-none text-dark">
+                                    {{ t('dashboard.catalog.title') }}
                                 </NuxtLink>
                             </h5>
 
                             <p class="mb-0">
-                                Машины всего:
+                                {{ t('dashboard.catalog.totalCars') }}:
                                 <span class="fw-bold">{{ dashboard.carsCount }}</span>
                             </p>
 
                             <p class="mb-0">
-                                Мои машины:
+                                {{ t('dashboard.catalog.myCars') }}:
                                 <span class="fw-bold">{{ dashboard.myCarsCount }}</span>
                             </p>
 
-                            <NuxtLink
-                                v-if="isApiUser"
-                                to="/dashboard/car/create"
-                                class="btn btn-outline-primary w-100 mt-3"
-                            >
-                                Добавить авто
+                            <NuxtLink v-if="isApiUser" :to="localePath('/dashboard/car/create')" class="btn btn-outline-primary w-100 mt-3">
+                                {{ t('dashboard.catalog.addCar') }}
                             </NuxtLink>
 
-                            <NuxtLink
-                                v-else
-                                to="/cars"
-                                class="btn btn-outline-primary w-100 mt-3"
-                            >
-                                Перейти в каталог
+                            <NuxtLink v-else :to="localePath('/cars')" class="btn btn-outline-primary w-100 mt-3">
+                                {{ t('dashboard.catalog.goToCatalog') }}
                             </NuxtLink>
 
                         </div>
@@ -137,15 +142,15 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <h5 class="mb-3">
-                                <NuxtLink to="/cart" class="text-decoration-none text-dark">
-                                    Корзина
+                                <NuxtLink :to="localePath('/cart')" class="text-decoration-none text-dark">
+                                    {{ t('nav.cart') }}
                                 </NuxtLink>
                             </h5>
 
                             <template v-if="cartTotal === 0">
 
                                 <div class="btn btn-outline-secondary w-100 mt-3 disabled">
-                                    Корзина пустая
+                                    {{ t('dashboard.cart.empty') }}
                                 </div>
 
                             </template>
@@ -153,20 +158,17 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                             <template v-else>
 
                                 <p class="text-muted">
-                                    Товаров:
+                                    {{ t('dashboard.cart.items') }}:
                                     <span class="fw-bold">{{ cartCount }}</span>
                                 </p>
 
                                 <p class="mb-0">
-                                    Стоимость:
+                                    {{ t('dashboard.cart.total') }}:
                                     <span class="fw-bold">{{ formatPrice(cartTotal) }}</span>
                                 </p>
 
-                                <NuxtLink
-                                    to="/cart"
-                                    class="btn btn-outline-primary w-100 mt-3"
-                                >
-                                    Перейти в корзину
+                                <NuxtLink :to="localePath('/cart')" class="btn btn-outline-primary w-100 mt-3">
+                                    {{ t('dashboard.cart.open') }}
                                 </NuxtLink>
 
                             </template>
@@ -183,22 +185,19 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
 
                     <div class="col-12 d-flex justify-content-between align-items-center">
 
-                        <NuxtLink to="/orders" class="text-decoration-none text-dark">
-                            <h4 class="mb-3">Заказы</h4>
+                        <NuxtLink :to="localePath('/orders')" class="text-decoration-none text-dark">
+                            <h4 class="mb-3">{{ t('dashboard.orders.title') }}</h4>
                         </NuxtLink>
 
-                        <NuxtLink
-                            to="/orders"
-                            class="btn btn-outline-primary btn-sm"
-                        >
-                            Посмотреть все
+                        <NuxtLink :to="localePath('/orders')" class="btn btn-outline-primary btn-sm">
+                            {{ t('dashboard.orders.all') }}
                         </NuxtLink>
 
                     </div>
 
                     <div class="col-12">
                         <span class="text-muted">
-                            Всего заказов:
+                            {{ t('dashboard.orders.total') }}:
                             <span class="fw-bold">{{ ordersCount }}</span>
                         </span>
                     </div>
@@ -206,7 +205,7 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                 </div>
 
                 <div v-if="!recentOrders.length" class="alert alert-light border text-center py-4">
-                    У вас пока нет заказов
+                    {{ t('dashboard.orders.empty') }}
                 </div>
 
                 <div v-else class="table-responsive">
@@ -215,10 +214,10 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                         <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>Дата и время</th>
-                            <th>Статус</th>
-                            <th class="text-end">Сумма</th>
-                            <th class="text-end">Действие</th>
+                            <th>{{ t('dashboard.orders.date') }}</th>
+                            <th>{{ t('dashboard.orders.status') }}</th>
+                            <th class="text-end">{{ t('dashboard.orders.amount') }}</th>
+                            <th class="text-end">{{ t('dashboard.orders.action') }}</th>
                         </tr>
                         </thead>
 
@@ -243,11 +242,8 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                             </td>
 
                             <td class="text-end">
-                                <NuxtLink
-                                    :to="`/orders/show/${order.id}`"
-                                    class="btn btn-sm btn-outline-primary"
-                                >
-                                    Открыть
+                                <NuxtLink :to="localePath(`/orders/show/${order.id}`)" class="btn btn-sm btn-outline-primary">
+                                    {{ t('dashboard.orders.open') }}
                                 </NuxtLink>
                             </td>
 

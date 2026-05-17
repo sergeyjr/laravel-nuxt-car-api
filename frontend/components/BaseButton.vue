@@ -3,7 +3,17 @@
 import {computed} from 'vue'
 import type {PropType} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 type ButtonType = 'button' | 'submit' | 'reset'
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 const props = defineProps({
     variant: {
@@ -74,7 +84,7 @@ const handleClick = (e: MouseEvent) => {
             class="d-inline-flex align-items-center gap-2"
         >
             <slot name="loading">
-                Загрузка...
+                {{ t('common.loading') }}
             </slot>
         </span>
 

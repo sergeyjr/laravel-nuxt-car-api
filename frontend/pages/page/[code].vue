@@ -1,12 +1,19 @@
 <script setup lang="ts">
 
-import { computed, watch } from 'vue'
+import {computed, watch} from 'vue'
 
-import { useRoute } from 'vue-router'
+import {useRoute} from 'vue-router'
+import {useI18n} from 'vue-i18n'
 
-import { usePageStore } from '~/stores/page'
+import {usePageStore} from '~/stores/page'
 
-const { t } = useI18n()
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    store
@@ -32,7 +39,7 @@ watch(
         if (!newCode) return
         await pageStore.fetch(newCode)
     },
-    { immediate: true }
+    {immediate: true}
 )
 
 /* -----------------------------
@@ -49,19 +56,19 @@ const page = computed(() => pageStore.current)
         <h1 class="mb-4">{{ page?.title || '' }}</h1>
 
         <template v-if="pageStore.loading">
-            <div class="alert alert-light mb-4">
+            <div class="alert alert-light border text-center py-4">
                 {{ t('page.loading') }}
             </div>
         </template>
 
         <template v-if="page">
             <div :class="{ 'content-loading': pageStore.loading }">
-                <div class="page-content" v-html="page.content" />
+                <div class="page-content" v-html="page.content"/>
             </div>
         </template>
 
         <template v-else-if="!pageStore.loading">
-            <div class="alert alert-light mb-4">
+            <div class="alert alert-light border text-center py-4">
                 {{ t('page.notFound') }}
             </div>
         </template>

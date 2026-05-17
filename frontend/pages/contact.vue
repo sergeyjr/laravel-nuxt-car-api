@@ -1,13 +1,25 @@
 <script setup lang="ts">
 
 import {useContactStore} from '~/stores/contact'
-import {formatPhoneRU} from '~/utils/formatters'
 
 import BaseButton from '~/components/BaseButton.vue'
 import BaseInput from '~/components/BaseInput.vue'
 import BaseTextarea from '~/components/BaseTextarea.vue'
 
+import {formatPhoneRU} from '~/utils/formatters'
+import {useI18n} from "vue-i18n";
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
 const {t} = useI18n()
+
+const localePath = useLocalePath()
+
+/* -----------------------------
+   stores
+------------------------------*/
 
 const contactStore = useContactStore()
 
@@ -16,6 +28,10 @@ const onSubmit = async (e: Event) => {
     if (!form.checkValidity()) return
     await contactStore.submit('contactPage')
 }
+
+/* -----------------------------
+   fake contacts (UI only)
+------------------------------*/
 
 const contacts = [
     {

@@ -2,11 +2,21 @@
 
 import {computed, onMounted} from 'vue'
 
+import {useI18n} from 'vue-i18n'
+
 import {useOrderStore} from '~/stores/order'
 
 import {useOrderStatus} from '~/composables/useOrderStatus'
 
 import {formatPrice, formatDate} from "~/utils/formatters";
+
+/* -----------------------------
+   i18n
+------------------------------*/
+
+const {t} = useI18n()
+
+const localePath = useLocalePath()
 
 /* -----------------------------
    store
@@ -70,7 +80,7 @@ const goBack = () => {
     if (import.meta.client && window.history.length > 1) {
         window.history.back()
     } else {
-        navigateTo('/dashboard')
+        navigateTo(localePath('/dashboard'))
     }
 }
 
@@ -80,19 +90,23 @@ const goBack = () => {
     <div class="container mt-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Мои заказы</h2>
+            <h2 class="mb-0">{{ t('order.myOrdersTitle') }}</h2>
 
-            <button v-if="initialized" class="btn btn-outline-secondary" @click="goBack">
-                ← Назад
-            </button>
+            <BaseButton
+                v-if="initialized"
+                variant="outline-secondary"
+                @click="goBack"
+            >
+                ← {{ t('common.back') }}
+            </BaseButton>
         </div>
 
         <div v-if="loading || !initialized" class="alert alert-light border text-center py-4">
-            Страница загружается...
+            {{ t('order.loadingList') }}
         </div>
 
         <div v-else-if="!orders.length" class="alert alert-light border text-center py-4">
-            У вас пока нет заказов
+            {{ t('order.emptyList') }}
         </div>
 
         <div v-else class="table-responsive">
@@ -101,11 +115,11 @@ const goBack = () => {
                 <thead class="table-light">
                 <tr>
                     <th>#</th>
-                    <th>Дата и время</th>
-                    <th>Статус</th>
-                    <th>Товаров</th>
-                    <th class="text-end">Сумма</th>
-                    <th class="text-end">Действия</th>
+                    <th>{{ t('order.dateTime') }}</th>
+                    <th>{{ t('order.status') }}</th>
+                    <th>{{ t('order.items') }}</th>
+                    <th class="text-end">{{ t('order.total') }}</th>
+                    <th class="text-end">{{ t('order.actions') }}</th>
                 </tr>
                 </thead>
 
@@ -133,10 +147,10 @@ const goBack = () => {
 
                     <td class="text-end">
                         <NuxtLink
-                            :to="`/orders/show/${order.id}`"
+                            :to="localePath(`/orders/show/${order.id}`)"
                             class="btn btn-sm btn-outline-primary"
                         >
-                            Открыть
+                            {{ t('order.open') }}
                         </NuxtLink>
                     </td>
                 </tr>
