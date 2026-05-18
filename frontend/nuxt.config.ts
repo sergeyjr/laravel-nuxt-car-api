@@ -41,7 +41,7 @@ export default defineNuxtConfig({
             {code: 'en', file: 'en.ts', name: 'English'}
         ],
         detectBrowserLanguage: false,
-        vueI18n: './i18n/config',
+        //vueI18n: './i18n/config',
     },
 
     // Конфигурация окружений
@@ -96,12 +96,13 @@ export default defineNuxtConfig({
 
         // Dev server (HMR + watch)
         server: {
-            // hmr: {
-            //     // домен, через который идёт websocket hot reload
-            //     host: 'laravel.local',
-            //     protocol: 'ws',
-            //     clientPort: 80
-            // },
+
+            hmr: {
+                // домен, через который идёт websocket hot reload
+                //host: 'laravel.local',
+                protocol: 'ws',
+                clientPort: 80
+            },
 
             allowedHosts: ['laravel.local'],
 

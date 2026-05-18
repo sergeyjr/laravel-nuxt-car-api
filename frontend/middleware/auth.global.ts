@@ -20,6 +20,12 @@ export default defineNuxtRouteMiddleware((to) => {
         return
     }
 
+    const isCartPage = to.path.includes('/cart')
+
+    if (isCartPage && !auth.isAuth) {
+        return navigateTo(localePath('/login'), { replace: true })
+    }
+
     if (!needsAuth) {
         if (auth.isAuth && to.path === '/login') {
             return navigateTo('/dashboard', {replace: true})

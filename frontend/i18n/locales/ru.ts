@@ -51,6 +51,7 @@ export default {
         perItem: 'шт',
         title: 'Корзина',
         total: 'Итого',
+        updateCart: "Обновить корзину",
     },
 
     catalog: {
@@ -160,7 +161,6 @@ export default {
             confirm: 'Удалить',
             deleting: 'Удаляем...',
             textLine1: 'Удалить товар из корзины?',
-            textLine2: 'Действие можно отменить только вручную.',
             title: 'Удаление товара'
         },
         checkout: {

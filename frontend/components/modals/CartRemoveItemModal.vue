@@ -64,8 +64,6 @@ const confirm = () => {
 
                     <p class="mb-0">
                         {{ t('modals.cartItemDelete.textLine1') }}
-                        <br>
-                        {{ t('modals.cartItemDelete.textLine2') }}
                     </p>
 
                 </div>

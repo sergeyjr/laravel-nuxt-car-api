@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {computed, ref} from 'vue'
+import {computed, ref, watch} from 'vue'
 
 import {useI18n} from 'vue-i18n'
 
@@ -35,6 +35,8 @@ const cartStore = useCartStore()
 
 const isSubmitting = ref(false)
 
+const isUpdatingCart = ref(false)
+
 const comment = ref('')
 
 const showRemoveModal = ref(false)
@@ -48,49 +50,99 @@ const selectedItemId = ref<number | null>(null)
 ------------------------------*/
 
 const items = computed(() => cartStore.items)
-
 const total = computed(() => cartStore.total)
+
+/* -----------------------------
+   LOCAL QTY STATE
+------------------------------*/
+
+const localQty = ref<Record<string, number>>({})
+
+const getQty = (id: string | number) => {
+    return localQty.value[String(id)] ?? items.value?.[id]?.qty ?? 1
+}
+
+watch(
+    items,
+    (val) => {
+        const next: Record<string, number> = {}
+        Object.entries(val || {}).forEach(([id, item]: any) => {
+            next[id] = item.qty
+        })
+        localQty.value = next
+    },
+    {immediate: true}
+)
 
 /* -----------------------------
    utils
 ------------------------------*/
 
 function sanitizeQty(value: unknown) {
-
     let qty = Number(value)
-
     if (!Number.isInteger(qty)) {
         qty = Math.floor(qty)
     }
-
     if (Number.isNaN(qty) || qty < 1) {
         qty = 1
     }
-
     return qty
-
 }
+
+function preventInvalidQtyKeys(event: KeyboardEvent) {
+    if (
+        event.key === '-' ||
+        event.key === '.' ||
+        event.key === ',' ||
+        event.key === 'e' ||
+        event.key === 'E' ||
+        event.key === '+'
+    ) {
+        event.preventDefault()
+    }
+}
+
+function normalizeQtyInput(value: unknown) {
+    const onlyDigits = String(value).replace(/\D/g, '') // убираем ВСЁ кроме цифр
+    const num = Number(onlyDigits)
+    return Number.isFinite(num) && num > 0 ? num : 1
+}
+
+/* -----------------------------
+   guards
+------------------------------*/
+
+const isLocked = computed(() =>
+    isUpdatingCart.value ||
+    isSubmitting.value
+)
+
+const hasChanges = computed(() => {
+    return Object.entries(localQty.value).some(([id, qty]) => {
+        return items.value?.[id]?.qty !== qty
+    })
+})
 
 /* -----------------------------
    modals
 ------------------------------*/
 
 function openCheckoutModal() {
-    if (isSubmitting.value) {
+    if (isLocked.value) {
         return
     }
     showCheckoutModal.value = true
 }
 
 function openClearModal() {
-    if (cartStore.loadingClear) {
+    if (isLocked.value || cartStore.loadingClear) {
         return
     }
     showClearModal.value = true
 }
 
 function openRemoveModal(id: number | string) {
-    if (cartStore.loadingRemove) {
+    if (isLocked.value || cartStore.loadingRemove) {
         return
     }
     selectedItemId.value = Number(id)
@@ -101,10 +153,29 @@ function openRemoveModal(id: number | string) {
    actions
 ------------------------------*/
 
-const confirmCheckout = async () => {
-    if (isSubmitting.value) {
-        return
+const updateQtyLocal = (id: string | number, value: unknown) => {
+    if (isLocked.value) return
+    localQty.value[String(id)] = normalizeQtyInput(value)
+}
+
+const applyCartUpdates = async () => {
+    if (isLocked.value) return
+    isUpdatingCart.value = true
+    try {
+        const entries = Object.entries(localQty.value)
+        for (const [id, qty] of entries) {
+            const original = items.value?.[id]?.qty
+            if (original !== qty) {
+                await cartStore.update(id, qty)
+            }
+        }
+    } finally {
+        isUpdatingCart.value = false
     }
+}
+
+const confirmCheckout = async () => {
+    if (isLocked.value) return
     isSubmitting.value = true
     try {
         const res: any = await cartStore.checkout({
@@ -116,13 +187,13 @@ const confirmCheckout = async () => {
         }
         showCheckoutModal.value = false
         await navigateTo(localePath(`/order-success/${order.id}`))
-
     } finally {
         isSubmitting.value = false
     }
 }
 
 const confirmClearCart = async () => {
+    if (isLocked.value) return
     try {
         await cartStore.clear()
         showClearModal.value = false
@@ -132,6 +203,7 @@ const confirmClearCart = async () => {
 }
 
 const confirmRemoveItem = async () => {
+    if (isLocked.value) return
     if (!selectedItemId.value) {
         return
     }
@@ -243,25 +315,30 @@ const confirmRemoveItem = async () => {
                                     <button
                                         type="button"
                                         class="btn btn-outline-secondary btn-sm"
-                                        :disabled="itemData.qty <= 1 || cartStore.loadingUpdate"
-                                        @click="cartStore.update(itemId, itemData.qty - 1)"
+                                        :disabled="isLocked || getQty(itemId) <= 1 || cartStore.loadingUpdate"
+                                        @click="updateQtyLocal(itemId, getQty(itemId) - 1)"
                                     >
                                         −
                                     </button>
 
                                     <input
                                         type="text"
+                                        inputmode="numeric"
+                                        pattern="[0-9]*"
                                         class="form-control text-center"
                                         style="width:90px;"
-                                        :value="itemData.qty"
-                                        @input="cartStore.update(itemId, sanitizeQty(($event.target as HTMLInputElement).value))"
+                                        :value="getQty(itemId)"
+                                        :disabled="isLocked || cartStore.loadingUpdate"
+                                        @keydown="preventInvalidQtyKeys"
+                                        @paste.prevent="updateQtyLocal(itemId, ($event.clipboardData as DataTransfer).getData('text'))"
+                                        @input="updateQtyLocal(itemId, ($event.target as HTMLInputElement).value)"
                                     />
 
                                     <button
                                         type="button"
                                         class="btn btn-outline-secondary btn-sm"
-                                        :disabled="cartStore.loadingUpdate"
-                                        @click="cartStore.update(itemId, itemData.qty + 1)"
+                                        :disabled="isLocked || cartStore.loadingUpdate"
+                                        @click="updateQtyLocal(itemId, getQty(itemId) + 1)"
                                     >
                                         +
                                     </button>
@@ -273,7 +350,7 @@ const confirmRemoveItem = async () => {
                             <div class="col-8 col-md-3 text-md-end">
 
                                 <div class="fw-bold fs-5">
-                                    {{ formatPrice(itemData.price * itemData.qty) }}
+                                    {{ formatPrice(itemData.price * (getQty(itemId) || itemData.qty)) }}
                                 </div>
 
                             </div>
@@ -283,7 +360,7 @@ const confirmRemoveItem = async () => {
                                 <button
                                     type="button"
                                     class="btn btn-outline-danger btn-sm"
-                                    :disabled="cartStore.loadingRemove"
+                                    :disabled="isLocked || cartStore.loadingRemove"
                                     @click="openRemoveModal(itemId)"
                                 >
                                     ✕
@@ -343,7 +420,7 @@ const confirmRemoveItem = async () => {
                             :label="t('cart.comment')"
                             :rows="5"
                             :placeholder="t('cart.commentPlaceholder')"
-                            :disabled="isSubmitting"
+                            :disabled="isLocked"
                         />
 
                     </div>
@@ -352,31 +429,39 @@ const confirmRemoveItem = async () => {
 
                 <div class="card border-0 shadow-sm">
 
-                    <div class="card-body d-grid gap-2">
+                    <div class="card-body d-grid gap-3">
 
                         <BaseButton
-                            variant="success"
-                            size="lg"
-                            class="w-100 py-3 fw-semibold"
-                            :loading="isSubmitting"
-                            :disabled="isSubmitting"
-                            @click="openCheckoutModal"
+                            :variant="!hasChanges ? 'secondary' : 'primary'"
+                            class="w-100 fw-semibold transition-all"
+                            :disabled="isLocked || cartStore.loadingUpdate || !hasChanges"
+                            :class="{
+                            'opacity-50': !hasChanges,
+                            'cursor-not-allowed': !hasChanges
+                        }"
+                            @click="applyCartUpdates"
                         >
-                            {{ t('cart.checkout') }}
-
-                            <template #loading>
-                                {{ t('cart.checkoutLoading') }}
-                            </template>
-
+                            {{ t('cart.updateCart') }}
                         </BaseButton>
 
                         <BaseButton
                             variant="outline-danger"
                             class="w-100"
-                            :disabled="cartStore.loadingClear || !Object.keys(items).length"
+                            :disabled="isLocked || cartStore.loadingClear || !Object.keys(items).length"
                             @click="openClearModal"
                         >
                             {{ t('cart.clear') }}
+                        </BaseButton>
+
+                        <BaseButton
+                            variant="success"
+                            size="lg"
+                            class="w-100 py-3 fw-semibold mt-3"
+                            :loading="isSubmitting"
+                            :disabled="isLocked"
+                            @click="openCheckoutModal"
+                        >
+                            {{ t('cart.checkout') }}
                         </BaseButton>
 
                     </div>

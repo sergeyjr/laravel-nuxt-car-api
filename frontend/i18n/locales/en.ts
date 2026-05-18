@@ -51,6 +51,7 @@ export default {
         perItem: 'pcs',
         title: 'Cart',
         total: 'Total',
+        updateCart: "Update cart",
     },
 
     catalog: {
@@ -160,7 +161,6 @@ export default {
             confirm: 'Delete',
             deleting: 'Deleting...',
             textLine1: 'Remove item from cart?',
-            textLine2: 'This action can only be undone manually.',
             title: 'Delete item',
         },
         checkout: {
