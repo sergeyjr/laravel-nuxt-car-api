@@ -28,18 +28,18 @@ const alertClass = (type: string) => {
                 <div
                     v-for="alert in alerts"
                     :key="alert.id"
-                    :class="['alert', alertClass(alert.type)]"
+                    :class="['alert d-flex justify-content-between align-items-center', alertClass(alert.type)]"
                 >
-
-                    {{ alert.message }}
+                    <span class="me-3">
+                        {{ alert.message }}
+                    </span>
 
                     <BaseButton
                         variant="link"
-                        class="btn-close"
+                        class="btn-close ms-auto"
                         aria-label="Close alert"
                         @click="alertStore.remove(alert.id)"
                     />
-
                 </div>
 
             </div>

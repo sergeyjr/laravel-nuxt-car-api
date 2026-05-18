@@ -50,6 +50,7 @@ export const useAuthStore = defineStore('auth', {
             } catch (e: any) {
                 if ([401, 403, 419].includes(e?.status)) {
                     this.user = null
+                    return false
                 }
                 console.error(e)
                 return false

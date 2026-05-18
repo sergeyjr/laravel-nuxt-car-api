@@ -5,39 +5,33 @@ import {useI18n} from 'vue-i18n'
 
 import BaseButton from '~/components/BaseButton.vue'
 
-/* -----------------------------
-   i18n
-------------------------------*/
-
 const {t} = useI18n()
 
-const localePath = useLocalePath()
-
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     show: boolean
-    loading?: boolean
-}>()
+    processing?: boolean
+}>(), {
+    processing: false
+})
 
 const emit = defineEmits<{
     (e: 'close'): void
     (e: 'confirm'): void
 }>()
 
-const isProcessing = computed(() => !!props.loading)
+const isLocked = computed(() => Boolean(props.processing))
 
 const close = () => {
-    if (isProcessing.value) {
+    if (isLocked.value) {
         return
     }
-
     emit('close')
 }
 
-const confirmDelete = () => {
-    if (isProcessing.value) {
+const confirm = () => {
+    if (isLocked.value) {
         return
     }
-
     emit('confirm')
 }
 
@@ -55,6 +49,7 @@ const confirmDelete = () => {
             <div class="modal-content">
 
                 <div class="modal-header">
+
                     <h5 class="modal-title text-danger">
                         {{ t('modals.deleteAccount.title') }}
                     </h5>
@@ -63,18 +58,21 @@ const confirmDelete = () => {
                         type="button"
                         variant="link"
                         class="btn-close"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         aria-label="Close"
                         @click="close"
                     />
+
                 </div>
 
                 <div class="modal-body">
+
                     <p class="mb-0">
                         {{ t('modals.deleteAccount.confirm') }}
                         <br>
                         {{ t('modals.deleteAccount.danger') }}
                     </p>
+
                 </div>
 
                 <div class="modal-footer">
@@ -82,21 +80,19 @@ const confirmDelete = () => {
                     <BaseButton
                         type="button"
                         variant="danger"
-                        :disabled="isProcessing"
-                        @click="confirmDelete"
+                        :disabled="isLocked"
+                        @click="confirm"
                     >
-                        <span v-if="isProcessing">
-                            {{ t('modals.deleteAccount.deleting') }}
-                        </span>
-                        <span v-else>
-                            {{ t('modals.deleteAccount.delete') }}
-                        </span>
+                        {{ isLocked
+                        ? t('modals.deleteAccount.deleting')
+                        : t('modals.deleteAccount.delete')
+                        }}
                     </BaseButton>
 
                     <BaseButton
                         type="button"
                         variant="secondary"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         @click="close"
                     >
                         {{ t('common.cancel') }}

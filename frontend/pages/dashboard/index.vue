@@ -32,12 +32,18 @@ const {getBadge} = useOrderStatus()
 const auth = useAuthStore()
 const dashboard = useDashboardStore()
 
+const pageLoading = ref(true)
+
 /* -----------------------------
    lifecycle
 ------------------------------*/
 
 onMounted(async () => {
-    await dashboard.fetchDashboard()
+    try {
+        await dashboard.fetchDashboard()
+    } finally {
+        pageLoading.value = false
+    }
 })
 
 /* -----------------------------
@@ -69,7 +75,7 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
 
         <h1 class="mb-4">{{ t('dashboard.title') }}</h1>
 
-        <div v-if="dashboard.loading" class="alert alert-light border text-center py-4">
+        <div v-if="pageLoading || dashboard.loading" class="alert alert-light border text-center py-4">
             {{ t('page.loading') }}
         </div>
 

@@ -382,7 +382,7 @@ const confirmDeleteAccount = async () => {
 
     <DeleteAccountModal
         :show="showDeleteModal"
-        :loading="profile.loadingDelete"
+        :processing="profile.loadingDelete"
         @close="showDeleteModal = false"
         @confirm="confirmDeleteAccount"
     />

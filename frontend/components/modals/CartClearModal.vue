@@ -1,14 +1,13 @@
 <script setup lang="ts">
 
+import {computed} from 'vue'
 import {useI18n} from 'vue-i18n'
 
 const {t} = useI18n()
 
-const localePath = useLocalePath()
-
 const props = defineProps<{
     show: boolean
-    isProcessing?: boolean
+    processing?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -16,15 +15,17 @@ const emit = defineEmits<{
     (e: 'confirm'): void
 }>()
 
+const isLocked = computed(() => Boolean(props.processing))
+
 const close = () => {
-    if (props.isProcessing) {
+    if (isLocked.value) {
         return
     }
     emit('close')
 }
 
 const confirm = () => {
-    if (props.isProcessing) {
+    if (isLocked.value) {
         return
     }
     emit('confirm')
@@ -44,6 +45,7 @@ const confirm = () => {
             <div class="modal-content">
 
                 <div class="modal-header">
+
                     <h5 class="modal-title text-danger">
                         {{ t('modals.cartClear.title') }}
                     </h5>
@@ -51,38 +53,39 @@ const confirm = () => {
                     <BaseButton
                         variant="link"
                         class="btn-close"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         aria-label="Close"
                         @click="close"
                     />
+
                 </div>
 
                 <div class="modal-body">
+
                     <p class="mb-0">
-                        {{ t('modals.cartClear.textLine1') }}<br>
+                        {{ t('modals.cartClear.textLine1') }}
+                        <br>
                         {{ t('modals.cartClear.textLine2') }}
                     </p>
+
                 </div>
 
                 <div class="modal-footer">
 
                     <BaseButton
                         variant="danger"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         @click="confirm"
                     >
-                        <span v-if="isProcessing">
-                            {{ t('modals.cartClear.clearing') }}
-                        </span>
-
-                        <span v-else>
-                            {{ t('modals.cartClear.confirm') }}
-                        </span>
+                        {{ isLocked
+                        ? t('modals.cartClear.clearing')
+                        : t('modals.cartClear.confirm')
+                        }}
                     </BaseButton>
 
                     <BaseButton
                         variant="secondary"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         @click="close"
                     >
                         {{ t('common.cancel') }}

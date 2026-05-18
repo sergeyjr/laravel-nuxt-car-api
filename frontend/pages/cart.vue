@@ -34,6 +34,7 @@ const cartStore = useCartStore()
 ------------------------------*/
 
 const isSubmitting = ref(false)
+
 const comment = ref('')
 
 const showRemoveModal = ref(false)
@@ -47,6 +48,7 @@ const selectedItemId = ref<number | null>(null)
 ------------------------------*/
 
 const items = computed(() => cartStore.items)
+
 const total = computed(() => cartStore.total)
 
 /* -----------------------------
@@ -54,54 +56,55 @@ const total = computed(() => cartStore.total)
 ------------------------------*/
 
 function sanitizeQty(value: unknown) {
+
     let qty = Number(value)
+
     if (!Number.isInteger(qty)) {
         qty = Math.floor(qty)
     }
+
     if (Number.isNaN(qty) || qty < 1) {
         qty = 1
     }
+
     return qty
+
 }
 
 /* -----------------------------
-   modal openers
+   modals
 ------------------------------*/
 
-function openRemoveModal(id: number | string) {
-    if (isSubmitting.value) return
-    selectedItemId.value = Number(id)
-    showRemoveModal.value = true
+function openCheckoutModal() {
+    if (isSubmitting.value) {
+        return
+    }
+    showCheckoutModal.value = true
 }
 
 function openClearModal() {
-    if (isSubmitting.value) return
+    if (cartStore.loadingClear) {
+        return
+    }
     showClearModal.value = true
 }
 
-function openCheckoutModal() {
-    if (isSubmitting.value) return
-    showCheckoutModal.value = true
+function openRemoveModal(id: number | string) {
+    if (cartStore.loadingRemove) {
+        return
+    }
+    selectedItemId.value = Number(id)
+    showRemoveModal.value = true
 }
 
 /* -----------------------------
    actions
 ------------------------------*/
 
-const confirmRemoveItem = async () => {
-    if (!selectedItemId.value) return
-    await cartStore.remove(selectedItemId.value)
-    showRemoveModal.value = false
-    selectedItemId.value = null
-}
-
-const confirmClearCart = async () => {
-    await cartStore.clear()
-    showClearModal.value = false
-}
-
 const confirmCheckout = async () => {
-    if (isSubmitting.value) return
+    if (isSubmitting.value) {
+        return
+    }
     isSubmitting.value = true
     try {
         const res: any = await cartStore.checkout({
@@ -113,8 +116,32 @@ const confirmCheckout = async () => {
         }
         showCheckoutModal.value = false
         await navigateTo(localePath(`/order-success/${order.id}`))
+
     } finally {
         isSubmitting.value = false
+    }
+}
+
+const confirmClearCart = async () => {
+    try {
+        await cartStore.clear()
+        showClearModal.value = false
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+const confirmRemoveItem = async () => {
+    if (!selectedItemId.value) {
+        return
+    }
+    try {
+        await cartStore.remove(selectedItemId.value)
+        showRemoveModal.value = false
+    } catch (e) {
+        console.error(e)
+    } finally {
+        selectedItemId.value = null
     }
 }
 
@@ -124,10 +151,15 @@ const confirmCheckout = async () => {
     <div class="container py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">{{ t('cart.title') }}</h2>
+            <h2 class="mb-0">
+                {{ t('cart.title') }}
+            </h2>
         </div>
 
-        <div v-if="cartStore.loading" class="alert alert-light border text-center py-4">
+        <div
+            v-if="cartStore.loading"
+            class="alert alert-light border text-center py-4"
+        >
             {{ t('cart.loading') }}
         </div>
 
@@ -136,16 +168,29 @@ const confirmCheckout = async () => {
             class="card border-0 shadow-sm"
         >
             <div class="card-body text-center py-5">
-                <h4 class="mb-2">{{ t('cart.emptyTitle') }}</h4>
-                <p class="text-muted mb-4">{{ t('cart.emptyText') }}</p>
 
-                <NuxtLink :to="localePath('/cars')" class="btn btn-primary px-4">
+                <h4 class="mb-2">
+                    {{ t('cart.emptyTitle') }}
+                </h4>
+
+                <p class="text-muted mb-4">
+                    {{ t('cart.emptyText') }}
+                </p>
+
+                <NuxtLink
+                    :to="localePath('/cars')"
+                    class="btn btn-primary px-4"
+                >
                     {{ t('cart.goToCatalog') }}
                 </NuxtLink>
+
             </div>
         </div>
 
-        <div v-else class="row g-4 align-items-start">
+        <div
+            v-else
+            class="row g-4 align-items-start"
+        >
 
             <div class="col-12 col-lg-8">
 
@@ -172,8 +217,13 @@ const confirmCheckout = async () => {
 
                                     <div>
 
-                                        <NuxtLink :to="localePath(`/cars/show/${itemData.id}`)" class="text-decoration-none text-dark">
-                                            <h5 class="mb-1">{{ itemData.name }}</h5>
+                                        <NuxtLink
+                                            :to="localePath(`/cars/show/${itemData.id}`)"
+                                            class="text-decoration-none text-dark"
+                                        >
+                                            <h5 class="mb-1">
+                                                {{ itemData.name }}
+                                            </h5>
                                         </NuxtLink>
 
                                         <div class="text-muted small">
@@ -210,6 +260,7 @@ const confirmCheckout = async () => {
                                     <button
                                         type="button"
                                         class="btn btn-outline-secondary btn-sm"
+                                        :disabled="cartStore.loadingUpdate"
                                         @click="cartStore.update(itemId, itemData.qty + 1)"
                                     >
                                         +
@@ -220,19 +271,24 @@ const confirmCheckout = async () => {
                             </div>
 
                             <div class="col-8 col-md-3 text-md-end">
+
                                 <div class="fw-bold fs-5">
                                     {{ formatPrice(itemData.price * itemData.qty) }}
                                 </div>
+
                             </div>
 
                             <div class="col-4 col-md-1 text-end">
+
                                 <button
                                     type="button"
                                     class="btn btn-outline-danger btn-sm"
+                                    :disabled="cartStore.loadingRemove"
                                     @click="openRemoveModal(itemId)"
                                 >
                                     ✕
                                 </button>
+
                             </div>
 
                         </div>
@@ -245,26 +301,41 @@ const confirmCheckout = async () => {
             <div class="col-12 col-lg-4">
 
                 <div class="card border-0 shadow-sm mb-3">
+
                     <div class="card-body">
 
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">{{ t('cart.total') }}:</span>
+
+                            <span class="text-muted">
+                                {{ t('cart.total') }}:
+                            </span>
+
                             <span class="fs-4 fw-bold text-success">
                                 {{ formatPrice(total) }}
                             </span>
+
                         </div>
 
                         <hr>
 
                         <div class="d-flex justify-content-between">
-                            <span class="text-muted">{{ t('cart.items') }}:</span>
-                            <span class="fw-semibold">{{ Object.keys(items).length }}</span>
+
+                            <span class="text-muted">
+                                {{ t('cart.items') }}:
+                            </span>
+
+                            <span class="fw-semibold">
+                                {{ Object.keys(items).length }}
+                            </span>
+
                         </div>
 
                     </div>
+
                 </div>
 
                 <div class="card border-0 shadow-sm mb-3">
+
                     <div class="card-body">
 
                         <BaseTextarea
@@ -276,9 +347,11 @@ const confirmCheckout = async () => {
                         />
 
                     </div>
+
                 </div>
 
                 <div class="card border-0 shadow-sm">
+
                     <div class="card-body d-grid gap-2">
 
                         <BaseButton
@@ -290,21 +363,24 @@ const confirmCheckout = async () => {
                             @click="openCheckoutModal"
                         >
                             {{ t('cart.checkout') }}
+
                             <template #loading>
                                 {{ t('cart.checkoutLoading') }}
                             </template>
+
                         </BaseButton>
 
                         <BaseButton
                             variant="outline-danger"
                             class="w-100"
-                            :disabled="isSubmitting || !Object.keys(items).length"
+                            :disabled="cartStore.loadingClear || !Object.keys(items).length"
                             @click="openClearModal"
                         >
                             {{ t('cart.clear') }}
                         </BaseButton>
 
                     </div>
+
                 </div>
 
             </div>
@@ -320,8 +396,9 @@ const confirmCheckout = async () => {
 
         <CartCheckoutModal
             :show="showCheckoutModal"
+            :processing="isSubmitting"
             @close="showCheckoutModal = false"
-            @success="confirmCheckout"
+            @confirm="confirmCheckout"
         />
 
         <CartClearModal

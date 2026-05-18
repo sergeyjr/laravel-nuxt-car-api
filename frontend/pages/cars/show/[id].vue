@@ -78,6 +78,7 @@ const isAdding = (id: number | string) =>
 const openAuthModal = (event?: Event) => {
     event?.stopPropagation()
     event?.preventDefault()
+    authStore.clearErrors()
     showAuth.value = true
 }
 
@@ -314,7 +315,7 @@ watch(carId, async (newId, oldId) => {
                 </BaseButton>
 
                 <NuxtLink
-                    to="/cars"
+                    :to="localePath('/cars')"
                     class="text-decoration-none"
                 >
                     <BaseButton variant="light">
@@ -325,8 +326,10 @@ watch(carId, async (newId, oldId) => {
             </div>
 
             <LoginModal
-                v-model:show="showAuth"
-                :loading="authLoading"
+                :show="showAuth"
+                :processing="authLoading"
+                :errors="authStore.errors"
+                @close="showAuth = false"
                 @confirm="confirmLogin"
             />
 

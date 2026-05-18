@@ -8,45 +8,47 @@ import BaseInput from '~/components/BaseInput.vue'
 
 const {t} = useI18n()
 
-const localePath = useLocalePath()
-
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     show: boolean
-    loading?: boolean
+    processing?: boolean
     errors?: Record<string, string>
-}>()
+}>(), {
+    processing: false
+})
 
 const emit = defineEmits<{
-    (e: 'update:show', value: boolean): void
+    (e: 'close'): void
     (e: 'confirm', payload: { email: string; password: string }): void
 }>()
 
 const email = ref('')
 const password = ref('')
 
-const isProcessing = computed(() => {
-    return props.loading ?? false
-})
+const isLocked = computed(() => Boolean(props.processing))
 
 const close = () => {
-    if (isProcessing.value) {
+    if (isLocked.value) {
         return
     }
-    emit('update:show', false)
+    emit('close')
 }
 
-const submit = () => {
+const confirm = () => {
+    if (isLocked.value) {
+        return
+    }
     emit('confirm', {
         email: email.value,
-        password: password.value,
+        password: password.value
     })
 }
 
-watch(() => props.show, (val) => {
-    if (val) {
-        email.value = ''
-        password.value = ''
+watch(() => props.show, (show) => {
+    if (!show) {
+        return
     }
+    email.value = ''
+    password.value = ''
 })
 
 </script>
@@ -56,13 +58,14 @@ watch(() => props.show, (val) => {
         v-if="show"
         class="modal fade show d-block"
         tabindex="-1"
-        style="background: rgba(0,0,0,.5);"
+        style="background: rgba(0,0,0,.6);"
         @click.self="close"
     >
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
 
                 <div class="modal-header">
+
                     <h5 class="modal-title">
                         {{ t('modals.auth.loginTitle') }}
                     </h5>
@@ -70,10 +73,11 @@ watch(() => props.show, (val) => {
                     <BaseButton
                         variant="link"
                         class="btn-close"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         aria-label="Close"
                         @click="close"
                     />
+
                 </div>
 
                 <div class="modal-body">
@@ -85,14 +89,14 @@ watch(() => props.show, (val) => {
                         {{ errors.general }}
                     </div>
 
-                    <form @submit.prevent="submit">
+                    <form @submit.prevent="confirm">
 
                         <BaseInput
                             v-model="email"
                             type="email"
                             :label="t('modals.auth.email')"
                             required
-                            :disabled="isProcessing"
+                            :disabled="isLocked"
                             :error="errors?.email"
                         />
 
@@ -101,22 +105,26 @@ watch(() => props.show, (val) => {
                             type="password"
                             :label="t('modals.auth.password')"
                             required
-                            :disabled="isProcessing"
+                            :disabled="isLocked"
                             :error="errors?.password"
                         />
 
                         <BaseButton
                             type="submit"
                             class="w-100 mt-3"
-                            :loading="isProcessing"
+                            :loading="isLocked"
+                            :disabled="isLocked"
                         >
                             <template #loading>
                                 {{ t('modals.auth.loggingIn') }}
                             </template>
+
                             {{ t('modals.auth.login') }}
+
                         </BaseButton>
 
                     </form>
+
                 </div>
 
             </div>

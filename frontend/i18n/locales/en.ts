@@ -267,7 +267,7 @@ export default {
 
     profile: {
         avatar: 'Avatar',
-        backToDashboard: '← Back to dashboard',
+        backToDashboard: 'Back to dashboard',
         confirmPassword: 'Confirmation',
         createdAt: 'Created',
         currentPassword: 'Current password',

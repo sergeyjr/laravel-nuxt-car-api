@@ -267,7 +267,7 @@ export default {
 
     profile: {
         avatar: 'Аватар',
-        backToDashboard: '← В панель управления',
+        backToDashboard: 'В панель управления',
         confirmPassword: 'Подтверждение',
         createdAt: 'Создан',
         currentPassword: 'Текущий пароль',

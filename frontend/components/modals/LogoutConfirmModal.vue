@@ -5,41 +5,31 @@ import {useI18n} from 'vue-i18n'
 
 const {t} = useI18n()
 
-const localePath = useLocalePath()
-
-/* -----------------------------
-   props
-------------------------------*/
-
 const props = withDefaults(defineProps<{
     show: boolean
-    loading?: boolean
+    processing?: boolean
 }>(), {
-    loading: false
+    processing: false
 })
 
 const emit = defineEmits<{
-    (e: 'update:show', value: boolean): void
+    (e: 'close'): void
     (e: 'confirm'): void
 }>()
 
-/* -----------------------------
-   computed
-------------------------------*/
-
-const isProcessing = computed(() => props.loading)
-
-/* -----------------------------
-   actions
-------------------------------*/
+const isLocked = computed(() => Boolean(props.processing))
 
 const close = () => {
-    if (isProcessing.value) return
-    emit('update:show', false)
+    if (isLocked.value) {
+        return
+    }
+    emit('close')
 }
 
-const confirmLogout = () => {
-    if (isProcessing.value) return
+const confirm = () => {
+    if (isLocked.value) {
+        return
+    }
     emit('confirm')
 }
 
@@ -50,13 +40,14 @@ const confirmLogout = () => {
         v-if="show"
         class="modal fade show d-block"
         tabindex="-1"
-        style="background: rgba(0,0,0,.5);"
+        style="background: rgba(0,0,0,.6);"
         @click.self="close"
     >
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
 
                 <div class="modal-header">
+
                     <h5 class="modal-title">
                         {{ t('modals.logout.title') }}
                     </h5>
@@ -64,36 +55,37 @@ const confirmLogout = () => {
                     <BaseButton
                         variant="link"
                         class="btn-close"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         aria-label="Close"
                         @click="close"
                     />
+
                 </div>
 
                 <div class="modal-body">
+
                     <p class="mb-0">
                         {{ t('modals.logout.text') }}
                     </p>
+
                 </div>
 
                 <div class="modal-footer">
 
                     <BaseButton
                         variant="danger"
-                        :disabled="isProcessing"
-                        @click="confirmLogout"
+                        :disabled="isLocked"
+                        @click="confirm"
                     >
-                        <span v-if="isProcessing">
-                            {{ t('modals.logout.loggingOut') }}
-                        </span>
-                        <span v-else>
-                            {{ t('modals.logout.confirm') }}
-                        </span>
+                        {{ isLocked
+                        ? t('modals.logout.loggingOut')
+                        : t('modals.logout.confirm')
+                        }}
                     </BaseButton>
 
                     <BaseButton
                         variant="secondary"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         @click="close"
                     >
                         {{ t('common.cancel') }}

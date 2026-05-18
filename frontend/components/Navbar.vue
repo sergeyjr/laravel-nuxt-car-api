@@ -21,7 +21,7 @@ const cart = useCartStore()
 const route = useRoute()
 
 /* -----------------------------
-   NUXT i18n
+   i18n
 ------------------------------*/
 
 const {t, locale, setLocale} = useI18n()
@@ -84,10 +84,11 @@ const currentLanguage = computed(() => {
 ------------------------------*/
 
 const cartCount = computed(() => {
-    if (!auth.isAuth) return 0
-    return Array.isArray(cart.items)
-        ? cart.items.length
-        : Object.keys(cart.items ?? {}).length
+    if (!auth.isAuth) {
+        return 0
+    }
+
+    return Object.keys(cart.items).length
 })
 
 /* -----------------------------
@@ -194,9 +195,13 @@ const onLogout = async () => {
                     </span>
                     </NuxtLink>
 
-                    <BaseButton class="nav-link logout" @click="showLogoutModal = true">
+                    <button
+                        type="button"
+                        class="nav-link logout-link"
+                        @click="showLogoutModal = true"
+                    >
                         {{ t('nav.logout') }}
-                    </BaseButton>
+                    </button>
 
                 </template>
 
@@ -238,8 +243,9 @@ const onLogout = async () => {
         </div>
 
         <LogoutModal
-            v-model:show="showLogoutModal"
-            :loading="isLogoutLoading"
+            :show="showLogoutModal"
+            :processing="isLogoutLoading"
+            @close="showLogoutModal = false"
             @confirm="onLogout"
         />
 
@@ -322,11 +328,11 @@ const onLogout = async () => {
     gap: 6px;
 }
 
-.logout {
+.logout-link {
     color: #fca5a5;
 }
 
-.logout:hover {
+.logout-link:hover {
     color: #ef4444;
 }
 

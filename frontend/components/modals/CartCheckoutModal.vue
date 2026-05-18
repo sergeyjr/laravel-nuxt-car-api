@@ -1,46 +1,34 @@
 <script setup lang="ts">
 
 import {computed} from 'vue'
-
 import {useI18n} from 'vue-i18n'
-
-import {useCartStore} from '~/stores/cart'
-
-/* -----------------------------
-   i18n
-------------------------------*/
 
 const {t} = useI18n()
 
-const localePath = useLocalePath()
-
-defineProps<{
+const props = defineProps<{
     show: boolean
+    processing?: boolean
 }>()
 
 const emit = defineEmits<{
     (e: 'close'): void
-    (e: 'success'): void
+    (e: 'confirm'): void
 }>()
 
-const cart = useCartStore()
-
-const isProcessing = computed(() => {
-    return cart.loadingCheckout
-})
+const isLocked = computed(() => Boolean(props.processing))
 
 const close = () => {
-    if (isProcessing.value) {
+    if (isLocked.value) {
         return
     }
     emit('close')
 }
 
-const confirmOrder = () => {
-    if (isProcessing.value) {
+const confirm = () => {
+    if (isLocked.value) {
         return
     }
-    emit('success')
+    emit('confirm')
 }
 
 </script>
@@ -57,6 +45,7 @@ const confirmOrder = () => {
             <div class="modal-content">
 
                 <div class="modal-header">
+
                     <h5 class="modal-title text-success">
                         {{ t('modals.checkout.title') }}
                     </h5>
@@ -64,38 +53,39 @@ const confirmOrder = () => {
                     <BaseButton
                         variant="link"
                         class="btn-close"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         aria-label="Close"
                         @click="close"
                     />
+
                 </div>
 
                 <div class="modal-body">
+
                     <p class="mb-0">
                         {{ t('modals.checkout.confirm') }}
                         <br>
                         {{ t('modals.checkout.warning') }}
                     </p>
+
                 </div>
 
                 <div class="modal-footer">
 
                     <BaseButton
                         variant="success"
-                        :disabled="isProcessing"
-                        @click="confirmOrder"
+                        :disabled="isLocked"
+                        @click="confirm"
                     >
-                        <span v-if="isProcessing">
-                            {{ t('modals.checkout.sending') }}
-                        </span>
-                        <span v-else>
-                            {{ t('modals.checkout.confirmButton') }}
-                        </span>
+                        {{ isLocked
+                        ? t('modals.checkout.sending')
+                        : t('modals.checkout.confirmButton')
+                        }}
                     </BaseButton>
 
                     <BaseButton
                         variant="secondary"
-                        :disabled="isProcessing"
+                        :disabled="isLocked"
                         @click="close"
                     >
                         {{ t('common.cancel') }}

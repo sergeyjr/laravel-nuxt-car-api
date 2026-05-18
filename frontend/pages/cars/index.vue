@@ -147,7 +147,13 @@ onMounted(async () => {
 })
 
 watch(page, async (newPage) => {
+
+    if (carStore.hasPage(newPage)) {
+        return
+    }
+
     await loadCars(newPage)
+
 })
 
 </script>
@@ -255,9 +261,10 @@ watch(page, async (newPage) => {
         </div>
 
         <LoginModal
-            v-model:show="showAuth"
-            :loading="authLoading"
+            :show="showAuth"
+            :processing="authLoading"
             :errors="authErrors"
+            @close="showAuth = false"
             @confirm="confirmLogin"
         />
 

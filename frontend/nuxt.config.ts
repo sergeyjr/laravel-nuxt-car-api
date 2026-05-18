@@ -27,18 +27,21 @@ export default defineNuxtConfig({
     ],
 
     // Pinia (state management)
-    modules: ['@pinia/nuxt', '@nuxtjs/i18n'],
+    modules: [
+        '@pinia/nuxt',
+        '@nuxtjs/i18n'
+    ],
 
     i18n: {
         defaultLocale: 'ru',
         strategy: 'prefix_except_default',
-        langDir: 'locales/',
+        langDir: 'locales',
         locales: [
             {code: 'ru', file: 'ru.ts', name: 'Русский'},
             {code: 'en', file: 'en.ts', name: 'English'}
         ],
         detectBrowserLanguage: false,
-        vueI18n: './i18n/config.ts'
+        vueI18n: './i18n/config',
     },
 
     // Конфигурация окружений
@@ -58,10 +61,10 @@ export default defineNuxtConfig({
     },
 
     experimental: {
-        // ОТКЛЮЧАЕТ восстановление состояния между навигациями
+        // восстановление состояния между навигациями
         // restoreState: false,
 
-        // НЕ очищает кеш useAsyncData / useFetch при переходах между страницами
+        // очищает кеш useAsyncData / useFetch при переходах между страницами
         purgeCachedData: false,
     },
 
