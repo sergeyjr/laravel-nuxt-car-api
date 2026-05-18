@@ -16,6 +16,7 @@ import BaseInput from '~/components/BaseInput.vue'
 const {t} = useI18n()
 
 const localePath = useLocalePath()
+
 /* -----------------------------
    store
 ------------------------------*/

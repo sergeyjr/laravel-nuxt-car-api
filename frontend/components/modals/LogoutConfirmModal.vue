@@ -73,22 +73,23 @@ const confirm = () => {
                 <div class="modal-footer">
 
                     <BaseButton
-                        variant="danger"
-                        :disabled="isLocked"
-                        @click="confirm"
-                    >
-                        {{ isLocked
-                        ? t('modals.logout.loggingOut')
-                        : t('modals.logout.confirm')
-                        }}
-                    </BaseButton>
-
-                    <BaseButton
                         variant="secondary"
                         :disabled="isLocked"
                         @click="close"
                     >
                         {{ t('common.cancel') }}
+                    </BaseButton>
+
+                    <BaseButton
+                        variant="danger"
+                        :disabled="isLocked"
+                        @click="confirm"
+                    >
+                        {{
+                            isLocked
+                                ? t('modals.logout.loggingOut')
+                                : t('modals.logout.confirm')
+                        }}
                     </BaseButton>
 
                 </div>

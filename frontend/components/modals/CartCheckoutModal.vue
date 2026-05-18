@@ -73,22 +73,23 @@ const confirm = () => {
                 <div class="modal-footer">
 
                     <BaseButton
-                        variant="success"
-                        :disabled="isLocked"
-                        @click="confirm"
-                    >
-                        {{ isLocked
-                        ? t('modals.checkout.sending')
-                        : t('modals.checkout.confirmButton')
-                        }}
-                    </BaseButton>
-
-                    <BaseButton
                         variant="secondary"
                         :disabled="isLocked"
                         @click="close"
                     >
                         {{ t('common.cancel') }}
+                    </BaseButton>
+
+                    <BaseButton
+                        variant="success"
+                        :disabled="isLocked"
+                        @click="confirm"
+                    >
+                        {{
+                            isLocked
+                                ? t('modals.checkout.sending')
+                                : t('modals.checkout.confirmButton')
+                        }}
                     </BaseButton>
 
                 </div>

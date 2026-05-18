@@ -56,7 +56,8 @@ laravel/
 │   │   │       ├── DebugRequest.php
 │   │   │       ├── EnsureApiRole.php
 │   │   │       ├── FixJsonMiddleware.php
-│   │   │       └── RedirectIfAuthenticated.php
+│   │   │       ├── RedirectIfAuthenticated.php
+│   │   │       └── SetLocale.php
 │   │   ├── Models/
 │   │   │   ├── Car.php
 │   │   │   ├── Cart.php
@@ -128,7 +129,7 @@ laravel/
 │   │       └── validation.php
 │   ├── public/
 │   │   ├── index.php
-│   │   └── scan.php
+│   │   ├── scan.php
 │   ├── routes/
 │   │   ├── api.php
 │   │   ├── console.php
@@ -149,17 +150,16 @@ laravel/
 │   ├── assets/
 │   │   ├── css/
 │   │   │   └── app.css
-│   │   ├── images/
-│   │   │   └── cars/
-│   │   │       └── car.jpg
-│   │   └── js/
+│   │   └── images/
+│   │       └── cars/
+│   │           └── car.jpg
 │   ├── components/
 │   │   ├── modals/
-│   │   │   ├── AuthModal.vue
 │   │   │   ├── CartCheckoutModal.vue
 │   │   │   ├── CartClearModal.vue
 │   │   │   ├── CartRemoveItemModal.vue
 │   │   │   ├── DeleteAccountModal.vue
+│   │   │   ├── LoginModal.vue
 │   │   │   └── LogoutConfirmModal.vue
 │   │   ├── Alerts.vue
 │   │   ├── BaseButton.vue
@@ -167,15 +167,20 @@ laravel/
 │   │   ├── BaseFileInput.vue
 │   │   ├── BaseInput.vue
 │   │   ├── BaseTextarea.vue
+│   │   ├── Footer.vue
 │   │   ├── Navbar.vue
 │   │   └── Pagination.vue
 │   ├── composables/
 │   │   ├── useApi.ts
-│   │   ├── useApiToken.ts
 │   │   ├── useLogout.ts
 │   │   ├── useModal.ts
 │   │   ├── useOrderStatus.ts
 │   │   └── useProtected.ts
+│   ├── i18n/
+│   │   ├── locales/
+│   │   │   ├── en.ts
+│   │   │   └── ru.ts
+│   │   └── __config.ts
 │   ├── layouts/
 │   │   └── default.vue
 │   ├── middleware/
@@ -204,7 +209,6 @@ laravel/
 │   │   ├── login.vue
 │   │   └── register.vue
 │   ├── plugins/
-│   │   ├── api.token.ts
 │   │   ├── api.ts
 │   │   ├── auth.ts
 │   │   ├── bootstrap.client.ts
@@ -217,23 +221,18 @@ laravel/
 │   │   └── robots.txt
 │   ├── services/
 │   │   └── api/
-│   │       ├── external/
-│   │       │   └── v1/
-│   │       │       └── car.api.ts
-│   │       └── internal/
-│   │           ├── auth.api.ts
-│   │           ├── car.api.ts
-│   │           ├── cart.api.ts
-│   │           ├── contact.api.ts
-│   │           ├── dashboard.api.ts
-│   │           ├── order.api.ts
-│   │           ├── page.api.ts
-│   │           └── profile.api.ts
+│   │       ├── auth.api.ts
+│   │       ├── car.api.ts
+│   │       ├── cart.api.ts
+│   │       ├── contact.api.ts
+│   │       ├── dashboard.api.ts
+│   │       ├── order.api.ts
+│   │       ├── page.api.ts
+│   │       └── profile.api.ts
 │   ├── stores/
 │   │   ├── alert.ts
 │   │   ├── auth.ts
 │   │   ├── car.ts
-│   │   ├── car.v1.ts
 │   │   ├── cart.ts
 │   │   ├── contact.ts
 │   │   ├── dashboard.ts
@@ -249,8 +248,7 @@ laravel/
 │   │   └── page.ts
 │   ├── utils/
 │   │   ├── debug.ts
-│   │   ├── formatters.ts
-│   │   └── navigation.ts
+│   │   └── formatters.ts
 │   ├── .gitignore
 │   ├── app.vue
 │   ├── error.vue

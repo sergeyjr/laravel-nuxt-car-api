@@ -14,15 +14,23 @@ class RedirectIfAuthenticated
 
         $guards = empty($guards) ? [null] : $guards;
 
+        $locale = app()->getLocale();
+
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+
                 if ($request->expectsJson()) {
                     return response()->json([
                         'message' => 'Аутентификация уже пройдена.'
                     ], 200);
                 }
 
-                return redirect('/dashboard');
+                $url = '/dashboard';
+                if ($locale != 'ru') {
+                    $url = '/' . $locale . '/dashboard';
+                }
+
+                return redirect($url);
             }
         }
 

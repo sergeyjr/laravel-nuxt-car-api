@@ -118,9 +118,7 @@ watch(() => props.show, (show) => {
                             <template #loading>
                                 {{ t('modals.auth.loggingIn') }}
                             </template>
-
                             {{ t('modals.auth.login') }}
-
                         </BaseButton>
 
                     </form>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 
+console.log('[Dashboard Vue]');
+
 import {computed, onMounted} from 'vue'
 
 import {useI18n} from 'vue-i18n'

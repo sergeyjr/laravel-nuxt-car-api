@@ -41,6 +41,8 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async fetchUser() {
+            console.log('[Auth Store] fetchUser')
+
             const api = useAuthApi()
 
             try {
@@ -58,6 +60,8 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async initAuth() {
+            console.log('[Auth Store] initAuth')
+
             if (this.initialized || this.initializing) {
                 return this.isAuth
             }
@@ -74,6 +78,7 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async login(email: string, password: string) {
+            console.log('[Auth Store] login')
 
             this.loading = true
             this.clearErrors()
@@ -109,6 +114,8 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async register(payload: any) {
+            console.log('[Auth Store] register')
+
             this.loading = true
             this.clearErrors()
 
@@ -134,6 +141,8 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async logout() {
+            console.log('[Auth Store] logout')
+
             if (this.loggingOut) {
                 return false
             }

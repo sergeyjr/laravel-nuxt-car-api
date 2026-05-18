@@ -79,23 +79,24 @@ const confirm = () => {
 
                     <BaseButton
                         type="button"
-                        variant="danger"
-                        :disabled="isLocked"
-                        @click="confirm"
-                    >
-                        {{ isLocked
-                        ? t('modals.deleteAccount.deleting')
-                        : t('modals.deleteAccount.delete')
-                        }}
-                    </BaseButton>
-
-                    <BaseButton
-                        type="button"
                         variant="secondary"
                         :disabled="isLocked"
                         @click="close"
                     >
                         {{ t('common.cancel') }}
+                    </BaseButton>
+
+                    <BaseButton
+                        type="button"
+                        variant="danger"
+                        :disabled="isLocked"
+                        @click="confirm"
+                    >
+                        {{
+                            isLocked
+                                ? t('modals.deleteAccount.deleting')
+                                : t('modals.deleteAccount.delete')
+                        }}
                     </BaseButton>
 
                 </div>
