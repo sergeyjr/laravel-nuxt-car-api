@@ -48,7 +48,7 @@
 * смена пароля;
 * управление аккаунтом.
 
-![Профиль](frontend/public/images/screenshots/laravel-profile.png)
+![Профиль](frontend/public/images/screenshots/laravel-dashboard-profile.png)
 
 ---
 
@@ -87,6 +87,15 @@
 * модальные окна подтверждения действий.
 
 ![Корзина](frontend/public/images/screenshots/laravel-cart.png)
+
+---
+
+# Мультиязычность
+
+**В проекте реализована поддержка двух языков: `ru / en`.**  
+Это важная часть интерфейса: пользовательская и административная части могут отображаться на русском и английском языках.
+
+![Dashboard EN](frontend/public/images/screenshots/laravel-dashboard-en.png)
 
 ---
 
@@ -149,6 +158,7 @@ Frontend реализован на Nuxt 4 + Vue с использованием 
 * middleware protection;
 * reusable UI components;
 * API service layer;
+* мультиязычность (`ru`, `en`);
 * SSR-ready структура.
 
 ---
@@ -158,62 +168,3 @@ Frontend реализован на Nuxt 4 + Vue с использованием 
 ```text
 backend/   -> Laravel API
 frontend/  -> Nuxt frontend
-```
-
-Проект использует API-first подход, что позволяет:
-
-* подключать мобильные приложения;
-* масштабировать frontend независимо от backend;
-* интегрировать внешние сервисы;
-* развивать публичное API.
-
----
-
-# Основные сущности системы
-
-* Users
-* Cars
-* Car Options
-* Cart
-* Orders
-* Pages
-* Contacts
-
----
-
-# Безопасность
-
-Реализовано:
-
-* token authentication;
-* middleware authorization;
-* role-based access;
-* protected routes;
-* API validation.
-
----
-
-# Дополнительно
-
-* [частичная] мультиязычность (`ru`, `en`);
-* feature tests;
-* seeders и factories;
-
----
-
-# Стек проекта
-
-## Backend
-
-* PHP
-* Laravel
-* Sanctum
-* PostgreSQL
-
-## Frontend
-
-* Nuxt 4
-* Vue 3
-* Pinia
-* TypeScript
-* Bootstrap 5

@@ -54,7 +54,7 @@ onBeforeUnmount(() => {
             <div class="d-flex gap-3 mt-2 mt-md-0">
 
                 <NuxtLink
-                    :to="localePath('/cars')"
+                    :to="localePath('/catalog')"
                     class="footer-link"
                     active-class="active"
                     exact-active-class="active"

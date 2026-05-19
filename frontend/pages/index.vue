@@ -61,7 +61,7 @@ const swiperOptions = {
 }
 
 /* -----------------------------
-   cars
+   catalog
 ------------------------------*/
 
 const carStore = useCarStore()
@@ -79,7 +79,7 @@ const onImgError = (e: Event) => {
 }
 
 const openCar = (id: number | string) =>
-    navigateTo(localePath(`/cars/show/${id}`))
+    navigateTo(localePath(`/catalog/show/${id}`))
 
 /* -----------------------------
    lifecycle
@@ -95,7 +95,7 @@ onMounted(() => {
 
 const quickLinks = [
     {
-        to: '/',
+        to: '/catalog',
         icon: 'bi-grid-1x2',
         label: 'Каталог',
         hint: 'Все автомобили',

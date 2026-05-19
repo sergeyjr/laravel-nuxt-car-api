@@ -31,8 +31,7 @@ export const useLogout = () => {
 
         const shouldRedirect =
             normalizedPath.startsWith('/cart') ||
-            normalizedPath.startsWith('/dashboard') ||
-            normalizedPath.startsWith('/cars/create')
+            normalizedPath.startsWith('/dashboard')
 
         console.log('[useLogout] normalized:', normalizedPath)
         console.log('[useLogout] shouldRedirect:', shouldRedirect)

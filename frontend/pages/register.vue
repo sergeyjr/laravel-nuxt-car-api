@@ -112,7 +112,7 @@ onMounted(() => {
                     <BaseInput
                         v-model="email"
                         type="email"
-                        label="t('auth.email')"
+                        :label="t('auth.email')"
                         required
                         :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.email"

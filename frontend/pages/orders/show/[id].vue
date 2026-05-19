@@ -152,7 +152,7 @@ watch(orderId, async (newId, oldId) => {
 
                                     <div class="d-flex align-items-center gap-3">
 
-                                        <NuxtLink :to="localePath(`/cars/show/${item.car_id}`)">
+                                        <NuxtLink :to="localePath(`/catalog/show/${item.car_id}`)">
                                             <img
                                                 :src="getItemPhoto(item)"
                                                 class="rounded border"
@@ -164,7 +164,7 @@ watch(orderId, async (newId, oldId) => {
                                         <div>
 
                                             <NuxtLink
-                                                :to="localePath(`/cars/show/${item.car_id}`)"
+                                                :to="localePath(`/catalog/show/${item.car_id}`)"
                                                 class="text-decoration-none text-dark"
                                             >
                                                 <h5 class="mb-1">

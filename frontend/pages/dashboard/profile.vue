@@ -66,10 +66,6 @@ const current_password = ref('')
 const password = ref('')
 const password_confirmation = ref('')
 
-const goBack = () => {
-    navigateTo(localePath('/dashboard'))
-}
-
 /* -----------------------------
    watch
 ------------------------------*/
@@ -78,9 +74,7 @@ watch(
     () => authStore.user,
     (user) => {
         if (!user) return
-
         profileStore.load(user)
-
         name.value = user.name ?? ''
         email.value = user.email ?? ''
         remove_avatar.value = false
@@ -89,29 +83,21 @@ watch(
 )
 
 /* -----------------------------
-   profile validation
+   actions
 ------------------------------*/
 
 const validateUpdateProfile = () => {
     profileStore.resetErrors()
-
     let hasError = false
-
     if (!name.value) {
         profileStore.errors.name = t('profile.nameRequired')
         hasError = true
     }
-
     return !hasError
 }
 
-/* -----------------------------
-   profile submit
-------------------------------*/
-
 const submitUpdateProfile = async () => {
     if (!validateUpdateProfile()) return
-
     await profileStore.updateProfile({
         name: name.value,
         // email: email.value,
@@ -119,51 +105,35 @@ const submitUpdateProfile = async () => {
     })
 }
 
-/* -----------------------------
-   password validation
-------------------------------*/
-
 const validatePassword = () => {
     profileStore.resetErrors()
-
     let hasError = false
-
     if (!current_password.value) {
         profileStore.errors.current_password = t('profile.currentPasswordRequired')
         hasError = true
     }
-
     if (!password.value) {
         profileStore.errors.password = t('profile.passwordRequired')
         hasError = true
     }
-
     if (password.value && password.value.length < 6) {
         profileStore.errors.password = t('profile.passwordMin')
         hasError = true
     }
-
     if (password.value !== password_confirmation.value) {
         profileStore.errors.password_confirmation = t('profile.passwordMismatch')
         hasError = true
     }
-
     return !hasError
 }
 
-/* -----------------------------
-   password submit
-------------------------------*/
-
 const submitPassword = async () => {
     if (!validatePassword()) return
-
     const ok = await profileStore.changePassword({
         current_password: current_password.value,
         password: password.value,
         password_confirmation: password_confirmation.value
     })
-
     if (ok) {
         current_password.value = ''
         password.value = ''
@@ -171,16 +141,15 @@ const submitPassword = async () => {
     }
 }
 
-/* -----------------------------
-   delete account
-------------------------------*/
-
 const confirmDeleteAccount = async () => {
     const ok = await profileStore.deleteAccount()
-
     if (ok) {
         showDeleteModal.value = false
     }
+}
+
+const goBack = () => {
+    navigateTo(localePath('/dashboard'))
 }
 
 </script>

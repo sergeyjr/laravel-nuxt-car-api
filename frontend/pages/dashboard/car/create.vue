@@ -34,7 +34,7 @@ const submit = async () => {
     try {
         const result = await carStore.submitCreateCarForm()
         // if (result?.id) {
-        //     await navigateTo(`/cars/show/${result.id}`)
+        //     await navigateTo(`/catalog/show/${result.id}`)
         // }
     } catch (e) {
         console.error(e)
@@ -49,12 +49,25 @@ const generate = async () => {
     }
 }
 
+const goBack = () => {
+    navigateTo(localePath('/dashboard'))
+}
+
 </script>
 
 <template>
     <div class="container mt-4">
 
-        <h1 class="mb-4">{{ t('car.createTitle') }}</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">{{ t('car.createTitle') }}</h2>
+
+            <BaseButton
+                variant="outline-secondary"
+                @click="goBack"
+            >
+                ← {{ t('profile.backToDashboard') }}
+            </BaseButton>
+        </div>
 
         <form @submit.prevent="submit">
 

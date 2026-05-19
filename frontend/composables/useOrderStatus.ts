@@ -1,3 +1,5 @@
+import {useI18n} from 'vue-i18n'
+
 export const ORDER_STATUS = {
     pending_payment: 'pending_payment',
     processing: 'processing',
@@ -10,16 +12,6 @@ export const ORDER_STATUS = {
 
 export type OrderStatus =
     typeof ORDER_STATUS[keyof typeof ORDER_STATUS]
-
-const statusLabels: Record<OrderStatus, string> = {
-    pending_payment: 'Ожидает оплаты',
-    processing: 'В обработке',
-    packed: 'Собран',
-    shipped: 'Отправлен',
-    completed: 'Завершён',
-    cancelled: 'Отменён',
-    refunded: 'Возврат'
-}
 
 const statusClasses: Record<OrderStatus, string> = {
     pending_payment: 'bg-warning text-dark',
@@ -37,11 +29,13 @@ const isOrderStatus = (status: string): status is OrderStatus => {
 
 export const useOrderStatus = () => {
 
+    const {t} = useI18n()
+
     const getLabel = (status: string): string => {
         if (!status) return '—'
 
         return isOrderStatus(status)
-            ? statusLabels[status]
+            ? t(`orderStatus.${status}`)
             : status
     }
 
@@ -64,5 +58,4 @@ export const useOrderStatus = () => {
         getClass,
         getBadge
     }
-
 }

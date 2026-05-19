@@ -189,7 +189,7 @@ const order = computed(() => orderStore.currentOrder)
                     <!-- ACTIONS -->
                     <div class="d-flex justify-content-center gap-2 mt-4">
 
-                        <NuxtLink :to="localePath('/cars')" class="btn btn-outline-secondary">
+                        <NuxtLink :to="localePath('/catalog')" class="btn btn-outline-secondary">
                             {{ t('order.continueShopping') }}
                         </NuxtLink>
 

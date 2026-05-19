@@ -255,7 +255,7 @@ export const useCarStore = defineStore('car', {
 
                 this.showAlert(
                     'success',
-                    `${res.message || `Создано ID: ${res.id}`} — <a href="/cars/show/${res.id}">открыть</a>`
+                    `${res.message || `Создано ID: ${res.id}`} — <a href="/catalog/show/${res.id}">открыть</a>`
                 )
 
                 this.reset()

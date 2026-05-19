@@ -172,7 +172,7 @@ const onLogout = async () => {
 
             <div class="nav-links">
 
-                <NuxtLink :to="localePath('/cars')" class="nav-link" :class="{ active: isActive('/cars') }">
+                <NuxtLink :to="localePath('/catalog')" class="nav-link" :class="{ active: isActive('/catalog') }">
                     {{ t('nav.catalog') }}
                 </NuxtLink>
 

@@ -94,8 +94,8 @@ export default {
         },
         catalog: {
             title: 'Catalog',
-            totalCars: 'Total cars',
-            myCars: 'My cars',
+            totalCars: 'Total catalog',
+            myCars: 'My catalog',
             addCar: 'Add car',
             goToCatalog: 'Go to catalog',
         },
@@ -254,6 +254,16 @@ export default {
         sum: 'Sum',
         title: 'Order #{id}',
         total: 'Total',
+    },
+    
+    orderStatus: {
+        pending_payment: 'Pending payment',
+        processing: 'Processing',
+        packed: 'Packed',
+        shipped: 'Shipped',
+        completed: 'Completed',
+        cancelled: 'Cancelled',
+        refunded: 'Refunded',
     },
 
     page: {

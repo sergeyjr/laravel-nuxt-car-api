@@ -108,8 +108,15 @@ export default defineNuxtConfig({
 
             // следит за файлами внутри docker volume
             watch: {
-                interval: 100,
                 usePolling: true,
+                interval: 300,
+                ignored: [
+                    '**/.nuxt/**',
+                    '**/.output/**',
+                    '**/node_modules/**',
+                    '**/.git/**',
+                    '**/*.log',
+                ],
             }
         }
 

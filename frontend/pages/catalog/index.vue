@@ -82,7 +82,7 @@ const openAuthModal = (event?: Event) => {
 
 const changePage = (newPage: number) =>
     navigateTo(localePath({
-        path: '/cars',
+        path: '/catalog',
         query: {
             ...route.query,
             page: newPage
@@ -135,9 +135,6 @@ const confirmLogin = async (payload: LoginPayload) => {
 ------------------------------*/
 
 onMounted(async () => {
-    if (carStore.hasPage(page.value)) {
-        return
-    }
     try {
         initialLoading.value = true
         await loadCars(page.value)
@@ -147,13 +144,7 @@ onMounted(async () => {
 })
 
 watch(page, async (newPage) => {
-
-    if (carStore.hasPage(newPage)) {
-        return
-    }
-
     await loadCars(newPage)
-
 })
 
 </script>
@@ -183,7 +174,7 @@ watch(page, async (newPage) => {
                 <div class="card car-card text-center">
 
                     <NuxtLink
-                        :to="localePath(`/cars/show/${car.id}`)"
+                        :to="localePath(`/catalog/show/${car.id}`)"
                         class="text-decoration-none text-dark"
                     >
                         <img
@@ -195,7 +186,7 @@ watch(page, async (newPage) => {
                     </NuxtLink>
 
                     <div class="card-body">
-                        <h5>{{ car.title }} [id: {{ car.id }}]</h5>
+                        <h5>{{ car.title }}</h5>
 
                         <p v-if="authStore.user && car.price" class="mb-0">
                             <span class="fs-5 fw-bold text-success">

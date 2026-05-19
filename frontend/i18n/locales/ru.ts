@@ -256,6 +256,16 @@ export default {
         total: 'Итого',
     },
 
+    orderStatus: {
+        pending_payment: 'Ожидает оплаты',
+        processing: 'В обработке',
+        packed: 'Заказ собран',
+        shipped: 'Заказ отправлен',
+        completed: 'Заказ завершён',
+        cancelled: 'Заказ отменён',
+        refunded: 'Возврат средств',
+    },
+
     page: {
         loading: 'Загрузка страницы...',
         notFound: 'Страница не найдена.',

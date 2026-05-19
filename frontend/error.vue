@@ -1,10 +1,7 @@
 <script setup lang="ts">
 
 import {useI18n} from 'vue-i18n'
-
-/* -----------------------------
-   i18n
-------------------------------*/
+import {computed} from 'vue'
 
 const {t} = useI18n()
 
@@ -22,27 +19,31 @@ const is404 = computed(() => props.error?.statusCode === 404)
 </script>
 
 <template>
-    <div class="container py-5 text-center">
+    <div class="container d-flex align-items-center justify-content-center min-vh-100">
 
-        <h1 class="display-1 fw-bold text-danger">
-            {{ props.error?.statusCode || 500 }}
-        </h1>
+        <div class="text-center">
 
-        <h3 class="mb-3">
-            {{ is404 ? t('notFound.title') : t('common.error') }}
-        </h3>
+            <h1 class="display-1 fw-bold text-danger">
+                {{ props.error?.statusCode || 500 }}
+            </h1>
 
-        <p class="text-muted mb-4">
-            {{
-                is404
-                    ? t('notFound.description')
-                    : props.error?.statusMessage
-            }}
-        </p>
+            <h3 class="mb-3">
+                {{ is404 ? t('notFound.title') : t('common.error') }}
+            </h3>
 
-        <NuxtLink :to="localePath('/')" class="btn btn-primary">
-            {{ t('notFound.home') }}
-        </NuxtLink>
+            <p class="text-muted mb-4">
+                {{
+                    is404
+                        ? t('notFound.description')
+                        : props.error?.statusMessage
+                }}
+            </p>
+
+            <NuxtLink :to="localePath('/')" class="btn btn-primary">
+                {{ t('notFound.home') }}
+            </NuxtLink>
+
+        </div>
 
     </div>
 </template>

@@ -257,7 +257,7 @@ const confirmRemoveItem = async () => {
                 </p>
 
                 <NuxtLink
-                    :to="localePath('/cars')"
+                    :to="localePath('/catalog')"
                     class="btn btn-primary px-4"
                 >
                     {{ t('cart.goToCatalog') }}
@@ -286,7 +286,7 @@ const confirmRemoveItem = async () => {
 
                                 <div class="d-flex align-items-center gap-3">
 
-                                    <NuxtLink :to="localePath(`/cars/show/${itemData.id}`)">
+                                    <NuxtLink :to="localePath(`/catalog/show/${itemData.id}`)">
                                         <img
                                             :src="itemData.photo_url || '/images/default_car.jpg'"
                                             class="rounded border"
@@ -297,7 +297,7 @@ const confirmRemoveItem = async () => {
                                     <div>
 
                                         <NuxtLink
-                                            :to="localePath(`/cars/show/${itemData.id}`)"
+                                            :to="localePath(`/catalog/show/${itemData.id}`)"
                                             class="text-decoration-none text-dark"
                                         >
                                             <h5 class="mb-1">

@@ -120,7 +120,7 @@ const cartTotal = computed(() => dashboardStore.cartTotal || 0)
                         <div class="card-body d-flex flex-column justify-content-between">
 
                             <h5 class="mb-3">
-                                <NuxtLink :to="localePath('/cars')" class="text-decoration-none text-dark">
+                                <NuxtLink :to="localePath('/catalog')" class="text-decoration-none text-dark">
                                     {{ t('dashboard.catalog.title') }}
                                 </NuxtLink>
                             </h5>
@@ -140,7 +140,7 @@ const cartTotal = computed(() => dashboardStore.cartTotal || 0)
                                 {{ t('dashboard.catalog.addCar') }}
                             </NuxtLink>
 
-                            <NuxtLink v-else :to="localePath('/cars')" class="btn btn-outline-primary w-100 mt-3">
+                            <NuxtLink v-else :to="localePath('/catalog')" class="btn btn-outline-primary w-100 mt-3">
                                 {{ t('dashboard.catalog.goToCatalog') }}
                             </NuxtLink>
 

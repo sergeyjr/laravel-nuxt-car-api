@@ -94,7 +94,7 @@ const goBack = () => {
         window.history.back()
         return
     }
-    navigateTo(localePath('/cars'))
+    navigateTo(localePath('/catalog'))
 }
 
 const addToCart = (carItem: Car) =>
@@ -152,7 +152,7 @@ watch(carId, async (newId, oldId) => {
 
                 <div class="col-12">
                     <h1 class="mb-4">
-                        {{ car.title }} [id: {{ car.id }}]
+                        {{ car.title }}
                     </h1>
                 </div>
 
@@ -314,7 +314,7 @@ watch(carId, async (newId, oldId) => {
                 </BaseButton>
 
                 <NuxtLink
-                    :to="localePath('/cars')"
+                    :to="localePath('/catalog')"
                     class="text-decoration-none"
                 >
                     <BaseButton variant="light">
