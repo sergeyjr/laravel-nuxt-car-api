@@ -5,17 +5,17 @@ import {watch} from 'vue'
 import {useAuthStore} from '~/stores/auth'
 import {useCartStore} from '~/stores/cart'
 
-const auth = useAuthStore()
-const cart = useCartStore()
+const authStore = useAuthStore()
+const cartStore = useCartStore()
 
 await callOnce(async () => {
-    if (!auth.isAuth) {
-        cart.items = {}
-        cart.initialized = true
+    if (!authStore.isAuth) {
+        cartStore.items = {}
+        cartStore.initialized = true
         return
     }
     try {
-        await cart.fetch(true)
+        await cartStore.fetch(true)
     } catch (e) {
         console.error('Ошибка загрузки корзины', e)
     }
@@ -23,7 +23,7 @@ await callOnce(async () => {
 })
 
 watch(
-    () => auth.isAuth,
+    () => authStore.isAuth,
     async (isAuth, oldValue) => {
 
         if (isAuth === oldValue) {
@@ -33,7 +33,7 @@ watch(
         // LOGIN
         if (isAuth) {
             try {
-                await cart.fetch(true)
+                await cartStore.fetch(true)
             } catch (e) {
                 console.error(e)
             }
@@ -42,7 +42,7 @@ watch(
         }
 
         // LOGOUT
-        cart.$patch({
+        cartStore.$patch({
             items: {},
             initialized: true
         })

@@ -82,7 +82,7 @@ export const useProfileStore = defineStore('profile', {
 
         async updateProfile(payload: any): Promise<boolean> {
 
-            const auth = useAuthStore()
+            const authStore = useAuthStore()
             const profileApi = useProfileApi()
 
             this.loadingAll = true
@@ -93,20 +93,16 @@ export const useProfileStore = defineStore('profile', {
                 const data: any = await profileApi.updateProfile(payload)
 
                 if (data?.user) {
-                    auth.user = data.user
+                    authStore.user = data.user
                 }
-
                 this.showAlert('success', data?.message || 'Профиль обновлён.')
-
                 return true
             } catch (e: any) {
                 if (e?.status === 422) {
                     this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
-
                 this.showAlert('error', 'Ошибка обновления профиля.')
-
                 return false
             } finally {
                 this.loadingAll = false
@@ -124,27 +120,20 @@ export const useProfileStore = defineStore('profile', {
 
             try {
                 const data: any = await profileApi.changePassword(payload)
-
                 this.passwordForm = {
                     current_password: '',
                     password: '',
                     password_confirmation: ''
                 }
-
                 this.success = true
-
                 this.showAlert('success', data?.message || 'Пароль обновлён.')
-
                 return true
-
             } catch (e: any) {
                 if (e?.status === 422) {
                     this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
-
                 this.showAlert('error', 'Ошибка смены пароля.')
-
                 return false
             } finally {
                 this.loadingAll = false
@@ -155,7 +144,7 @@ export const useProfileStore = defineStore('profile', {
 
         async deleteAccount(): Promise<boolean> {
 
-            const auth = useAuthStore()
+            const authStore = useAuthStore()
             const router = useRouter()
             const profileApi = useProfileApi()
 
@@ -165,23 +154,17 @@ export const useProfileStore = defineStore('profile', {
 
             try {
                 const data: any = await profileApi.delete()
-
-                auth.user = null
+                authStore.user = null
                 this.success = true
-
                 this.showAlert('success', data?.message || 'Аккаунт удален.')
-
                 await router.push('/')
-
                 return true
             } catch (e: any) {
                 if (e?.status === 422) {
                     this.errors = this.normalizeErrors(e.data?.errors)
                     return false
                 }
-
                 this.showAlert('error', 'Ошибка удаления аккаунта')
-
                 return false
             } finally {
                 this.loadingAll = false

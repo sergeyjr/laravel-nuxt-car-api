@@ -1,6 +1,7 @@
 export default {
 
     auth: {
+        email: 'Email',
         emailRequired: 'Email обязателен',
         login: 'Войти',
         loginLink: 'Войти',

@@ -1,5 +1,7 @@
 export const useProtected = () => {
 
+    console.log('[useProtected] init')
+
     const protectedPages = [
         '/admin',
         '/cabinet',
@@ -7,22 +9,38 @@ export const useProtected = () => {
         '/orders',
         '/profile',
         '/settings',
-    ];
+    ]
 
-    const locales: any = ['ru', 'en']
+    const locales = ['ru', 'en']
 
-    const requiresAuth = (path: string): boolean => {
-        if (!locales) {
-            return protectedPages.some(p => path === p || path.startsWith(p + '/'))
-        }
+    /**
+     * Убирает locale prefix из path
+     *
+     * /en/dashboard -> /dashboard
+     * /dashboard -> /dashboard
+     * /en -> /
+     */
+    const normalizePath = (path: string): string => {
         const parts = path.split('/').filter(Boolean)
-        if (parts.length > 0 && locales.includes(parts[0])) {
-            const normalizedPath = '/' + parts.slice(1).join('/')
-            return protectedPages.some(p => normalizedPath === p || normalizedPath.startsWith(p + '/'))
+        const locale = parts[0]
+        if (locale && locales.includes(locale)) {
+            const normalized = '/' + parts.slice(1).join('/')
+            console.log('[useProtected] normalized:', path, '->', normalized || '/',)
+            return normalized || '/'
         }
-        return protectedPages.some(p => path === p || path.startsWith(p + '/'))
+        return path || '/'
     }
 
-    return {requiresAuth}
+    const requiresAuth = (path: string): boolean => {
+        const normalizedPath = normalizePath(path)
+        const result = protectedPages.some(p => normalizedPath === p || normalizedPath.startsWith(p + '/'))
+        console.log('[useProtected] requiresAuth:', normalizedPath, result,)
+        return result
+    }
+
+    return {
+        requiresAuth,
+        normalizePath,
+    }
 
 }

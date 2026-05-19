@@ -78,7 +78,6 @@ const isAdding = (id: number | string) =>
 const openAuthModal = (event?: Event) => {
     event?.stopPropagation()
     event?.preventDefault()
-    authStore.clearErrors()
     showAuth.value = true
 }
 

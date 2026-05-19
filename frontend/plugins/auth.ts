@@ -1,17 +1,24 @@
 export default defineNuxtPlugin(async () => {
 
-    const auth = useAuthStore()
+    console.log('[Auth Plugin] init')
+
+    const authStore = useAuthStore()
     const route = useRoute()
     const localePath = useLocalePath()
 
-    if (!auth.initialized) {
-        await auth.initAuth()
+    if (!authStore.initialized) {
+        console.log('[Auth Plugin] initAuth')
+        await authStore.initAuth()
     }
 
+    // login path с учётом текущей локали
     const loginPath = localePath('/login')
+    const dashboardPath = localePath('/dashboard')
 
-    if (auth.isAuth && route.path === loginPath) {
-        await navigateTo(localePath('/dashboard'), { replace: true })
+    // авторизованный пользователь не должен видеть login
+    if (authStore.isAuth && route.path === loginPath) {
+        console.log('[Auth Plugin] redirect auth user from login')
+        await navigateTo(dashboardPath, {replace: true})
     }
 
 })

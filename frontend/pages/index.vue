@@ -89,6 +89,95 @@ onMounted(() => {
     carStore.fetchLatest()
 })
 
+/* -----------------------------
+   links
+------------------------------*/
+
+const quickLinks = [
+    {
+        to: '/',
+        icon: 'bi-grid-1x2',
+        label: 'Каталог',
+        hint: 'Все автомобили',
+        auth: null,
+    },
+    {
+        to: '/page/about',
+        icon: 'bi-info-circle',
+        label: 'О проекте',
+        hint: 'Кратко о сервисе',
+        auth: null,
+    },
+    {
+        to: '/page/info',
+        icon: 'bi-card-text',
+        label: 'Инфо',
+        hint: 'Полезные материалы',
+        auth: null,
+    },
+    {
+        to: '/contact',
+        icon: 'bi-telephone',
+        label: 'Контакты',
+        hint: 'Связаться с нами',
+        auth: null,
+    },
+
+    // AUTH ONLY
+    {
+        to: '/dashboard',
+        icon: 'bi-person-badge',
+        label: 'Личный кабинет',
+        hint: 'Профиль и заказы',
+        auth: true,
+    },
+    {
+        to: '/dashboard/profile',
+        icon: 'bi-person-circle',
+        label: 'Мой профиль',
+        hint: 'Настройки аккаунта',
+        auth: true,
+    },
+    {
+        to: '/cart',
+        icon: 'bi-cart3',
+        label: 'Корзина',
+        hint: 'Выбранные авто',
+        auth: true,
+    },
+
+    // GUEST ONLY
+    {
+        to: '/login',
+        icon: 'bi-box-arrow-in-right',
+        label: 'Вход',
+        hint: 'Авторизация в системе',
+        auth: false,
+    },
+    {
+        to: '/register',
+        icon: 'bi-person-plus',
+        label: 'Регистрация',
+        hint: 'Создать аккаунт',
+        auth: false,
+    },
+] as const
+
+const filteredLinks = computed(() => {
+    return quickLinks.filter(l => {
+        if (l.auth === null) return true
+        if (l.auth === true) return authStore.isAuth
+        if (l.auth === false) return !authStore.isAuth
+        return true
+    })
+})
+
+const onLogout = async () => {
+    if (!authStore.isAuth) return
+    await authStore.logout()
+    await navigateTo(localePath('/'))
+}
+
 </script>
 
 <template>
@@ -96,7 +185,9 @@ onMounted(() => {
 
         <div class="text-center mb-5">
 
-            <h1 class="display-5 fw-bold">{{ t('home.title') }}</h1>
+            <h1 class="display-5 fw-bold">
+                {{ t('home.title') }}
+            </h1>
 
             <p class="text-muted">Laravel 13 + Nuxt 4 (Nitro 2, Vite 7, Vue 3) + Pinia 3</p>
 
@@ -104,95 +195,64 @@ onMounted(() => {
 
         <div class="row g-4">
 
-            <!-- USER STATUS -->
-            <div class="col-md-6">
+            <!-- DASHBOARD TILES -->
+            <div class="col-12 mt-4">
 
-                <div class="card shadow-sm h-100">
+                <div class="row g-3">
 
-                    <div class="card-body">
+                    <div
+                        v-for="link in filteredLinks"
+                        :key="link.to"
+                        class="col-12 col-sm-6 col-lg-4"
+                    >
 
-                        <h4 class="mb-4">{{ t('home.userStatusTitle') }}</h4>
+                        <NuxtLink :to="localePath(link.to)" class="tile-card">
+                            <div class="tile-icon">
+                                <i :class="`bi ${link.icon}`"></i>
+                            </div>
 
-                        <div v-if="authStore.isAuth">
+                            <div class="tile-content">
+                                <div class="tile-title">
+                                    {{ link.label }}
+                                </div>
+                                <div class="tile-hint">
+                                    {{ link.hint }}
+                                </div>
+                            </div>
 
-                            <p class="text-muted">
-                                {{ t('home.welcome') }}, {{ authStore.user?.name }}
-                            </p>
-
-                            <p class="text-success mb-0">
-                                {{ t('home.loggedIn') }}
-                            </p>
-
-                        </div>
-
-                        <div v-else>
-
-                            <p class="text-warning mb-0">
-                                {{ t('home.guest') }}
-                            </p>
-
-                            <small class="text-muted">
-                                {{ t('home.authHint') }}
-                            </small>
-
-                        </div>
+                            <div class="tile-arrow">
+                                <i class="bi bi-arrow-up-right"></i>
+                            </div>
+                        </NuxtLink>
 
                     </div>
 
-                </div>
+                    <!-- LOGOUT TILE -->
+                    <div
+                        v-if="authStore.isAuth"
+                        class="col-12 col-sm-6 col-lg-4"
+                    >
+                        <button class="tile-card tile-button" @click="onLogout">
+                            <div class="tile-icon">
+                                <i class="bi bi-box-arrow-right"></i>
+                            </div>
 
-            </div>
+                            <div class="tile-content">
+                                <div class="tile-title">
+                                    Выход
+                                </div>
+                                <div class="tile-hint">
+                                    Завершить сессию
+                                </div>
+                            </div>
 
-            <!-- ACTIONS -->
-            <div class="col-md-6">
-
-                <div class="card shadow-sm h-100">
-
-                    <div class="card-body">
-
-                        <h4 class="mb-4">{{ t('home.quickActions') }}</h4>
-
-                        <template v-if="authStore.isAuth">
-
-                            <BaseButton
-                                class="w-100 mb-2"
-                                @click="router.push('/dashboard')"
-                            >
-                                {{ t('home.buttons.dashboard') }}
-                            </BaseButton>
-
-                            <BaseButton
-                                class="w-100 mb-2"
-                                @click="router.push('/dashboard/profile')"
-                            >
-                                {{ t('home.buttons.profile') }}
-                            </BaseButton>
-
-                        </template>
-
-                        <template v-else>
-
-                            <BaseButton
-                                class="w-100 mb-2"
-                                @click="router.push('/login')"
-                            >
-                                {{ t('home.buttons.login') }}
-                            </BaseButton>
-
-                            <BaseButton
-                                variant="secondary"
-                                class="w-100"
-                                @click="router.push('/register')"
-                            >
-                                {{ t('home.buttons.register') }}
-                            </BaseButton>
-
-                        </template>
-
+                            <div class="tile-arrow">
+                                <i class="bi bi-arrow-up-right"></i>
+                            </div>
+                        </button>
                     </div>
 
                 </div>
-
             </div>
 
             <!-- CARS -->
@@ -269,6 +329,130 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
+.tiles-header {
+    padding: 6px 2px 2px;
+}
+
+.tile-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 96px;
+    padding: 18px 18px 18px 16px;
+    border-radius: 18px;
+    text-decoration: none;
+    color: #0f172a;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(248, 250, 252, .96));
+    border: 1px solid rgba(148, 163, 184, .22);
+    overflow: hidden;
+    transition: transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease,
+    background .22s ease;
+}
+
+.tile-button {
+    width: 100%;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(255, 235, 235, .9), rgba(255, 245, 245, .95));
+}
+
+.tile-card::before {
+    content: "";
+    position: absolute;
+    inset: auto -20% -55% auto;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.tile-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(59, 130, 246, .35);
+    box-shadow: 0 10px 15px rgba(15, 23, 42, .12),
+    0 0 0 1px rgba(59, 130, 246, .08);
+}
+
+.tile-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 52px;
+    color: #2563eb;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+
+.tile-icon i {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.tile-content {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.tile-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    color: #0f172a;
+}
+
+.tile-hint {
+    font-size: .88rem;
+    line-height: 1.2;
+    color: #64748b;
+}
+
+.tile-arrow {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    flex: 0 0 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, .08);
+    color: #2563eb;
+    transition: transform .22s ease, background .22s ease;
+}
+
+.tile-card:hover .tile-arrow {
+    transform: translate(2px, -2px);
+    background: rgba(59, 130, 246, .14);
+}
+
+@media (max-width: 576px) {
+    .tile-card {
+        min-height: 88px;
+        padding: 16px;
+    }
+
+    .tile-icon {
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+        border-radius: 14px;
+    }
+
+    .tile-title {
+        font-size: .98rem;
+    }
+
+    .tile-hint {
+        font-size: .84rem;
+    }
+}
 
 .swiper-custom {
     padding: 20px 0 40px 0;

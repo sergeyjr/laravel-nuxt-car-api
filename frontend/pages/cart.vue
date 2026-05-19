@@ -1,10 +1,8 @@
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import {computed, ref, watch} from 'vue'
-
-import {useI18n} from 'vue-i18n'
-
-import {useCartStore} from '~/stores/cart'
+import { useCartStore } from '~/stores/cart'
 
 import BaseTextarea from '~/components/BaseTextarea.vue'
 import BaseButton from '~/components/BaseButton.vue'
@@ -13,13 +11,13 @@ import CartRemoveItemModal from '~/components/modals/CartRemoveItemModal.vue'
 import CartCheckoutModal from '~/components/modals/CartCheckoutModal.vue'
 import CartClearModal from '~/components/modals/CartClearModal.vue'
 
-import {formatPrice} from '~/utils/formatters'
+import { formatPrice } from '~/utils/formatters'
 
 /* -----------------------------
    i18n
 ------------------------------*/
 
-const {t} = useI18n()
+const { t } = useI18n()
 
 const localePath = useLocalePath()
 
@@ -34,9 +32,7 @@ const cartStore = useCartStore()
 ------------------------------*/
 
 const isSubmitting = ref(false)
-
 const isUpdatingCart = ref(false)
-
 const comment = ref('')
 
 const showRemoveModal = ref(false)
@@ -71,7 +67,7 @@ watch(
         })
         localQty.value = next
     },
-    {immediate: true}
+    { immediate: true }
 )
 
 /* -----------------------------
@@ -103,7 +99,7 @@ function preventInvalidQtyKeys(event: KeyboardEvent) {
 }
 
 function normalizeQtyInput(value: unknown) {
-    const onlyDigits = String(value).replace(/\D/g, '') // убираем ВСЁ кроме цифр
+    const onlyDigits = String(value).replace(/\D/g, '')
     const num = Number(onlyDigits)
     return Number.isFinite(num) && num > 0 ? num : 1
 }
@@ -176,17 +172,29 @@ const applyCartUpdates = async () => {
 
 const confirmCheckout = async () => {
     if (isLocked.value) return
+
     isSubmitting.value = true
     try {
         const res: any = await cartStore.checkout({
             comment: comment.value
         })
-        const order = res?.data?.order || res?.order
+
+        const order =
+            res?.data?.order ||
+            res?.order ||
+            res?.data
+
         if (!order?.id) {
             throw new Error('Order ID missing in response')
         }
+
         showCheckoutModal.value = false
-        await navigateTo(localePath(`/order-success/${order.id}`))
+
+        cartStore.reset()
+
+        navigateTo(localePath(`/order-success/${order.id}`))
+    } catch (e) {
+        console.error(e)
     } finally {
         isSubmitting.value = false
     }
@@ -216,7 +224,6 @@ const confirmRemoveItem = async () => {
         selectedItemId.value = null
     }
 }
-
 </script>
 
 <template>
@@ -436,9 +443,9 @@ const confirmRemoveItem = async () => {
                             class="w-100 fw-semibold transition-all"
                             :disabled="isLocked || cartStore.loadingUpdate || !hasChanges"
                             :class="{
-                            'opacity-50': !hasChanges,
-                            'cursor-not-allowed': !hasChanges
-                        }"
+                                'opacity-50': !hasChanges,
+                                'cursor-not-allowed': !hasChanges
+                            }"
                             @click="applyCartUpdates"
                         >
                             {{ t('cart.updateCart') }}

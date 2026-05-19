@@ -12,7 +12,6 @@ export const useAuthStore = defineStore('auth', {
         initializing: false,
         loading: false,
         loggingOut: false,
-        success: null as string | null,
         errors: {} as Record<string, string>,
     }),
 
@@ -28,7 +27,6 @@ export const useAuthStore = defineStore('auth', {
 
         clearErrors() {
             this.errors = {}
-            this.success = null
         },
 
         normalizeErrors(errors: any): Record<string, string> {
@@ -94,7 +92,7 @@ export const useAuthStore = defineStore('auth', {
                     await this.fetchUser()
                 }
                 this.initialized = true
-                this.showAlert('success', data?.message || 'Вход в аккаунт.')
+                this.showAlert('success', data?.message || 'Вход выполнен.')
                 return true
             } catch (e: any) {
                 const data = e?.data || e?.response?._data || e?.response?.data || {}
@@ -153,7 +151,7 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const data: any = await api.logout()
-                this.showAlert('success', data?.message || 'Выход из аккаунта.')
+                this.showAlert('success', data?.message || 'Вы успешно вышли из аккаунта.')
                 this.logoutLocal()
                 return true
             } catch (e: any) {

@@ -1,19 +1,17 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 
-import {computed} from 'vue'
-import {useI18n} from 'vue-i18n'
-
-import {useRoute} from 'vue-router'
-import {useOrderStore} from '~/stores/order'
-import {useOrderStatus} from '~/composables/useOrderStatus'
-
-import {formatPrice} from "~/utils/formatters";
+import { useOrderStore } from '~/stores/order'
+import { useOrderStatus } from '~/composables/useOrderStatus'
+import { formatPrice } from '~/utils/formatters'
 
 /* -----------------------------
    i18n
 ------------------------------*/
 
-const {t} = useI18n()
+const { t } = useI18n()
 
 const localePath = useLocalePath()
 
@@ -22,7 +20,7 @@ const localePath = useLocalePath()
 ------------------------------*/
 
 const orderStore = useOrderStore()
-const {getLabel, getClass} = useOrderStatus()
+const { getLabel, getClass } = useOrderStatus()
 const route = useRoute()
 
 /* -----------------------------
@@ -38,19 +36,43 @@ const orderId = computed(() => {
 })
 
 /* -----------------------------
-   load order (once)
+   helpers
+------------------------------*/
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+/* -----------------------------
+   load order (with retry)
 ------------------------------*/
 
 await callOnce(async () => {
+
     if (!orderId.value) {
         return navigateTo(localePath('/'))
     }
 
-    try {
-        await orderStore.fetchOrder(orderId.value)
-    } catch {
-        throw createError({statusCode: 404})
+    let attempts = 0
+    const maxAttempts = 5
+
+    while (attempts < maxAttempts) {
+        try {
+            await orderStore.fetchOrder(orderId.value)
+
+            if (orderStore.currentOrder?.id) {
+                return
+            }
+        } catch (e) {
+            console.error(e)
+        }
+
+        attempts++
+        await sleep(700)
     }
+
+    throw createError({
+        statusCode: 404,
+        statusMessage: 'Order not found'
+    })
 })
 
 /* -----------------------------
@@ -58,7 +80,6 @@ await callOnce(async () => {
 ------------------------------*/
 
 const order = computed(() => orderStore.currentOrder)
-
 </script>
 
 <template>

@@ -26,16 +26,16 @@ const localePath = useLocalePath()
    store
 ------------------------------*/
 
-const auth = useAuthStore()
-const profile = useProfileStore()
+const authStore = useAuthStore()
+const profileStore = useProfileStore()
 
 /* -----------------------------
    init
 ------------------------------*/
 
 await callOnce(() => {
-    if (auth.user) {
-        profile.load(auth.user)
+    if (authStore.user) {
+        profileStore.load(authStore.user)
     }
 })
 
@@ -43,7 +43,7 @@ await callOnce(() => {
    computed
 ------------------------------*/
 
-const user = computed(() => auth.user)
+const user = computed(() => authStore.user)
 
 const avatarUrl = computed(() => {
     if (user.value?.avatar) {
@@ -75,11 +75,11 @@ const goBack = () => {
 ------------------------------*/
 
 watch(
-    () => auth.user,
+    () => authStore.user,
     (user) => {
         if (!user) return
 
-        profile.load(user)
+        profileStore.load(user)
 
         name.value = user.name ?? ''
         email.value = user.email ?? ''
@@ -93,12 +93,12 @@ watch(
 ------------------------------*/
 
 const validateUpdateProfile = () => {
-    profile.resetErrors()
+    profileStore.resetErrors()
 
     let hasError = false
 
     if (!name.value) {
-        profile.errors.name = t('profile.nameRequired')
+        profileStore.errors.name = t('profile.nameRequired')
         hasError = true
     }
 
@@ -112,7 +112,7 @@ const validateUpdateProfile = () => {
 const submitUpdateProfile = async () => {
     if (!validateUpdateProfile()) return
 
-    await profile.updateProfile({
+    await profileStore.updateProfile({
         name: name.value,
         // email: email.value,
         remove_avatar: remove_avatar.value
@@ -124,27 +124,27 @@ const submitUpdateProfile = async () => {
 ------------------------------*/
 
 const validatePassword = () => {
-    profile.resetErrors()
+    profileStore.resetErrors()
 
     let hasError = false
 
     if (!current_password.value) {
-        profile.errors.current_password = t('profile.currentPasswordRequired')
+        profileStore.errors.current_password = t('profile.currentPasswordRequired')
         hasError = true
     }
 
     if (!password.value) {
-        profile.errors.password = t('profile.passwordRequired')
+        profileStore.errors.password = t('profile.passwordRequired')
         hasError = true
     }
 
     if (password.value && password.value.length < 6) {
-        profile.errors.password = t('profile.passwordMin')
+        profileStore.errors.password = t('profile.passwordMin')
         hasError = true
     }
 
     if (password.value !== password_confirmation.value) {
-        profile.errors.password_confirmation = t('profile.passwordMismatch')
+        profileStore.errors.password_confirmation = t('profile.passwordMismatch')
         hasError = true
     }
 
@@ -158,7 +158,7 @@ const validatePassword = () => {
 const submitPassword = async () => {
     if (!validatePassword()) return
 
-    const ok = await profile.changePassword({
+    const ok = await profileStore.changePassword({
         current_password: current_password.value,
         password: password.value,
         password_confirmation: password_confirmation.value
@@ -176,7 +176,7 @@ const submitPassword = async () => {
 ------------------------------*/
 
 const confirmDeleteAccount = async () => {
-    const ok = await profile.deleteAccount()
+    const ok = await profileStore.deleteAccount()
 
     if (ok) {
         showDeleteModal.value = false
@@ -211,7 +211,7 @@ const confirmDeleteAccount = async () => {
                             class="rounded-circle mb-3 avatar"
                             width="120"
                             height="120"
-                            @click="profile.openAvatar"
+                            @click="profileStore.openAvatar"
                             alt=""
                         />
 
@@ -228,9 +228,9 @@ const confirmDeleteAccount = async () => {
 
                 <!-- MODAL -->
                 <div
-                    v-if="profile.showAvatarModal"
+                    v-if="profileStore.showAvatarModal"
                     class="avatar-modal"
-                    @click="profile.closeAvatar"
+                    @click="profileStore.closeAvatar"
                 >
                     <img
                         :src="avatarUrl"
@@ -244,7 +244,7 @@ const confirmDeleteAccount = async () => {
                 <BaseButton
                     variant="danger"
                     class="w-100"
-                    :disabled="profile.loadingAll"
+                    :disabled="profileStore.loadingAll"
                     @click="showDeleteModal = true"
                 >
                     {{ t('profile.deleteAccount') }}
@@ -264,8 +264,8 @@ const confirmDeleteAccount = async () => {
 
                     <div class="card-body">
 
-                        <div v-if="profile.errors.general" class="alert alert-danger mb-3">
-                            {{ profile.errors.general }}
+                        <div v-if="profileStore.errors.general" class="alert alert-danger mb-3">
+                            {{ profileStore.errors.general }}
                         </div>
 
                         <form @submit.prevent="submitUpdateProfile">
@@ -275,7 +275,7 @@ const confirmDeleteAccount = async () => {
                                 :label="t('profile.name')"
                                 type="text"
                                 required
-                                :error="profile.errors.name"
+                                :error="profileStore.errors.name"
                             />
 
                             <BaseInput
@@ -283,7 +283,7 @@ const confirmDeleteAccount = async () => {
                                 label="Email"
                                 type="email"
                                 disabled
-                                :error="profile.errors.email"
+                                :error="profileStore.errors.email"
                             />
 
                             <small class="text-muted d-block mt-1 mb-3">
@@ -293,23 +293,23 @@ const confirmDeleteAccount = async () => {
 
                             <BaseFileInput
                                 :label="t('profile.avatar')"
-                                :error="profile.errors.avatar"
-                                :disabled="profile.loadingAll"
-                                @change="profile.onFile"
+                                :error="profileStore.errors.avatar"
+                                :disabled="profileStore.loadingAll"
+                                @change="profileStore.onFile"
                             />
 
                             <BaseCheckbox
                                 id="remove-avatar"
                                 v-model="remove_avatar"
                                 :label="t('profile.removeAvatar')"
-                                :disabled="profile.loadingAll"
+                                :disabled="profileStore.loadingAll"
                             />
 
                             <BaseButton
                                 type="submit"
                                 class="w-100"
-                                :loading="profile.loadingProfile"
-                                :disabled="profile.loadingAll"
+                                :loading="profileStore.loadingProfile"
+                                :disabled="profileStore.loadingAll"
                             >
                                 <template #loading>
                                     {{ t('profile.saving') }}
@@ -329,8 +329,8 @@ const confirmDeleteAccount = async () => {
 
                         <form @submit.prevent="submitPassword">
 
-                            <div v-if="profile.errors.general" class="alert alert-danger mb-3">
-                                {{ profile.errors.general }}
+                            <div v-if="profileStore.errors.general" class="alert alert-danger mb-3">
+                                {{ profileStore.errors.general }}
                             </div>
 
                             <BaseInput
@@ -338,7 +338,7 @@ const confirmDeleteAccount = async () => {
                                 :label="t('profile.currentPassword')"
                                 type="password"
                                 required
-                                :error="profile.errors.current_password"
+                                :error="profileStore.errors.current_password"
                             />
 
                             <BaseInput
@@ -346,7 +346,7 @@ const confirmDeleteAccount = async () => {
                                 :label="t('profile.newPassword')"
                                 type="password"
                                 required
-                                :error="profile.errors.password"
+                                :error="profileStore.errors.password"
                             />
 
                             <BaseInput
@@ -354,15 +354,15 @@ const confirmDeleteAccount = async () => {
                                 :label="t('profile.confirmPassword')"
                                 type="password"
                                 required
-                                :error="profile.errors.password_confirmation"
+                                :error="profileStore.errors.password_confirmation"
                             />
 
                             <BaseButton
                                 type="submit"
                                 variant="warning"
                                 class="w-100"
-                                :loading="profile.loadingPassword"
-                                :disabled="profile.loadingAll"
+                                :loading="profileStore.loadingPassword"
+                                :disabled="profileStore.loadingAll"
                             >
                                 <template #loading>
                                     {{ t('profile.updating') }}
@@ -382,7 +382,7 @@ const confirmDeleteAccount = async () => {
 
     <DeleteAccountModal
         :show="showDeleteModal"
-        :processing="profile.loadingDelete"
+        :processing="profileStore.loadingDelete"
         @close="showDeleteModal = false"
         @confirm="confirmDeleteAccount"
     />

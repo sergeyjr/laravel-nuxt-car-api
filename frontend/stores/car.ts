@@ -218,7 +218,7 @@ export const useCarStore = defineStore('car', {
         async submitCreateCarForm() {
             this.clearErrors()
 
-            const auth = useAuthStore()
+            const authStore = useAuthStore()
 
             const missing = this.validateOptions()
 
@@ -266,7 +266,7 @@ export const useCarStore = defineStore('car', {
                 const data = e?.data
 
                 if (status === 401) {
-                    auth.logoutLocal()
+                    authStore.logoutLocal()
                     this.showAlert('danger', 'Сессия истекла.')
                     return null
                 }

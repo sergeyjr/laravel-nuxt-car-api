@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {computed} from 'vue'
+import {computed, ref, onMounted, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 
 import {useOrderStore} from '~/stores/order'
@@ -43,33 +43,21 @@ if (!orderId.value) {
 }
 
 /* -----------------------------
-   fetch (SSR + client)
-------------------------------*/
-
-await useAsyncData(
-    () => `order-${orderId.value}`,
-    async () => {
-        try {
-            const result = await orderStore.fetchOrder(orderId.value)
-            return result ?? orderStore.currentOrder ?? null
-        } catch (err: any) {
-            if (err?.statusCode === 404 || err?.status === 404) {
-                return null
-            }
-            throw err
-        }
-    },
-    {
-        watch: [orderId]
-    }
-)
-
-/* -----------------------------
    state
 ------------------------------*/
 
+const loaded = ref(false)
+
 const order = computed(() => orderStore.currentOrder)
 const loadingOrder = computed(() => orderStore.loadingOrder)
+
+/* -----------------------------
+   load order
+------------------------------*/
+
+const loadOrder = async (id: string) => {
+    await orderStore.fetchOrder(id)
+}
 
 /* -----------------------------
    derived state
@@ -102,187 +90,218 @@ const goBack = () => {
     }
 }
 
+/* -----------------------------
+   lifecycle
+------------------------------*/
+
+onMounted(async () => {
+    loaded.value = false
+    await loadOrder(orderId.value)
+    loaded.value = true
+})
+
+watch(orderId, async (newId, oldId) => {
+    if (!newId || newId === oldId) return
+    loaded.value = false
+    await loadOrder(newId)
+    loaded.value = true
+})
+
 </script>
 
 <template>
     <div class="container py-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-3">
-                {{ t('orderDetail.title', {id: order?.id}) }}
-            </h2>
+        <template v-if="loadingOrder || !loaded">
 
-            <button
-                v-if="!loadingOrder"
-                class="btn btn-outline-secondary"
-                @click="goBack"
-            >
-                ← {{ t('nav.back') }}
-            </button>
-        </div>
-
-        <div v-if="loadingOrder && !order" class="alert alert-light border text-center py-4">
-            {{ t('orderDetail.loading') }}
-        </div>
-
-        <div v-else-if="!loadingOrder && !order" class="alert alert-warning border text-center py-5">
-
-            <h4 class="mb-2">
-                {{ t('orderDetail.notFoundTitle') }}
-            </h4>
-
-            <div class="text-muted mb-3">
-                {{ t('orderDetail.notFoundSubtitle') }}
+            <div class="alert alert-light border text-center py-4">
+                {{ t('orderDetail.loading') }}
             </div>
 
-            <NuxtLink :to="localePath('/orders')" class="btn btn-primary">
-                {{ t('orderDetail.backToOrders') }}
-            </NuxtLink>
+        </template>
 
-        </div>
+        <template v-else-if="order">
 
-        <div v-else-if="order" class="row g-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-3">
+                    {{ t('orderDetail.title', {id: order.id}) }}
+                </h2>
 
-            <div class="col-12 col-lg-8">
-
-                <div
-                    v-for="item in order.items"
-                    :key="item.id"
-                    class="card border-0 shadow-sm mb-3"
+                <button
+                    class="btn btn-outline-secondary"
+                    @click="goBack"
                 >
-                    <div class="card-body">
+                    ← {{ t('nav.back') }}
+                </button>
+            </div>
 
-                        <div class="row align-items-center g-3">
+            <div class="row g-4">
 
-                            <div class="col-12 col-md-6">
+                <div class="col-12 col-lg-8">
 
-                                <div class="d-flex align-items-center gap-3">
+                    <div
+                        v-for="item in order.items"
+                        :key="item.id"
+                        class="card border-0 shadow-sm mb-3"
+                    >
+                        <div class="card-body">
 
-                                    <NuxtLink :to="localePath(`/cars/show/${item.car_id}`)">
-                                        <img
-                                            :src="getItemPhoto(item)"
-                                            class="rounded border"
-                                            style="width:110px;height:80px;object-fit:contain;"
-                                            alt=""
-                                        />
-                                    </NuxtLink>
+                            <div class="row align-items-center g-3">
 
-                                    <div>
+                                <div class="col-12 col-md-6">
 
-                                        <NuxtLink :to="localePath(`/cars/show/${item.car_id}`)" class="text-decoration-none text-dark">
-                                            <h5 class="mb-1">
-                                                {{ getItemName(item) }}
-                                            </h5>
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <NuxtLink :to="localePath(`/cars/show/${item.car_id}`)">
+                                            <img
+                                                :src="getItemPhoto(item)"
+                                                class="rounded border"
+                                                style="width:110px;height:80px;object-fit:contain;"
+                                                alt=""
+                                            />
                                         </NuxtLink>
 
-                                        <div class="text-muted small">
-                                            {{ formatPrice(item.price) }} / {{ t('orderDetail.perItem') }}
+                                        <div>
+
+                                            <NuxtLink
+                                                :to="localePath(`/cars/show/${item.car_id}`)"
+                                                class="text-decoration-none text-dark"
+                                            >
+                                                <h5 class="mb-1">
+                                                    {{ getItemName(item) }}
+                                                </h5>
+                                            </NuxtLink>
+
+                                            <div class="text-muted small">
+                                                {{ formatPrice(item.price) }} / {{ t('orderDetail.perItem') }}
+                                            </div>
+
                                         </div>
 
                                     </div>
 
                                 </div>
 
+                                <div class="col-6 col-md-2 text-center">
+                                    <div class="text-muted small mb-1">
+                                        {{ t('orderDetail.qty') }}
+                                    </div>
+                                    <div class="fw-semibold">{{ item.qty }}</div>
+                                </div>
+
+                                <div class="col-6 col-md-2 text-center">
+                                    <div class="text-muted small mb-1">
+                                        {{ t('orderDetail.price') }}
+                                    </div>
+                                    <div class="fw-semibold">
+                                        {{ formatPrice(item.price) }}
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-2 text-md-end">
+                                    <div class="text-muted small mb-1">
+                                        {{ t('orderDetail.sum') }}
+                                    </div>
+                                    <div class="fw-bold fs-5">
+                                        {{ formatPrice(item.qty * item.price) }}
+                                    </div>
+                                </div>
+
                             </div>
 
-                            <div class="col-6 col-md-2 text-center">
-                                <div class="text-muted small mb-1">
-                                    {{ t('orderDetail.qty') }}
-                                </div>
-                                <div class="fw-semibold">{{ item.qty }}</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-12 col-lg-4">
+
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">{{ t('orderDetail.total') }}:</span>
+                                <span class="fs-4 fw-bold text-success">
+                                    {{ formatPrice(order.total) }}
+                                </span>
                             </div>
 
-                            <div class="col-6 col-md-2 text-center">
-                                <div class="text-muted small mb-1">
-                                    {{ t('orderDetail.price') }}
-                                </div>
+                            <hr>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">{{ t('orderDetail.itemsCount') }}:</span>
+                                <span class="fw-semibold">
+                                    {{ order.items?.length || 0 }}
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div v-if="hasComment" class="card border-0 shadow-sm mb-3">
+                        <div class="card-body">
+                            <div class="text-muted small mb-1">
+                                {{ t('orderDetail.comment') }}:
+                            </div>
+                            {{ order.comment }}
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="text-muted small">{{ t('orderDetail.date') }}:</div>
                                 <div class="fw-semibold">
-                                    {{ formatPrice(item.price) }}
+                                    {{ formatDate(order.created_at) }}
                                 </div>
                             </div>
-
-                            <div class="col-12 col-md-2 text-md-end">
-                                <div class="text-muted small mb-1">
-                                    {{ t('orderDetail.sum') }}
-                                </div>
-                                <div class="fw-bold fs-5">
-                                    {{ formatPrice(item.qty * item.price) }}
-                                </div>
-                            </div>
-
                         </div>
-
                     </div>
+
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="text-muted small">{{ t('orderDetail.status') }}:</div>
+                                <span class="badge" :class="getBadge(order.status).class">
+                                    {{ getLabel(order.status) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <NuxtLink :to="localePath('/orders')" class="btn btn-outline-primary w-100">
+                                {{ t('orderDetail.allOrders') }}
+                            </NuxtLink>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
 
-            <div class="col-12 col-lg-4">
+        </template>
 
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
+        <template v-else>
 
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted">{{ t('orderDetail.total') }}:</span>
-                            <span class="fs-4 fw-bold text-success">
-                                {{ formatPrice(order.total) }}
-                            </span>
-                        </div>
+            <div class="alert alert-warning border text-center py-5">
 
-                        <hr>
+                <h4 class="mb-2">
+                    {{ t('orderDetail.notFoundTitle') }}
+                </h4>
 
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">{{ t('orderDetail.itemsCount') }}:</span>
-                            <span class="fw-semibold">
-                                {{ order.items?.length || 0 }}
-                            </span>
-                        </div>
-
-                    </div>
+                <div class="text-muted mb-3">
+                    {{ t('orderDetail.notFoundSubtitle') }}
                 </div>
 
-                <div v-if="hasComment" class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <div class="text-muted small mb-1">
-                            {{ t('orderDetail.comment') }}:
-                        </div>
-                        {{ order.comment }}
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div class="text-muted small">{{ t('orderDetail.date') }}:</div>
-                            <div class="fw-semibold">
-                                {{ formatDate(order.created_at) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div class="text-muted small">{{ t('orderDetail.status') }}:</div>
-                            <span class="badge" :class="getBadge(order.status).class">
-                                {{ getLabel(order.status) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <NuxtLink :to="localePath('/orders')" class="btn btn-outline-primary w-100">
-                            {{ t('orderDetail.allOrders') }}
-                        </NuxtLink>
-                    </div>
-                </div>
+                <NuxtLink :to="localePath('/orders')" class="btn btn-primary">
+                    {{ t('orderDetail.backToOrders') }}
+                </NuxtLink>
 
             </div>
 
-        </div>
+        </template>
 
     </div>
 </template>

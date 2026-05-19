@@ -15,8 +15,8 @@ import LogoutModal from '~/components/modals/LogoutConfirmModal.vue'
    stores
 ------------------------------*/
 
-const auth = useAuthStore()
-const cart = useCartStore()
+const authStore = useAuthStore()
+const cartStore = useCartStore()
 
 const route = useRoute()
 
@@ -61,22 +61,19 @@ const languages = [
     {
         code: 'ru',
         name: 'Русский',
-        icon: 'fi fi-ru'
+        icon: 'fi fi-ru',
     },
     {
         code: 'en',
         name: 'English',
-        icon: 'fi fi-gb'
-    }
+        icon: 'fi fi-gb',
+    },
 ] as const
 
 type LocaleCode = (typeof languages)[number]['code']
 
 const currentLanguage = computed(() => {
-    return (
-        languages.find(l => l.code === locale.value) ??
-        languages[0]
-    )
+    return (languages.find(l => l.code === locale.value,) ?? languages[0])
 })
 
 /* -----------------------------
@@ -84,11 +81,10 @@ const currentLanguage = computed(() => {
 ------------------------------*/
 
 const cartCount = computed(() => {
-    if (!auth.isAuth) {
+    if (!authStore.isAuth) {
         return 0
     }
-
-    return Object.keys(cart.items).length
+    return Object.keys(cartStore.items).length
 })
 
 /* -----------------------------
@@ -97,7 +93,11 @@ const cartCount = computed(() => {
 
 const isActive = (path: string) => {
     const target = localePath(path)
-    return route.path === target || route.path.startsWith(target + '/')
+    // special case for homepage
+    if (target === '/') {
+        return route.path === '/'
+    }
+    return (route.path === target || route.path.startsWith(target + '/'))
 }
 
 const toggleLangMenu = () => {
@@ -114,7 +114,9 @@ const chooseLanguage = async (code: LocaleCode) => {
 }
 
 const handleClickOutside = (event: MouseEvent) => {
-    if (!langRef.value) return
+    if (!langRef.value) {
+        return
+    }
     if (!langRef.value.contains(event.target as Node)) {
         isLangOpen.value = false
     }
@@ -137,11 +139,19 @@ onBeforeUnmount(() => {
 ------------------------------*/
 
 const onLogout = async () => {
-    if (isLogoutLoading.value) return
+    console.log('[Header] logout click')
+    if (isLogoutLoading.value) {
+        console.log('[Header] logout locked')
+        return
+    }
     isLogoutLoading.value = true
     try {
         const ok = await logout(route.path)
-        if (!ok) return
+        if (!ok) {
+            console.log('[Header] logout failed')
+            return
+        }
+        console.log('[Header] logout success')
         showLogoutModal.value = false
     } finally {
         isLogoutLoading.value = false
@@ -178,7 +188,7 @@ const onLogout = async () => {
                     {{ t('nav.info') }}
                 </NuxtLink>
 
-                <template v-if="auth.isAuth">
+                <template v-if="authStore.isAuth">
 
                     <NuxtLink :to="localePath('/dashboard')" class="nav-link"
                               :class="{ active: isActive('/dashboard') }">

@@ -31,8 +31,8 @@ const {getBadge} = useOrderStatus()
    stores
 ------------------------------*/
 
-const auth = useAuthStore()
-const dashboard = useDashboardStore()
+const authStore = useAuthStore()
+const dashboardStore = useDashboardStore()
 
 const pageLoading = ref(true)
 
@@ -42,7 +42,7 @@ const pageLoading = ref(true)
 
 onMounted(async () => {
     try {
-        await dashboard.fetchDashboard()
+        await dashboardStore.fetchDashboard()
     } finally {
         pageLoading.value = false
     }
@@ -52,32 +52,34 @@ onMounted(async () => {
    auth state
 ------------------------------*/
 
-const user = computed(() => auth.user)
+const user = computed(() => authStore.user)
 
-const isApiUser = computed(() => auth.user?.role === 'api')
+const isApiUser = computed(() => authStore.user?.role === 'api')
 
 /* -----------------------------
    dashboard state
 ------------------------------*/
 
-const ordersCount = computed(() => dashboard.ordersCount)
+const ordersCount = computed(() => dashboardStore.ordersCount)
 
-const recentOrders = computed(() => dashboard.orders || [])
+const recentOrders = computed(() => dashboardStore.orders || [])
 
 const cartCount = computed(() =>
-    Object.keys(dashboard.cart || {}).length
+    Object.keys(dashboardStore.cart || {}).length
 )
 
-const cartTotal = computed(() => dashboard.cartTotal || 0)
+const cartTotal = computed(() => dashboardStore.cartTotal || 0)
 
 </script>
 
 <template>
     <div class="container mt-4">
 
-        <h1 class="mb-4">{{ t('dashboard.title') }}</h1>
+        <h1 class="mb-4">
+            {{ t('dashboard.title') }}
+        </h1>
 
-        <div v-if="pageLoading || dashboard.loading" class="alert alert-light border text-center py-4">
+        <div v-if="pageLoading || dashboardStore.loading" class="alert alert-light border text-center py-4">
             {{ t('page.loading') }}
         </div>
 
@@ -125,15 +127,16 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
 
                             <p class="mb-0">
                                 {{ t('dashboard.catalog.totalCars') }}:
-                                <span class="fw-bold">{{ dashboard.carsCount }}</span>
+                                <span class="fw-bold">{{ dashboardStore.carsCount }}</span>
                             </p>
 
                             <p class="mb-0">
                                 {{ t('dashboard.catalog.myCars') }}:
-                                <span class="fw-bold">{{ dashboard.myCarsCount }}</span>
+                                <span class="fw-bold">{{ dashboardStore.myCarsCount }}</span>
                             </p>
 
-                            <NuxtLink v-if="isApiUser" :to="localePath('/dashboard/car/create')" class="btn btn-outline-primary w-100 mt-3">
+                            <NuxtLink v-if="isApiUser" :to="localePath('/dashboard/car/create')"
+                                      class="btn btn-outline-primary w-100 mt-3">
                                 {{ t('dashboard.catalog.addCar') }}
                             </NuxtLink>
 
@@ -157,9 +160,10 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
 
                             <template v-if="cartTotal === 0">
 
-                                <div class="btn btn-outline-secondary w-100 mt-3 disabled">
+                                <NuxtLink :to="localePath('/cart')"
+                                          class="btn btn-outline-secondary w-100 mt-3">
                                     {{ t('dashboard.cart.empty') }}
-                                </div>
+                                </NuxtLink>
 
                             </template>
 
@@ -250,7 +254,8 @@ const cartTotal = computed(() => dashboard.cartTotal || 0)
                             </td>
 
                             <td class="text-end">
-                                <NuxtLink :to="localePath(`/orders/show/${order.id}`)" class="btn btn-sm btn-outline-primary">
+                                <NuxtLink :to="localePath(`/orders/show/${order.id}`)"
+                                          class="btn btn-sm btn-outline-primary">
                                     {{ t('dashboard.orders.open') }}
                                 </NuxtLink>
                             </td>

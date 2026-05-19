@@ -1,6 +1,7 @@
 export default {
 
     auth: {
+        email: 'Email',
         emailRequired: 'Email is required',
         login: 'Login',
         loginLink: 'Login',

@@ -31,6 +31,7 @@ const name = ref('')
 const email = ref('')
 const password = ref('')
 const password_confirmation = ref('')
+const redirecting = ref(false)
 
 /* -----------------------------
    validation
@@ -38,29 +39,22 @@ const password_confirmation = ref('')
 
 const validate = () => {
     const errors: Record<string, string> = {}
-
     if (!name.value) {
         errors.name = t('auth.nameRequired')
     }
-
     if (!email.value) {
         errors.email = t('auth.emailRequired')
     }
-
     if (!password.value) {
         errors.password = t('auth.passwordRequired')
     }
-
     if (password.value && password.value.length < 6) {
         errors.password = t('auth.passwordMin')
     }
-
     if (password.value !== password_confirmation.value) {
         errors.password_confirmation = t('auth.passwordMismatch')
     }
-
     authStore.errors = {...errors}
-
     return Object.keys(errors).length === 0
 }
 
@@ -69,6 +63,7 @@ const validate = () => {
 ------------------------------*/
 
 const submit = async () => {
+    if (authStore.loading || redirecting.value) return
     if (!validate()) return
     const ok = await authStore.register({
         name: name.value,
@@ -81,6 +76,8 @@ const submit = async () => {
         email.value = ''
         password.value = ''
         password_confirmation.value = ''
+        redirecting.value = true
+        // return navigateTo(localePath('/dashboard'))
     }
 }
 
@@ -108,16 +105,16 @@ onMounted(() => {
                         type="text"
                         :label="t('auth.name')"
                         required
-                        :disabled="authStore.loading"
+                        :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.name"
                     />
 
                     <BaseInput
                         v-model="email"
                         type="email"
-                        label="Email"
+                        label="t('auth.email')"
                         required
-                        :disabled="authStore.loading"
+                        :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.email"
                     />
 
@@ -126,7 +123,7 @@ onMounted(() => {
                         type="password"
                         :label="t('auth.password')"
                         required
-                        :disabled="authStore.loading"
+                        :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.password"
                     />
 
@@ -135,14 +132,14 @@ onMounted(() => {
                         type="password"
                         :label="t('auth.passwordConfirm')"
                         required
-                        :disabled="authStore.loading"
+                        :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.password_confirmation"
                     />
 
                     <BaseButton
                         type="submit"
                         class="w-100 mt-3"
-                        :loading="authStore.loading"
+                        :loading="authStore.loading|| redirecting"
                     >
                         <template #loading>
                             {{ t('auth.registering') }}
