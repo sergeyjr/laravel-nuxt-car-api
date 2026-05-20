@@ -37,10 +37,10 @@ export const useCartApi = () => {
         },
 
         async removeItem(id: number) {
-            debugLog('[CartAPI] removeItem → request', { id })
+            debugLog('[CartAPI] removeItem → request', {id})
             return logResponse(
                 'removeItem',
-                api.post('/api/cart/remove', { id })
+                api.post('/api/cart/remove', {id})
             )
         },
 

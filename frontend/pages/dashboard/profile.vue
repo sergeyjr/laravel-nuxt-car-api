@@ -159,7 +159,9 @@ const goBack = () => {
         <div class="row">
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">{{ t('profile.title') }}</h2>
+                <h2 class="mb-0">
+                    {{ t('profile.title') }}
+                </h2>
 
                 <BaseButton
                     variant="outline-secondary"
@@ -184,7 +186,9 @@ const goBack = () => {
                             alt=""
                         />
 
-                        <h4>{{ user?.name }}</h4>
+                        <h4 class="mb-2">
+                            {{ user?.name }}
+                        </h4>
 
                         <p class="text-muted">{{ user?.email }}</p>
 

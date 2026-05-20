@@ -1,20 +1,18 @@
 <script setup lang="ts">
-
 import {ref, onMounted} from 'vue'
-
 import {useI18n} from 'vue-i18n'
 
 import {useAuthStore} from '~/stores/auth'
 
 import BaseButton from '~/components/ui/base/BaseButton.vue'
 import BaseInput from '~/components/ui/base/BaseInput.vue'
+import {useFormValidation} from '~/composables/useFormValidation'
 
 /* -----------------------------
    i18n
 ------------------------------*/
 
 const {t} = useI18n()
-
 const localePath = useLocalePath()
 
 /* -----------------------------
@@ -34,49 +32,39 @@ const password_confirmation = ref('')
 const redirecting = ref(false)
 
 /* -----------------------------
-   validation
+   validation composable
 ------------------------------*/
 
-const validate = () => {
-    const errors: Record<string, string> = {}
-    if (!name.value) {
-        errors.name = t('auth.nameRequired')
-    }
-    if (!email.value) {
-        errors.email = t('auth.emailRequired')
-    }
-    if (!password.value) {
-        errors.password = t('auth.passwordRequired')
-    }
-    if (password.value && password.value.length < 6) {
-        errors.password = t('auth.passwordMin')
-    }
-    if (password.value !== password_confirmation.value) {
-        errors.password_confirmation = t('auth.passwordMismatch')
-    }
-    authStore.errors = {...errors}
-    return Object.keys(errors).length === 0
-}
+const {
+    setNativeValidity,
+    clearNativeValidity,
+} = useFormValidation()
 
 /* -----------------------------
    submit
 ------------------------------*/
 
-const submit = async () => {
+const submit = async (e: Event) => {
+    const form = e.currentTarget as HTMLFormElement
+
+    if (!form.reportValidity()) return
     if (authStore.loading || redirecting.value) return
-    if (!validate()) return
+
     const ok = await authStore.register({
         name: name.value,
         email: email.value,
         password: password.value,
         password_confirmation: password_confirmation.value
     })
+
     if (ok) {
         name.value = ''
         email.value = ''
         password.value = ''
         password_confirmation.value = ''
         redirecting.value = true
+
+        // если нужно:
         // return navigateTo(localePath('/dashboard'))
     }
 }
@@ -88,7 +76,6 @@ const submit = async () => {
 onMounted(() => {
     authStore.clearErrors()
 })
-
 </script>
 
 <template>
@@ -96,7 +83,9 @@ onMounted(() => {
         <div class="row justify-content-center">
             <div class="col-md-5">
 
-                <h1 class="mb-4">{{ t('auth.registerTitle') }}</h1>
+                <h1 class="mb-4">
+                    {{ t('auth.registerTitle') }}
+                </h1>
 
                 <form @submit.prevent="submit">
 
@@ -107,6 +96,8 @@ onMounted(() => {
                         required
                         :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.name"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseInput
@@ -116,6 +107,8 @@ onMounted(() => {
                         required
                         :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.email"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseInput
@@ -125,6 +118,8 @@ onMounted(() => {
                         required
                         :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.password"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseInput
@@ -134,12 +129,14 @@ onMounted(() => {
                         required
                         :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.password_confirmation"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseButton
                         type="submit"
                         class="w-100 mt-3"
-                        :loading="authStore.loading|| redirecting"
+                        :loading="authStore.loading || redirecting"
                     >
                         <template #loading>
                             {{ t('auth.registering') }}

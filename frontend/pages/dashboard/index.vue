@@ -196,7 +196,9 @@ const cartTotal = computed(() => dashboardStore.cartTotal || 0)
                     <div class="col-12 d-flex justify-content-between align-items-center">
 
                         <NuxtLink :to="localePath('/orders')" class="text-decoration-none text-dark">
-                            <h4 class="mb-3">{{ t('dashboard.orders.title') }}</h4>
+                            <h4 class="mb-2">
+                                {{ t('dashboard.orders.title') }}
+                            </h4>
                         </NuxtLink>
 
                         <NuxtLink :to="localePath('/orders')" class="btn btn-outline-primary btn-sm">

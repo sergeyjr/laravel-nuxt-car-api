@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import {computed} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {useRoute} from 'vue-router'
 
-import { useOrderStore } from '~/stores/order'
-import { useOrderStatus } from '~/composables/useOrderStatus'
-import { formatPrice } from '~/utils/formatters'
+import {useOrderStore} from '~/stores/order'
+import {useOrderStatus} from '~/composables/useOrderStatus'
+import {formatPrice} from '~/utils/formatters'
 
 /* -----------------------------
    i18n
 ------------------------------*/
 
-const { t } = useI18n()
+const {t} = useI18n()
 
 const localePath = useLocalePath()
 
@@ -20,7 +20,7 @@ const localePath = useLocalePath()
 ------------------------------*/
 
 const orderStore = useOrderStore()
-const { getLabel, getClass } = useOrderStatus()
+const {getLabel, getClass} = useOrderStatus()
 const route = useRoute()
 
 /* -----------------------------

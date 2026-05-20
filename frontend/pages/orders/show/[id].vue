@@ -123,7 +123,7 @@ watch(orderId, async (newId, oldId) => {
         <template v-else-if="order">
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-3">
+                <h2 class="mb-0">
                     {{ t('orderDetail.title', {id: order.id}) }}
                 </h2>
 

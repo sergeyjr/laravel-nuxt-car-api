@@ -3,14 +3,11 @@ import type {$Fetch} from 'ofetch'
 declare module '#app' {
     interface NuxtApp {
         $api: $Fetch
-        // $apiToken: $Fetch
     }
 }
-
 declare module 'vue' {
     interface ComponentCustomProperties {
         $api: $Fetch
-        // $apiToken: $Fetch
     }
 }
 

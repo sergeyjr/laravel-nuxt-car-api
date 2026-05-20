@@ -5,7 +5,7 @@ import {useRouter} from 'vue-router'
 import {useAuthStore} from '~/stores/auth'
 import {useCarStore} from '~/stores/car'
 
-import BaseButton from '~/components/ui/base/BaseButton.vue'
+import {useI18n} from "vue-i18n";
 
 import {formatPrice} from '~/utils/formatters'
 
@@ -39,7 +39,6 @@ import {Swiper, SwiperSlide} from 'swiper/vue'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
-import {useI18n} from "vue-i18n";
 
 const modules = [Navigation, Pagination]
 
@@ -185,7 +184,7 @@ const onLogout = async () => {
 
         <div class="text-center mb-5">
 
-            <h1 class="display-5 fw-bold mb-3">
+            <h1 class="mb-4">
                 {{ t('home.title') }}
             </h1>
 
@@ -251,7 +250,9 @@ const onLogout = async () => {
             <!-- CARS -->
             <div class="col-12 mt-5">
 
-                <h2 class="mb-4">{{ t('home.newArrivals') }}</h2>
+                <h2 class="mb-0">
+                    {{ t('home.newArrivals') }}
+                </h2>
 
                 <ClientOnly>
 
@@ -290,7 +291,9 @@ const onLogout = async () => {
 
                                     <div class="card-body">
 
-                                        <h5>{{ car.title }}</h5>
+                                        <h5 class="mb-3">
+                                            {{ car.title }}
+                                        </h5>
 
                                         <p v-if="authStore.user && car.price" class="mb-0">
                                             <span class="fs-5 fw-bold text-success">

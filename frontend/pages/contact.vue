@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 
 import { useContactStore } from '~/stores/contact'
 import type { ContactPerson } from '~/types/contacts'
@@ -7,21 +8,30 @@ import BaseButton from '~/components/ui/base/BaseButton.vue'
 import BaseInput from '~/components/ui/base/BaseInput.vue'
 import BaseTextarea from '~/components/ui/base/BaseTextarea.vue'
 
-import {formatPhoneRU, formatPhoneRaw} from '~/utils/formatters'
-
-import {useI18n} from "vue-i18n";
+import { formatPhoneRU, formatPhoneRaw } from '~/utils/formatters'
+import { useI18n } from 'vue-i18n'
+import { useFormValidation } from '~/composables/useFormValidation'
 
 /* -----------------------------
    i18n
 ------------------------------*/
 
-const {t, tm } = useI18n()
+const { t, tm } = useI18n()
 
 /* -----------------------------
    stores
 ------------------------------*/
 
 const contactStore = useContactStore()
+
+/* -----------------------------
+   validation
+------------------------------*/
+
+const {
+    setNativeValidity,
+    clearNativeValidity,
+} = useFormValidation()
 
 /* -----------------------------
    locales
@@ -51,11 +61,12 @@ const mailto = (key: string) => {
 ------------------------------*/
 
 const onSubmit = async (e: Event) => {
-    const form = e.target as HTMLFormElement
-    if (!form.checkValidity()) return
+    const form = e.currentTarget as HTMLFormElement
+
+    if (!form.reportValidity()) return
+
     await contactStore.submit('contactPage')
 }
-
 </script>
 
 <template>
@@ -64,7 +75,9 @@ const onSubmit = async (e: Event) => {
 
             <div class="col-12 col-md-6">
 
-                <h1 class="mb-4">{{ t('contact.title') }}</h1>
+                <h1 class="mb-4">
+                    {{ t('contact.title') }}
+                </h1>
 
                 <div
                     v-for="c in contacts"
@@ -105,10 +118,12 @@ const onSubmit = async (e: Event) => {
 
             <div class="col-12 col-md-6">
 
-                <h1 class="mb-4">{{ t('contact.formTitle') }}</h1>
+                <h1 class="mb-4">
+                    {{ t('contact.formTitle') }}
+                </h1>
 
                 <div v-if="contactStore.retryAfter > 0" class="alert alert-warning mt-4">
-                    {{ t('contact.retry', {sec: contactStore.retryAfter}) }}
+                    {{ t('contact.retry', { sec: contactStore.retryAfter }) }}
                 </div>
 
                 <form @submit.prevent="onSubmit">
@@ -119,6 +134,8 @@ const onSubmit = async (e: Event) => {
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.name"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseInput
@@ -128,6 +145,8 @@ const onSubmit = async (e: Event) => {
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.email"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseInput
@@ -136,6 +155,8 @@ const onSubmit = async (e: Event) => {
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.subject"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseTextarea
@@ -144,6 +165,8 @@ const onSubmit = async (e: Event) => {
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.body"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseButton

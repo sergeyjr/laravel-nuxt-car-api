@@ -1,13 +1,14 @@
 <script setup lang="ts">
 
 import {ref, onMounted} from 'vue'
-
 import {useI18n} from 'vue-i18n'
 
 import {useAuthStore} from '~/stores/auth'
 
 import BaseButton from '~/components/ui/base/BaseButton.vue'
 import BaseInput from '~/components/ui/base/BaseInput.vue'
+
+import {useFormValidation} from '~/composables/useFormValidation'
 
 /* -----------------------------
    i18n
@@ -35,26 +36,23 @@ const redirecting = ref(false)
    validation
 ------------------------------*/
 
-const validate = () => {
-    const errors: Record<string, string> = {}
-    if (!email.value) {
-        errors.email = t('auth.emailRequired')
-    }
-    if (!password.value) {
-        errors.password = t('auth.passwordRequired')
-    }
-    authStore.errors = {...errors}
-    return Object.keys(errors).length === 0
-}
+const {
+    setNativeValidity,
+    clearNativeValidity,
+} = useFormValidation()
 
 /* -----------------------------
    submit
 ------------------------------*/
 
-const submit = async () => {
+const submit = async (e: Event) => {
+    const form = e.currentTarget as HTMLFormElement
+
+    if (!form.reportValidity()) return
     if (authStore.loading || redirecting.value) return
-    if (!validate()) return
+
     const ok = await authStore.login(email.value, password.value)
+
     if (ok) {
         redirecting.value = true
         return navigateTo(localePath('/dashboard'))
@@ -76,7 +74,9 @@ onMounted(() => {
         <div class="row justify-content-center">
             <div class="col-md-5">
 
-                <h1 class="mb-4">{{ t('auth.loginTitle') }}</h1>
+                <h1 class="mb-4">
+                    {{ t('auth.loginTitle') }}
+                </h1>
 
                 <form @submit.prevent="submit">
 
@@ -87,14 +87,19 @@ onMounted(() => {
                         :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.email"
                         :label="t('auth.email')"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseInput
                         v-model="password"
                         type="password"
+                        required
                         :disabled="authStore.loading || redirecting"
                         :error="authStore.errors.password"
                         :label="t('auth.password')"
+                        @invalid="setNativeValidity"
+                        @input="clearNativeValidity"
                     />
 
                     <BaseButton

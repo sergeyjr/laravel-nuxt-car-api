@@ -205,7 +205,9 @@ const confirmLogin = async (payload: LoginPayload) => {
             </div>
         </div>
 
-        <h1 class="mb-4">{{ t('catalog.title') }}</h1>
+        <h1 class="mb-4">
+            {{ t('catalog.title') }}
+        </h1>
 
         <!-- TOP CONTROLS -->
         <div
@@ -257,7 +259,9 @@ const confirmLogin = async (payload: LoginPayload) => {
                     </NuxtLink>
 
                     <div class="card-body">
-                        <h5 class="mb-3">{{ car.title }}</h5>
+                        <h5 class="mb-3">
+                            {{ car.title }}
+                        </h5>
 
                         <p v-if="authStore.user && car.price" class="mb-0">
                             <span class="fs-5 fw-bold text-success">

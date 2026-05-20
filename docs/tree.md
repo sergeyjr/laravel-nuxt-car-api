@@ -153,22 +153,31 @@ laravel-nuxt/
 │   │       └── cars/
 │   │           └── car.jpg
 │   ├── components/
+│   │   ├── layout/
+│   │   │   ├── Footer.vue
+│   │   │   └── Navbar.vue
 │   │   ├── modals/
-│   │   │   ├── CartCheckoutModal.vue
-│   │   │   ├── CartClearModal.vue
-│   │   │   ├── CartRemoveItemModal.vue
-│   │   │   ├── DeleteAccountModal.vue
-│   │   │   ├── LoginModal.vue
-│   │   │   └── LogoutConfirmModal.vue
-│   │   ├── Alerts.vue
-│   │   ├── BaseButton.vue
-│   │   ├── BaseCheckbox.vue
-│   │   ├── BaseFileInput.vue
-│   │   ├── BaseInput.vue
-│   │   ├── BaseTextarea.vue
-│   │   ├── Footer.vue
-│   │   ├── Navbar.vue
-│   │   └── Pagination.vue
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginModal.vue
+│   │   │   │   └── LogoutConfirmModal.vue
+│   │   │   ├── cart/
+│   │   │   │   ├── CartCheckoutModal.vue
+│   │   │   │   ├── CartClearModal.vue
+│   │   │   │   ├── CartRemoveItemModal.vue
+│   │   │   │   └── CartUpdateModal.vue
+│   │   │   └── user/
+│   │   │       └── DeleteAccountModal.vue
+│   │   └── ui/
+│   │       ├── base/
+│   │       │   ├── BaseButton.vue
+│   │       │   ├── BaseCheckbox.vue
+│   │       │   ├── BaseFileInput.vue
+│   │       │   ├── BaseInput.vue
+│   │       │   └── BaseTextarea.vue
+│   │       ├── feedback/
+│   │       │   └── Alerts.vue
+│   │       └── navigation/
+│   │           └── Pagination.vue
 │   ├── composables/
 │   │   ├── useApi.ts
 │   │   ├── useLogout.ts

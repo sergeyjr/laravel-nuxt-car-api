@@ -15,6 +15,7 @@ import type {Car} from '~/types/car'
 import {formatPrice} from '~/utils/formatters'
 
 import LoginModal from '~/components/modals/auth/LoginModal.vue'
+import BaseButton from "~/components/ui/base/BaseButton.vue";
 
 /* -----------------------------
    i18n
@@ -151,9 +152,18 @@ watch(carId, async (newId, oldId) => {
             <div class="row">
 
                 <div class="col-12">
-                    <h1 class="mb-4">
-                        {{ car.title }}
-                    </h1>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="mb-4">
+                            {{ car.title }}
+                        </h1>
+
+                        <BaseButton
+                            variant="light"
+                            @click="goBack"
+                        >
+                            ← {{ t('nav.back') }}
+                        </BaseButton>
+                    </div>
                 </div>
 
                 <div class="col-md-5">
@@ -197,7 +207,9 @@ watch(carId, async (newId, oldId) => {
 
                             <tr v-if="car.description">
                                 <td colspan="2">
-                                    <h5>{{ car.description }}</h5>
+                                    <h5>
+                                        {{ car.description }}
+                                    </h5>
                                 </td>
                             </tr>
 
@@ -306,19 +318,12 @@ watch(carId, async (newId, oldId) => {
 
             <div class="d-flex justify-content-between align-items-center">
 
-                <BaseButton
-                    variant="light"
-                    @click="goBack"
-                >
-                    ← {{ t('nav.back') }}
-                </BaseButton>
-
                 <NuxtLink
                     :to="localePath('/catalog')"
                     class="text-decoration-none"
                 >
                     <BaseButton variant="light">
-                        {{ t('catalog.title') }} →
+                        ← {{ t('catalog.title') }}
                     </BaseButton>
                 </NuxtLink>
 

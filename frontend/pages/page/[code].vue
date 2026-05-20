@@ -51,7 +51,9 @@ const page = computed(() => pageStore.current)
 <template>
     <div class="container mt-4">
 
-        <h1 class="mb-4">{{ page?.title || '' }}</h1>
+        <h1 class="mb-4">
+            {{ page?.title || '' }}
+        </h1>
 
         <template v-if="pageStore.loading">
             <div class="alert alert-light border text-center py-4">

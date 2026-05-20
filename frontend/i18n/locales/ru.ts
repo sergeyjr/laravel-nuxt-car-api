@@ -346,4 +346,8 @@ export default {
         updating: 'Обновляем...',
     },
 
+    validation: {
+        required: "Заполните это поле",
+    },
+
 }

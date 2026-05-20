@@ -346,4 +346,8 @@ export default {
         updating: 'Updating...',
     },
 
+    validation: {
+        required: "Fill in this field",
+    },
+
 }
