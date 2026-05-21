@@ -41,61 +41,10 @@ class ApiAuthController extends Controller
         $token = $user->createToken('api_token')->plainTextToken;
 
         return $this->success([
-            'message' => 'Токен успешно получен.',
+            // 'message' => 'Токен успешно получен.',
             'user' => $user,
             'token' => $token,
         ]);
     }
-
-    public function me(Request $request): JsonResponse
-    {
-        return $this->success($request->user());
-    }
-
-    public function logout(Request $request): JsonResponse
-    {
-        if ($request->user()?->currentAccessToken()) {
-            $request->user()->currentAccessToken()->delete();
-        }
-
-        return $this->success([
-            'message' => 'Успешный выход.'
-        ]);
-    }
-
-//    public function token(Request $request)
-//    {
-//        $user = $request->user();
-//
-//        if (!$user) {
-//            return $this->error(
-//                'Требуется авторизация.',
-//                401
-//            );
-//        }
-//
-//        if (!$user->isAdmin() && !$user->isApiUser()) {
-//            return $this->error(
-//                'Доступ запрещен.',
-//                403);
-//        }
-//
-//        $token = $user->tokens()
-//            ->where('name', 'api_token')
-//            ->latest()
-//            ->first();
-//
-//        if ($token) {
-//            return $this->success([
-//                'token' => $token->token
-//            ]);
-//        }
-//
-//        $plain = $user->createToken('api_token')->plainTextToken;
-//
-//        return $this->success([
-//            'token' => $plain,
-//        ]);
-//    }
 
 }

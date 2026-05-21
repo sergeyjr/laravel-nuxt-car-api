@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,7 +22,7 @@ class AuthController extends Controller
             'password' => ['required', 'min:6', 'confirmed'],
         ]);
 
-        $user = User::create([
+        $user = User::query()->create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
@@ -34,7 +33,7 @@ class AuthController extends Controller
         // $request->session()->regenerate();
 
         return $this->success([
-            'message' => 'Регистрация успешно завершена! Теперь вы можете войти.',
+            'message' => 'auth.registerSuccess',
             'user' => $user,
             // 'redirect' => '/dashboard',
         ]);
@@ -50,21 +49,20 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // Проверка email/password
         if (!Auth::attempt($credentials)) {
             return $this->error(
-                'Имя пользователя и пароль не совпадают.',
-                422
+                message: 'auth.invalidCredentials',
+                code: 422,
             );
         }
 
-        $user = Auth::user(); // или auth()->user()
+        $user = Auth::user(); // или auth()->user() / $this->user()
 
         // Обновление сессии
         $request->session()->regenerate();
 
         return $this->success([
-            'message' => 'Авторизация прошла успешна.',
+            'message' => 'auth.loginSuccess',
             'user' => $user,
         ]);
     }
@@ -72,14 +70,17 @@ class AuthController extends Controller
     /**
      * Выход пользователя из системы
      */
-    public function logout(Request $request): Response
+    public function logout(Request $request): JsonResponse
     {
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->noContent();
+        // return response()->noContent();
+        return $this->success([
+            'message' => 'auth.logoutSuccess',
+        ]);
     }
 
     /**
@@ -87,9 +88,44 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        return $this->success($user);
+        return $this->success(
+            $request->user()
+        );
     }
+
+//    public function token(Request $request)
+//    {
+//        $user = $request->user();
+//
+//        if (!$user) {
+//            return $this->error(
+//                'Требуется авторизация.',
+//                401
+//            );
+//        }
+//
+//        if (!$user->isAdmin() && !$user->isApiUser()) {
+//            return $this->error(
+//                'Доступ запрещен.',
+//                403);
+//        }
+//
+//        $token = $user->tokens()
+//            ->where('name', 'api_token')
+//            ->latest()
+//            ->first();
+//
+//        if ($token) {
+//            return $this->success([
+//                'token' => $token->token
+//            ]);
+//        }
+//
+//        $plain = $user->createToken('api_token')->plainTextToken;
+//
+//        return $this->success([
+//            'token' => $plain,
+//        ]);
+//    }
 
 }

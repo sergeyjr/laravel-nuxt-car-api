@@ -11,10 +11,14 @@ export const useOrderStore = defineStore('order', {
         loadingOrders: false,
         error: null as any,
         initialized: false,
-        orderCache: {} as Record<string, any>
+        orderCache: {} as Record<string, any>,
     }),
 
     actions: {
+
+        unwrapResponse(data: any) {
+            return data?.data ?? data
+        },
 
         async fetchOrder(id: string | number) {
             const key = String(id).trim()
@@ -35,7 +39,8 @@ export const useOrderStore = defineStore('order', {
                     return this.currentOrder
                 }
 
-                const data = await orderApi.getOrder(orderId)
+                const response: any = await orderApi.getOrder(orderId)
+                const data = this.unwrapResponse(response)
 
                 if (!data) {
                     this.currentOrder = null
@@ -46,13 +51,11 @@ export const useOrderStore = defineStore('order', {
                 this.orderCache[key] = data
 
                 return data
-
             } catch (e) {
                 this.error = e
                 this.currentOrder = null
                 console.error(e)
                 return null
-
             } finally {
                 this.loadingOrder = false
             }
@@ -70,7 +73,8 @@ export const useOrderStore = defineStore('order', {
             this.error = null
 
             try {
-                const data = await orderApi.getOrders()
+                const response: any = await orderApi.getOrders()
+                const data = this.unwrapResponse(response)
 
                 this.orders = Array.isArray(data)
                     ? data
@@ -78,12 +82,10 @@ export const useOrderStore = defineStore('order', {
 
                 this.initialized = true
                 return this.orders
-
             } catch (e) {
                 this.error = e
                 console.error(e)
                 return []
-
             } finally {
                 this.loading = false
                 this.loadingOrders = false

@@ -21,11 +21,9 @@ class SiteController extends Controller
          * Страница README.md
          */
         if ($code === 'about') {
-
             $projectRoot = dirname(base_path());
             $readmePath = $projectRoot . '/README.md';
 
-            // Проверка существования README.md
             if (!file_exists($readmePath)) {
                 abort(404, 'Файл README.md не найден.');
             }
@@ -41,14 +39,11 @@ class SiteController extends Controller
             ]);
         }
 
-        /**
-         * Страница из базы данных
-         */
-        $page = Page::where('code', $code)
+        $page = Page::query()
+            ->where('code', $code)
             ->where('is_active', true)
             ->firstOrFail();
 
-        // Определение формата контента
         $format = $page->format ?? $this->detectFormat($page->content);
 
         return $this->success([
@@ -63,9 +58,6 @@ class SiteController extends Controller
      */
     protected function detectFormat(string $content): string
     {
-        /**
-         * Явные markdown-маркеры
-         */
         if (
             str_contains($content, '[md]') ||
             str_contains($content, '```') ||
@@ -74,9 +66,6 @@ class SiteController extends Controller
             return 'markdown';
         }
 
-        /**
-         * HTML-контент
-         */
         if ($content !== strip_tags($content)) {
             return 'html';
         }
@@ -103,7 +92,6 @@ class SiteController extends Controller
      */
     protected function renderMarkdown(string $content): string
     {
-        // Замена frontend/public/images/screenshots/ на images/screenshots/
         $pattern = '#frontend/public(/images/screenshots/[^)\s]+)#';
         $replacement = '$1';
         $content = preg_replace($pattern, $replacement, $content);
@@ -116,12 +104,19 @@ class SiteController extends Controller
     }
 
     /**
-     * Возвращает ключ ограничения частоты отправки формы контакта.
-     * Используется Laravel RateLimiter и IP пользователя.
+     * Ключ ограничения частоты отправки формы контакта
+     */
+    protected function contactThrottleKey(Request $request): string
+    {
+        return 'contact:' . $request->ip();
+    }
+
+    /**
+     * Возвращает время до следующей попытки отправки формы контакта
      */
     protected function contactRetryAfter(Request $request): int
     {
-        return RateLimiter::availableIn($request->ip());
+        return RateLimiter::availableIn($this->contactThrottleKey($request));
     }
 
     /**
@@ -129,6 +124,18 @@ class SiteController extends Controller
      */
     public function sendContact(Request $request): JsonResponse
     {
+        $key = $this->contactThrottleKey($request);
+
+        if (RateLimiter::tooManyAttempts($key, 1)) {
+            return $this->error(
+                'contact.tooManyRequests',
+                429,
+                [
+                    'retry_after' => $this->contactRetryAfter($request),
+                ]
+            );
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -138,8 +145,10 @@ class SiteController extends Controller
 
         Contact::create($validated);
 
+        RateLimiter::hit($key, 60);
+
         return $this->success([
-            'message' => 'Ваше сообщение успешно отправлено.',
+            'message' => 'contact.sent',
             'retry_after' => $this->contactRetryAfter($request),
         ]);
     }

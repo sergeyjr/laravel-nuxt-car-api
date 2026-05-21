@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 
 import type {User} from '~/types/auth'
+
 import {useAuthApi} from '~/services/api/auth.api'
 import {useAlertStore} from './alert'
 
@@ -8,35 +9,59 @@ export const useAuthStore = defineStore('auth', {
 
     state: () => ({
         user: null as User | null,
+
         initialized: false,
         initializing: false,
+
         loading: false,
         loggingOut: false,
+
         errors: {} as Record<string, string>,
     }),
 
     getters: {
-        isAuth: (state) => !!state.user,
+        isAuth: state => !!state.user,
     },
 
     actions: {
+
+        /* -----------------------------
+           helpers
+        ------------------------------*/
 
         showAlert(type: string, message: string) {
             useAlertStore().add(type, message)
         },
 
-        clearErrors() {
+        t(key?: string) {
+            const {$i18n} = useNuxtApp()
+            if (!key) {
+                return $i18n.t('common.error')
+            }
+            return $i18n.t(key)
+        },
+
+        resolveMessage(data: any, fallbackKey: string) {
+            const messageKey = data?.message || fallbackKey
+            return this.t(messageKey)
+        },
+
+        resetErrors() {
             this.errors = {}
         },
 
-        normalizeErrors(errors: any): Record<string, string> {
-            return Object.fromEntries(
-                Object.entries(errors || {}).map(([k, v]) => [
-                    k,
-                    Array.isArray(v) ? (v[0] ?? '') : String(v ?? ''),
-                ]),
-            )
+        setError(field: string, message: string) {
+            this.errors[field] = message
         },
+
+        logoutLocal() {
+            this.user = null
+            this.initialized = true
+        },
+
+        /* -----------------------------
+           auth state
+        ------------------------------*/
 
         async fetchUser() {
             debugLog('[Auth Store] fetchUser')
@@ -45,14 +70,19 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const user = await api.me()
+
                 this.user = user || null
+
                 return !!user
             } catch (e: any) {
+
                 if ([401, 403, 419].includes(e?.status)) {
                     this.user = null
                     return false
                 }
+
                 console.error(e)
+
                 return false
             }
         },
@@ -60,7 +90,10 @@ export const useAuthStore = defineStore('auth', {
         async initAuth() {
             debugLog('[Auth Store] initAuth')
 
-            if (this.initialized || this.initializing) {
+            if (
+                this.initialized ||
+                this.initializing
+            ) {
                 return this.isAuth
             }
 
@@ -68,75 +101,133 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const ok = await this.fetchUser()
+
                 this.initialized = true
+
                 return ok
             } finally {
                 this.initializing = false
             }
         },
 
+        /* -----------------------------
+           login
+        ------------------------------*/
+
         async login(email: string, password: string) {
             debugLog('[Auth Store] login')
 
             this.loading = true
-            this.clearErrors()
+
+            this.resetErrors()
 
             const api = useAuthApi()
 
             try {
                 await api.csrf()
+
                 const data: any = await api.login(email, password)
+
                 if (data?.user) {
                     this.user = data.user
                 } else {
                     await this.fetchUser()
                 }
+
                 this.initialized = true
-                this.showAlert('success', data?.message || 'Вход выполнен.')
+
+                this.showAlert(
+                    'success',
+                    this.resolveMessage(data, 'auth.loginSuccess')
+                )
+
                 return true
             } catch (e: any) {
-                const data = e?.data || e?.response?._data || e?.response?.data || {}
-                const message = data?.message || e?.message || 'Ошибка входа.'
+                const data =
+                    e?.data ||
+                    e?.response?._data ||
+                    e?.response?.data ||
+                    {}
+
+                // debugLog(data, e?.status)
+
                 if (e?.status === 422 && data?.errors) {
-                    this.errors = this.normalizeErrors(data.errors)
-                    return false
+                    Object.entries(data.errors).forEach(([k, v]: any) => {
+                        this.setError(k, Array.isArray(v) ? v[0] : String(v ?? ''))
+                    })
+                } else {
+                    this.showAlert(
+                        'error',
+                        this.resolveMessage(data, 'common.error')
+                    )
                 }
-                this.errors = {
-                    general: message,
-                }
-                // console.error(e)
+
                 return false
             } finally {
                 this.loading = false
             }
         },
+
+        /* -----------------------------
+           register
+        ------------------------------*/
 
         async register(payload: any) {
             debugLog('[Auth Store] register')
 
             this.loading = true
-            this.clearErrors()
+
+            this.resetErrors()
 
             const api = useAuthApi()
 
             try {
                 await api.csrf()
-                const data: any = await api.register(payload)
-                this.showAlert('success', data?.message || 'Регистрация завершена.')
+
+                const data: any = await api.register(
+                    payload,
+                )
+
                 this.user = null
                 this.initialized = true
+
+                this.showAlert(
+                    'success',
+                    this.resolveMessage(data, 'auth.registerSuccess')
+                )
+
                 return true
             } catch (e: any) {
-                if (e?.status === 422) {
-                    this.errors = this.normalizeErrors(e.data?.errors)
-                    return false
+
+                const data =
+                    e?.data ||
+                    e?.response?._data ||
+                    e?.response?.data ||
+                    {}
+
+                // debugLog(data)
+
+                if (e?.status === 422 && data?.errors) {
+                    Object.entries(data.errors).forEach(([k, v]: any) => {
+                        this.setError(k, Array.isArray(v) ? v[0] : String(v ?? ''))
+                    })
+                } else {
+                    this.showAlert(
+                        'error',
+                        this.resolveMessage(data, 'common.error')
+                    )
                 }
-                this.showAlert('error', e?.data?.message || 'Ошибка регистрации.')
+
                 return false
+
             } finally {
                 this.loading = false
             }
         },
+
+        /* -----------------------------
+           logout
+        ------------------------------*/
 
         async logout() {
             debugLog('[Auth Store] logout')
@@ -151,21 +242,34 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const data: any = await api.logout()
-                this.showAlert('success', data?.message || 'Вы успешно вышли из аккаунта.')
+
+                this.showAlert(
+                    'success',
+                    this.resolveMessage(data, 'auth.logoutSuccess')
+                )
+
                 this.logoutLocal()
+
                 return true
             } catch (e: any) {
-                this.showAlert('error', e?.data?.message || 'Ошибка выхода.')
+
+                const data =
+                    e?.data ||
+                    e?.response?._data ||
+                    e?.response?.data ||
+                    {}
+
+                this.showAlert(
+                    'error',
+                    this.resolveMessage(data, 'common.error')
+                )
+
                 console.error(e)
+
                 return false
             } finally {
                 this.loggingOut = false
             }
-        },
-
-        logoutLocal() {
-            this.user = null
-            this.initialized = true
         }
 
     }

@@ -9,7 +9,6 @@ use App\API\V1\DTO\Request\PaginationRequest;
 use App\API\V1\Services\CarService;
 use App\API\V1\Support\CarMapper;
 use App\Http\Controllers\Controller;
-use Database\Seeders\CarSeeder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,12 +16,17 @@ class ApiCarController extends Controller
 {
 
     private CarService $service;
+
     private CarMapper $mapper;
 
     public const CAR_NOT_FOUND = 'Машина не найдена.';
+
     public const DELETE_SUCCESS = 'Машина с ID :id удалена.';
+
     public const ID_IS_REQUIRED = 'Требуется ID.';
+
     public const VALIDATION_FAILED = 'Проверка не удалась.';
+
     public const ACCESS_DENIDED = 'Доступ запрещён.';
 
     public function __construct(CarService $service, CarMapper $mapper)
@@ -51,7 +55,10 @@ class ApiCarController extends Controller
         $car = $this->service->getCar($id);
 
         if (!$car) {
-            return $this->error(self::CAR_NOT_FOUND, 404);
+            return $this->error(
+                self::CAR_NOT_FOUND,
+                404
+            );
         }
 
         return $this->success(
@@ -82,7 +89,9 @@ class ApiCarController extends Controller
     public function update(int $id, Request $request): JsonResponse
     {
         if (!$id) {
-            return $this->error(self::ID_IS_REQUIRED);
+            return $this->error(
+                self::ID_IS_REQUIRED
+            );
         }
 
         $dto = CarUpdateRequest::fromRequest($request);
@@ -98,11 +107,17 @@ class ApiCarController extends Controller
         $car = $this->service->updateCar($id, $dto->toArray());
 
         if (!$car) {
-            return $this->error(self::CAR_NOT_FOUND, 404);
+            return $this->error(
+                self::CAR_NOT_FOUND,
+                404
+            );
         }
 
         if (($car['user_id'] ?? null) !== auth()->id()) {
-            return $this->error(self::ACCESS_DENIDED, 403);
+            return $this->error(
+                self::ACCESS_DENIDED,
+                403
+            );
         }
 
         return $this->success(
@@ -113,7 +128,9 @@ class ApiCarController extends Controller
     public function patch(int $id, Request $request): JsonResponse
     {
         if (!$id) {
-            return $this->error(self::ID_IS_REQUIRED);
+            return $this->error(
+                self::ID_IS_REQUIRED
+            );
         }
 
         $dto = CarPatchRequest::fromRequest($request);
@@ -129,11 +146,17 @@ class ApiCarController extends Controller
         $result = $this->service->patchCar($id, $dto->toArray());
 
         if ($result === 'not_found') {
-            return $this->error(self::CAR_NOT_FOUND, 404);
+            return $this->error(
+                self::CAR_NOT_FOUND,
+                404
+            );
         }
 
         if ($result === 'forbidden') {
-            return $this->error(self::ACCESS_DENIDED, 403);
+            return $this->error(
+                self::ACCESS_DENIDED,
+                403
+            );
         }
 
         return $this->success(
@@ -144,17 +167,25 @@ class ApiCarController extends Controller
     public function destroy(int $id): JsonResponse
     {
         if (!$id) {
-            return $this->error(self::ID_IS_REQUIRED);
+            return $this->error(
+                self::ID_IS_REQUIRED
+            );
         }
 
         $result = $this->service->deleteCar($id);
 
         if ($result === 'not_found') {
-            return $this->error(self::CAR_NOT_FOUND, 404);
+            return $this->error(
+                self::CAR_NOT_FOUND,
+                404
+            );
         }
 
         if ($result === 'forbidden') {
-            return $this->error(self::ACCESS_DENIDED, 403);
+            return $this->error(
+                self::ACCESS_DENIDED,
+                403
+            );
         }
 
         $message = str_replace(':id', $id, self::DELETE_SUCCESS);

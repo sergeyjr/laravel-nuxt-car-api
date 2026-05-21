@@ -23,28 +23,25 @@ class OrderController extends Controller
 
         return DB::transaction(function () use ($request, $user) {
 
-            // Получение корзины пользователя
-            $cart = Cart::where('user_id', $user->id)
+            $cart = Cart::query()
+                ->where('user_id', $user->id)
                 ->with('items')
                 ->first();
 
-            // Проверка пустой корзины
             if (!$cart || $cart->items->isEmpty()) {
                 return $this->error(
-                    'Корзина пуста.',
+                    'cart.emptyTitle',
                     422
                 );
             }
 
-            // Создание заказа
             $order = Order::create([
                 'user_id' => $user->id,
-                'total' => $cart->items->sum(fn($item) => $item->price * $item->qty),
+                'total' => $cart->items->sum(fn ($item) => $item->price * $item->qty),
                 'status' => OrderStatus::PendingPayment->value,
                 'comment' => $request->input('comment'),
             ]);
 
-            // Создание товаров заказа
             foreach ($cart->items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -54,14 +51,12 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Очистка корзины
             $cart->items()->delete();
 
             return $this->success([
-                'message' => 'Заказ успешно создан.',
-                'order' => $order->load(['items.car'])
+                'message' => 'order.successTitle',
+                'order' => $order->load(['items.car']),
             ]);
-
         });
     }
 
@@ -70,7 +65,8 @@ class OrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $orders = Order::where('user_id', $request->user()->id)
+        $orders = Order::query()
+            ->where('user_id', $request->user()->id)
             ->with(['items.car'])
             ->latest()
             ->get();
@@ -83,7 +79,8 @@ class OrderController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
-        $order = Order::where('id', $id)
+        $order = Order::query()
+            ->where('id', $id)
             ->where('user_id', $request->user()->id)
             ->with(['items.car'])
             ->firstOrFail();

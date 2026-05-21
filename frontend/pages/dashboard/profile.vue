@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import {ref, computed, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 
@@ -7,8 +6,8 @@ import {useAuthStore} from '~/stores/auth'
 import {useProfileStore} from '~/stores/profile'
 
 import BaseButton from '~/components/ui/base/BaseButton.vue'
-import BaseCheckbox from "~/components/ui/base/BaseCheckbox.vue"
-import BaseFileInput from "~/components/ui/base/BaseFileInput.vue"
+import BaseCheckbox from '~/components/ui/base/BaseCheckbox.vue'
+import BaseFileInput from '~/components/ui/base/BaseFileInput.vue'
 import BaseInput from '~/components/ui/base/BaseInput.vue'
 import DeleteAccountModal from '~/components/modals/user/DeleteAccountModal.vue'
 
@@ -79,7 +78,7 @@ watch(
         email.value = user.email ?? ''
         remove_avatar.value = false
     },
-    {immediate: true}
+    {immediate: true},
 )
 
 /* -----------------------------
@@ -100,8 +99,7 @@ const submitUpdateProfile = async () => {
     if (!validateUpdateProfile()) return
     await profileStore.updateProfile({
         name: name.value,
-        // email: email.value,
-        remove_avatar: remove_avatar.value
+        remove_avatar: remove_avatar.value,
     })
 }
 
@@ -132,7 +130,7 @@ const submitPassword = async () => {
     const ok = await profileStore.changePassword({
         current_password: current_password.value,
         password: password.value,
-        password_confirmation: password_confirmation.value
+        password_confirmation: password_confirmation.value,
     })
     if (ok) {
         current_password.value = ''
@@ -151,7 +149,6 @@ const confirmDeleteAccount = async () => {
 const goBack = () => {
     navigateTo(localePath('/dashboard'))
 }
-
 </script>
 
 <template>
@@ -253,7 +250,7 @@ const goBack = () => {
 
                             <BaseInput
                                 v-model="email"
-                                label="Email"
+                                :label="t('profile.email')"
                                 type="email"
                                 disabled
                                 :error="profileStore.errors.email"

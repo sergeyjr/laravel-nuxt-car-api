@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+
 import {useContactApi} from '~/services/api/contact.api'
 import {useAlertStore} from '~/stores/alert'
 
@@ -7,22 +8,46 @@ type ContactContext = 'home' | 'contactPage'
 export const useContactStore = defineStore('contact', {
 
     state: () => ({
-        form: {name: '', email: '', subject: '', body: ''},
+        form: {
+            name: '',
+            email: '',
+            subject: '',
+            body: '',
+        },
         errors: {} as Record<string, string>,
         loading: false,
         retryAfter: 0,
         timer: null as ReturnType<typeof setInterval> | null,
         successCountdown: null as number | null,
         contexts: {
-            home: {successMessage: '', errorMessage: ''},
-            contactPage: {successMessage: '', errorMessage: ''}
-        } as Record<ContactContext, { successMessage: string; errorMessage: string }>
+            home: {
+                successMessage: '',
+                errorMessage: '',
+            },
+            contactPage: {
+                successMessage: '',
+                errorMessage: '',
+            },
+        } as Record<ContactContext, { successMessage: string; errorMessage: string }>,
     }),
 
     actions: {
 
         showAlert(type: string, message: string) {
             useAlertStore().add(type, message)
+        },
+
+        t(key?: string, params: Record<string, any> = {}) {
+            const {$i18n} = useNuxtApp()
+            if (!key) {
+                return String($i18n.t('common.error', params))
+            }
+            return String($i18n.t(key, params))
+        },
+
+        resolveMessage(data: any, fallbackKey: string) {
+            const messageKey = data?.message || fallbackKey
+            return this.t(messageKey)
         },
 
         stopCountdown() {
@@ -32,12 +57,13 @@ export const useContactStore = defineStore('contact', {
             }
         },
 
-        resetErrors() {
-            this.errors = {}
-        },
-
         resetForm() {
-            this.form = {name: '', email: '', subject: '', body: ''}
+            this.form = {
+                name: '',
+                email: '',
+                subject: '',
+                body: '',
+            }
             this.errors = {}
         },
 
@@ -46,13 +72,12 @@ export const useContactStore = defineStore('contact', {
             this.contexts[context].errorMessage = ''
         },
 
-        normalizeErrors(errors: any): Record<string, string> {
-            return Object.fromEntries(
-                Object.entries(errors || {}).map(([k, v]) => [
-                    k,
-                    Array.isArray(v) ? (v[0] ?? '') : String(v ?? ''),
-                ]),
-            )
+        resetErrors() {
+            this.errors = {}
+        },
+
+        setError(field: string, message: string) {
+            this.errors[field] = message
         },
 
         startCountdown() {
@@ -61,10 +86,11 @@ export const useContactStore = defineStore('contact', {
             this.timer = setInterval(() => {
                 if (this.retryAfter > 0) {
                     this.retryAfter--
-                } else {
-                    this.stopCountdown()
-                    this.retryAfter = 0
+                    return
                 }
+
+                this.stopCountdown()
+                this.retryAfter = 0
             }, 1000)
         },
 
@@ -80,41 +106,55 @@ export const useContactStore = defineStore('contact', {
 
                 this.resetForm()
 
-                this.contexts[context].successMessage =
-                    data?.message || 'Сообщение отправлено.'
+                const message = this.resolveMessage(data, 'contact.sent')
 
-                this.showAlert('success', this.contexts[context].successMessage)
+                this.contexts[context].successMessage = message
+                this.showAlert('success', message)
 
                 this.retryAfter = data?.retry_after ?? 60
                 this.startCountdown()
             } catch (e: any) {
-                const status = e?.status
-                const data = e?.data
 
-                if (status === 422) {
-                    this.errors = this.normalizeErrors(data?.errors)
-                    return
+                const status = e?.status
+                const data = e?.data || e?.response?._data || e?.response?.data || {}
+
+                if (e?.status === 422 && data?.errors) { // Ошибка валидации
+                        Object.entries(data.errors).forEach(([k, v]: any) => {
+                            this.setError(k, v[0])
+                        })
+
+                } else {
+
+                    this.showAlert(
+                        'error',
+                        this.resolveMessage(data, 'common.error')
+                    )
                 }
 
                 if (status === 429) {
                     this.retryAfter = data?.retry_after ?? 60
                     this.startCountdown()
 
-                    this.showAlert('warning', `Подождите ${this.retryAfter} сек. перед следующим сообщением.`,)
+                    const message = this.t(
+                        data?.message || 'contact.tooManyRequests',
+                        {sec: this.retryAfter},
+                    )
+
+                    this.showAlert('warning', message)
                     return
                 }
 
-                this.contexts[context].errorMessage =
-                    data?.message || 'Ошибка отправки формы.'
-
-                this.showAlert('error', this.contexts[context].errorMessage)
+                // const message = this.resolveMessage(data, 'contact.error')
+                //
+                // this.contexts[context].errorMessage = message
+                // this.showAlert('error', message)
 
                 console.error(e)
             } finally {
                 this.loading = false
             }
-        }
+        },
 
-    }
+    },
 
 })

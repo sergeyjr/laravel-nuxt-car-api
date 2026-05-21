@@ -1,13 +1,13 @@
 <script setup lang="ts">
 
-import {computed, ref, onMounted, watch} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 
 import {useRoute} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 
 import {useAuthStore} from '~/stores/auth'
-import {useCartStore} from '~/stores/cart'
 import {useCarStore} from '~/stores/car'
+import {useCartStore} from '~/stores/cart'
 
 import type {LoginPayload} from '~/types/auth'
 import type {Car} from '~/types/car'
@@ -15,7 +15,7 @@ import type {Car} from '~/types/car'
 import {formatPrice} from '~/utils/formatters'
 
 import LoginModal from '~/components/modals/auth/LoginModal.vue'
-import BaseButton from "~/components/ui/base/BaseButton.vue";
+import BaseButton from '~/components/ui/base/BaseButton.vue'
 
 /* -----------------------------
    i18n
@@ -30,25 +30,34 @@ const localePath = useLocalePath()
 ------------------------------*/
 
 const authStore = useAuthStore()
-const cartStore = useCartStore()
 const carStore = useCarStore()
+const cartStore = useCartStore()
 
 const route = useRoute()
 
 /* -----------------------------
-   state (ui)
+   state
 ------------------------------*/
 
 const showAuth = ref(false)
 const showImage = ref(false)
-const loaded = ref(false)
+
 const authLoading = ref(false)
+const loaded = ref(false)
+
+const authErrors = reactive<Record<string, string>>({})
 
 /* -----------------------------
-   computed route data
+   route
 ------------------------------*/
 
-const carId = computed(() => Number(route.params.id))
+const carId = computed(() =>
+    Number(route.params.id)
+)
+
+/* -----------------------------
+   computed
+------------------------------*/
 
 const car = computed(() =>
     carStore.getCar(carId.value)
@@ -63,8 +72,61 @@ const carImage = computed(() =>
 )
 
 /* -----------------------------
+   load data
+------------------------------*/
+
+const loadCar = async (id: number) => {
+    loaded.value = false
+
+    try {
+        await carStore.fetchCar(id)
+    } finally {
+        loaded.value = true
+    }
+}
+
+/* -----------------------------
    helpers
 ------------------------------*/
+
+const clearAuthErrors = () => {
+    Object.keys(authErrors).forEach(key => {
+        delete authErrors[key]
+    })
+}
+
+const openAuthModal = (event?: Event) => {
+    event?.stopPropagation()
+    event?.preventDefault()
+
+    clearAuthErrors()
+
+    showAuth.value = true
+}
+
+const closeAuthModal = () => {
+    showAuth.value = false
+}
+
+const openImage = () => {
+    showImage.value = true
+}
+
+const closeImage = () => {
+    showImage.value = false
+}
+
+const goBack = () => {
+    if (
+        import.meta.client &&
+        window.history.length > 1
+    ) {
+        window.history.back()
+        return
+    }
+
+    navigateTo(localePath('/catalog'))
+}
 
 const isInCart = (id: number | string) =>
     !!cartStore.items[String(id)]
@@ -72,45 +134,49 @@ const isInCart = (id: number | string) =>
 const isAdding = (id: number | string) =>
     carStore.isAdding(id)
 
-/* -----------------------------
-   actions
-------------------------------*/
-
-const openAuthModal = (event?: Event) => {
-    event?.stopPropagation()
-    event?.preventDefault()
-    showAuth.value = true
-}
-
-const loadCar = async (id: number) => {
-    await carStore.fetchCar(id)
-}
-
-const openImage = () => showImage.value = true
-
-const closeImage = () => showImage.value = false
-
-const goBack = () => {
-    if (import.meta.client && window.history.length > 1) {
-        window.history.back()
-        return
-    }
-    navigateTo(localePath('/catalog'))
-}
-
 const addToCart = (carItem: Car) =>
     carStore.addToCart(carItem)
 
-const confirmLogin = async (payload: LoginPayload) => {
+/* -----------------------------
+   auth
+------------------------------*/
+
+const confirmLogin = async (
+    payload: LoginPayload,
+) => {
+    clearAuthErrors()
+
+    const {email, password} = payload
+
+    if (!email) {
+        authErrors.email = t('auth.emailRequired')
+    }
+
+    if (!password) {
+        authErrors.password = t('auth.passwordRequired')
+    }
+
+    if (Object.keys(authErrors).length) {
+        return
+    }
+
     authLoading.value = true
+
     try {
-        const ok = await authStore.login(
-            payload.email,
-            payload.password
+        const success = await authStore.login(
+            email,
+            password,
         )
-        if (ok) {
-            showAuth.value = false
+
+        if (success) {
+            closeAuthModal()
+            return
         }
+
+        Object.assign(
+            authErrors,
+            authStore.errors,
+        )
     } finally {
         authLoading.value = false
     }
@@ -121,16 +187,15 @@ const confirmLogin = async (payload: LoginPayload) => {
 ------------------------------*/
 
 onMounted(async () => {
-    loaded.value = false
     await loadCar(carId.value)
-    loaded.value = true
 })
 
 watch(carId, async (newId, oldId) => {
-    if (!newId || newId === oldId) return
-    loaded.value = false
+    if (!newId || newId === oldId) {
+        return
+    }
+
     await loadCar(newId)
-    loaded.value = true
 })
 
 </script>
@@ -139,6 +204,7 @@ watch(carId, async (newId, oldId) => {
 
     <div class="container mt-4">
 
+        <!-- LOADING -->
         <template v-if="carLoading || !loaded">
 
             <div class="alert alert-light border text-center py-4">
@@ -147,25 +213,28 @@ watch(carId, async (newId, oldId) => {
 
         </template>
 
+        <!-- CONTENT -->
         <template v-else-if="car">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <h1 class="mb-0">
+                    {{ car.title }}
+                </h1>
+
+                <BaseButton
+                    variant="light"
+                    @click="goBack"
+                >
+                    ← {{ t('nav.back') }}
+                </BaseButton>
+
+            </div>
 
             <div class="row">
 
-                <div class="col-12">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h1 class="mb-4">
-                            {{ car.title }}
-                        </h1>
-
-                        <BaseButton
-                            variant="light"
-                            @click="goBack"
-                        >
-                            ← {{ t('nav.back') }}
-                        </BaseButton>
-                    </div>
-                </div>
-
+                <!-- IMAGE -->
                 <div class="col-md-5">
 
                     <div class="car-image-wrapper">
@@ -173,30 +242,16 @@ watch(carId, async (newId, oldId) => {
                         <img
                             :src="carImage"
                             class="img-fluid rounded car-image"
-                            style="max-height:400px;object-fit:contain;"
+                            style="max-height: 400px; object-fit: contain;"
                             alt=""
                             @click="openImage"
                         >
 
                     </div>
 
-                    <div
-                        v-if="showImage"
-                        class="image-modal"
-                        @click="closeImage"
-                    >
-
-                        <img
-                            :src="carImage"
-                            class="image-full"
-                            @click.stop
-                            alt=""
-                        >
-
-                    </div>
-
                 </div>
 
+                <!-- INFO -->
                 <div class="col-md-7">
 
                     <div class="table-responsive mb-3">
@@ -206,39 +261,63 @@ watch(carId, async (newId, oldId) => {
                             <tbody>
 
                             <tr v-if="car.description">
+
                                 <td colspan="2">
-                                    <h5>
+
+                                    <h5 class="mb-0">
                                         {{ car.description }}
                                     </h5>
+
                                 </td>
+
                             </tr>
 
                             <tr v-if="car.options?.brand">
+
                                 <td class="text-muted fw-semibold w-50">
                                     {{ t('car.brand') }}
                                 </td>
-                                <td>{{ car.options.brand }}</td>
+
+                                <td>
+                                    {{ car.options.brand }}
+                                </td>
+
                             </tr>
 
                             <tr v-if="car.options?.model">
+
                                 <td class="text-muted fw-semibold">
                                     {{ t('car.model') }}
                                 </td>
-                                <td>{{ car.options.model }}</td>
+
+                                <td>
+                                    {{ car.options.model }}
+                                </td>
+
                             </tr>
 
                             <tr v-if="car.options?.year">
+
                                 <td class="text-muted fw-semibold">
                                     {{ t('car.year') }}
                                 </td>
-                                <td>{{ car.options.year }}</td>
+
+                                <td>
+                                    {{ car.options.year }}
+                                </td>
+
                             </tr>
 
                             <tr v-if="car.options?.mileage">
+
                                 <td class="text-muted fw-semibold">
                                     {{ t('car.mileage') }}
                                 </td>
-                                <td>{{ car.options.mileage }}</td>
+
+                                <td>
+                                    {{ car.options.mileage }}
+                                </td>
+
                             </tr>
 
                             <tr>
@@ -253,11 +332,9 @@ watch(carId, async (newId, oldId) => {
                                         v-if="authStore.user && car.price"
                                         class="mb-0"
                                     >
-
                                         <span class="fs-5 fw-bold text-success">
                                             {{ formatPrice(car.price) }}
                                         </span>
-
                                     </p>
 
                                     <BaseButton
@@ -314,31 +391,43 @@ watch(carId, async (newId, oldId) => {
 
             </div>
 
+            <!-- IMAGE MODAL -->
+            <div
+                v-if="showImage"
+                class="image-modal"
+                @click="closeImage"
+            >
+
+                <img
+                    :src="carImage"
+                    class="image-full"
+                    alt=""
+                    @click.stop
+                >
+
+            </div>
+
             <hr>
 
+            <!-- FOOTER -->
             <div class="d-flex justify-content-between align-items-center">
 
                 <NuxtLink
                     :to="localePath('/catalog')"
                     class="text-decoration-none"
                 >
+
                     <BaseButton variant="light">
                         ← {{ t('catalog.title') }}
                     </BaseButton>
+
                 </NuxtLink>
 
             </div>
 
-            <LoginModal
-                :show="showAuth"
-                :processing="authLoading"
-                :errors="authStore.errors"
-                @close="showAuth = false"
-                @confirm="confirmLogin"
-            />
-
         </template>
 
+        <!-- NOT FOUND -->
         <template v-else>
 
             <div class="alert alert-light border text-center py-4">
@@ -349,10 +438,18 @@ watch(carId, async (newId, oldId) => {
 
     </div>
 
+    <!-- AUTH MODAL -->
+    <LoginModal
+        :show="showAuth"
+        :processing="authLoading"
+        :errors="authErrors"
+        @close="closeAuthModal"
+        @confirm="confirmLogin"
+    />
+
 </template>
 
 <style scoped>
-
 .car-image-wrapper {
     display: inline-block;
     overflow: hidden;
@@ -398,5 +495,4 @@ watch(carId, async (newId, oldId) => {
 .description-table td {
     padding: 10px 12px;
 }
-
 </style>

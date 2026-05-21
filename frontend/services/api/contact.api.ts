@@ -1,12 +1,14 @@
+import type {ContactPayload, ContactResponse} from '~/types/contacts'
+
 export const useContactApi = () => {
 
     const api = useApi()
 
     return {
 
-        submit(payload: any) {
+        submit(payload: ContactPayload) {
             debugLog('[ContactAPI] submit → request')
-            return api.post('/api/contact', payload)
+            return api.post<ContactResponse>('/api/contact', payload)
         }
 
     }

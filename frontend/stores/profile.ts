@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+
 import {useAuthStore} from './auth'
 import {useAlertStore} from './alert'
 import {useProfileApi} from '~/services/api/profile.api'
@@ -16,12 +17,12 @@ export const useProfileStore = defineStore('profile', {
             name: '',
             email: '',
             avatar: null as File | null,
-            remove_avatar: false
+            remove_avatar: false,
         },
         passwordForm: {
             current_password: '',
             password: '',
-            password_confirmation: ''
+            password_confirmation: '',
         } as ProfilePasswordForm,
         errors: {} as Record<string, string>,
         loadingProfile: false,
@@ -30,7 +31,7 @@ export const useProfileStore = defineStore('profile', {
         loadingPassword: false,
         loadingAll: false,
         success: false,
-        showAvatarModal: false
+        showAvatarModal: false,
     }),
 
     actions: {
@@ -39,9 +40,16 @@ export const useProfileStore = defineStore('profile', {
             useAlertStore().add(type, message)
         },
 
+        t(key?: string, params: Record<string, any> = {}) {
+            const {$i18n} = useNuxtApp()
+            if (!key) {
+                return String($i18n.t('common.error', params))
+            }
+            return String($i18n.t(key, params))
+        },
+
         load(user: any) {
             if (!user) return
-
             this.updateForm.name = user.name
             this.updateForm.email = user.email
             this.updateForm.avatar = null
@@ -51,9 +59,7 @@ export const useProfileStore = defineStore('profile', {
         onFile(e: Event) {
             const target = e.target as HTMLInputElement
             const file = target.files?.[0] || null
-
             this.updateForm.avatar = file
-
             if (file) {
                 this.updateForm.remove_avatar = false
             }
@@ -71,17 +77,20 @@ export const useProfileStore = defineStore('profile', {
             this.errors = {}
         },
 
-        normalizeErrors(errors: any): Record<string, string> {
-            return Object.fromEntries(
-                Object.entries(errors || {}).map(([k, v]) => [
-                    k,
-                    Array.isArray(v) ? (v[0] ?? '') : String(v ?? ''),
-                ]),
-            )
+        setError(field: string, message: string) {
+            this.errors[field] = message
+        },
+
+        unwrapResponse(data: any) {
+            return data?.data ?? data
+        },
+
+        resolveMessage(data: any, fallbackKey: string) {
+            const messageKey = data?.message || fallbackKey
+            return this.t(messageKey)
         },
 
         async updateProfile(payload: any): Promise<boolean> {
-
             const authStore = useAuthStore()
             const profileApi = useProfileApi()
 
@@ -90,19 +99,35 @@ export const useProfileStore = defineStore('profile', {
             this.resetErrors()
 
             try {
-                const data: any = await profileApi.updateProfile(payload)
+                const response: any = await profileApi.updateProfile(payload)
+                const data = this.unwrapResponse(response)
 
                 if (data?.user) {
                     authStore.user = data.user
                 }
-                this.showAlert('success', data?.message || 'Профиль обновлён.')
+
+                this.showAlert(
+                    'success',
+                    this.resolveMessage(data, 'profile.updated'),
+                )
+
                 return true
             } catch (e: any) {
-                if (e?.status === 422) {
-                    this.errors = this.normalizeErrors(e.data?.errors)
-                    return false
+                const data = this.unwrapResponse(
+                    e?.data || e?.response?._data || e?.response?.data || {},
+                )
+
+                if (e?.status === 422 && data?.errors) { // Ошибка валидации
+                        Object.entries(data.errors).forEach(([k, v]: any) => {
+                            this.setError(k, v[0])
+                        })
+                } else {
+                    this.showAlert(
+                        'error',
+                        this.resolveMessage(data, 'common.error')
+                    )
                 }
-                this.showAlert('error', 'Ошибка обновления профиля.')
+
                 return false
             } finally {
                 this.loadingAll = false
@@ -111,7 +136,6 @@ export const useProfileStore = defineStore('profile', {
         },
 
         async changePassword(payload: ProfilePasswordForm): Promise<boolean> {
-
             const profileApi = useProfileApi()
 
             this.loadingAll = true
@@ -119,31 +143,46 @@ export const useProfileStore = defineStore('profile', {
             this.resetErrors()
 
             try {
-                const data: any = await profileApi.changePassword(payload)
+                const response: any = await profileApi.changePassword(payload)
+                const data = this.unwrapResponse(response)
+
                 this.passwordForm = {
                     current_password: '',
                     password: '',
-                    password_confirmation: ''
+                    password_confirmation: '',
                 }
+
                 this.success = true
-                this.showAlert('success', data?.message || 'Пароль обновлён.')
+
+                this.showAlert(
+                    'success',
+                    this.resolveMessage(data, 'profile.passwordUpdated'),
+                )
+
                 return true
             } catch (e: any) {
-                if (e?.status === 422) {
-                    this.errors = this.normalizeErrors(e.data?.errors)
-                    return false
-                }
-                this.showAlert('error', 'Ошибка смены пароля.')
+                const data = this.unwrapResponse(
+                    e?.data || e?.response?._data || e?.response?.data || {},
+                )
+
+                if (e?.status === 422 && data?.errors) { // Ошибка валидации
+                        Object.entries(data.errors).forEach(([k, v]: any) => {
+                            this.setError(k, v[0])
+                        })
+                } else {
+                    this.showAlert(
+                        'error',
+                        this.resolveMessage(data, 'common.error')
+                    )                }
+
                 return false
             } finally {
                 this.loadingAll = false
                 this.loadingPassword = false
             }
-
         },
 
         async deleteAccount(): Promise<boolean> {
-
             const authStore = useAuthStore()
             const router = useRouter()
             const profileApi = useProfileApi()
@@ -153,18 +192,36 @@ export const useProfileStore = defineStore('profile', {
             this.resetErrors()
 
             try {
-                const data: any = await profileApi.delete()
+                const response: any = await profileApi.delete()
+                const data = this.unwrapResponse(response)
+
                 authStore.user = null
                 this.success = true
-                this.showAlert('success', data?.message || 'Аккаунт удален.')
-                await router.push('/')
+
+                this.showAlert(
+                    'success',
+                    this.resolveMessage(data, 'profile.deleted'),
+                )
+
+                const redirect = data?.redirect || '/'
+                await router.push(redirect)
+
                 return true
             } catch (e: any) {
-                if (e?.status === 422) {
-                    this.errors = this.normalizeErrors(e.data?.errors)
-                    return false
-                }
-                this.showAlert('error', 'Ошибка удаления аккаунта')
+                const data = this.unwrapResponse(
+                    e?.data || e?.response?._data || e?.response?.data || {},
+                )
+
+                if (e?.status === 422 && data?.errors) { // Ошибка валидации
+                        Object.entries(data.errors).forEach(([k, v]: any) => {
+                            this.setError(k, v[0])
+                        })
+                } else {
+                    this.showAlert(
+                        'error',
+                        this.resolveMessage(data, 'common.error')
+                    )                }
+
                 return false
             } finally {
                 this.loadingAll = false

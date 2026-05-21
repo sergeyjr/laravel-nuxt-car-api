@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import {computed} from 'vue'
 
-import { useContactStore } from '~/stores/contact'
-import type { ContactPerson } from '~/types/contacts'
+import {useContactStore} from '~/stores/contact'
+import type {ContactPerson} from '~/types/contacts'
 
 import BaseButton from '~/components/ui/base/BaseButton.vue'
 import BaseInput from '~/components/ui/base/BaseInput.vue'
 import BaseTextarea from '~/components/ui/base/BaseTextarea.vue'
 
-import { formatPhoneRU, formatPhoneRaw } from '~/utils/formatters'
-import { useI18n } from 'vue-i18n'
-import { useFormValidation } from '~/composables/useFormValidation'
+import {formatPhoneRU, formatPhoneRaw} from '~/utils/formatters'
+import {useI18n} from 'vue-i18n'
+import {useFormValidation} from '~/composables/useFormValidation'
 
 /* -----------------------------
    i18n
 ------------------------------*/
 
-const { t, tm } = useI18n()
+const {t, tm} = useI18n()
 
 /* -----------------------------
    stores
@@ -141,7 +141,7 @@ const onSubmit = async (e: Event) => {
                     <BaseInput
                         v-model="contactStore.form.email"
                         type="email"
-                        label="Email"
+                        :label="t('contact.email')"
                         required
                         :disabled="contactStore.retryAfter > 0"
                         :error="contactStore.errors.email"

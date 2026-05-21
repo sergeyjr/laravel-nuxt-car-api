@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
+
+import {onMounted, ref} from 'vue'
+
 import {useI18n} from 'vue-i18n'
 
 import {useAuthStore} from '~/stores/auth'
 
+import {useFormValidation} from '~/composables/useFormValidation'
+
 import BaseButton from '~/components/ui/base/BaseButton.vue'
 import BaseInput from '~/components/ui/base/BaseInput.vue'
-import {useFormValidation} from '~/composables/useFormValidation'
 
 /* -----------------------------
    i18n
 ------------------------------*/
 
 const {t} = useI18n()
+
 const localePath = useLocalePath()
 
 /* -----------------------------
@@ -22,17 +26,16 @@ const localePath = useLocalePath()
 const authStore = useAuthStore()
 
 /* -----------------------------
-   form state
+   state
 ------------------------------*/
 
 const name = ref('')
 const email = ref('')
 const password = ref('')
-const password_confirmation = ref('')
-const redirecting = ref(false)
+const passwordConfirmation = ref('')
 
 /* -----------------------------
-   validation composable
+   validation
 ------------------------------*/
 
 const {
@@ -41,32 +44,46 @@ const {
 } = useFormValidation()
 
 /* -----------------------------
+   helpers
+------------------------------*/
+
+const isDisabled = () =>
+    authStore.loading
+
+const resetForm = () => {
+    name.value = ''
+    email.value = ''
+    password.value = ''
+    passwordConfirmation.value = ''
+}
+
+/* -----------------------------
    submit
 ------------------------------*/
 
-const submit = async (e: Event) => {
-    const form = e.currentTarget as HTMLFormElement
+const submit = async (event: Event) => {
+    const form = event.currentTarget as HTMLFormElement
 
-    if (!form.reportValidity()) return
-    if (authStore.loading || redirecting.value) return
+    if (!form.reportValidity()) {
+        return
+    }
 
-    const ok = await authStore.register({
+    if (isDisabled()) {
+        return
+    }
+
+    const success = await authStore.register({
         name: name.value,
         email: email.value,
         password: password.value,
-        password_confirmation: password_confirmation.value
+        password_confirmation: passwordConfirmation.value,
     })
 
-    if (ok) {
-        name.value = ''
-        email.value = ''
-        password.value = ''
-        password_confirmation.value = ''
-        redirecting.value = true
-
-        // если нужно:
-        // return navigateTo(localePath('/dashboard'))
+    if (!success) {
+        return
     }
+
+    resetForm()
 }
 
 /* -----------------------------
@@ -74,13 +91,17 @@ const submit = async (e: Event) => {
 ------------------------------*/
 
 onMounted(() => {
-    authStore.clearErrors()
+    authStore.resetErrors()
 })
+
 </script>
 
 <template>
+
     <div class="container mt-4">
+
         <div class="row justify-content-center">
+
             <div class="col-md-5">
 
                 <h1 class="mb-4">
@@ -94,7 +115,7 @@ onMounted(() => {
                         type="text"
                         :label="t('auth.name')"
                         required
-                        :disabled="authStore.loading || redirecting"
+                        :disabled="isDisabled()"
                         :error="authStore.errors.name"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
@@ -105,7 +126,7 @@ onMounted(() => {
                         type="email"
                         :label="t('auth.email')"
                         required
-                        :disabled="authStore.loading || redirecting"
+                        :disabled="isDisabled()"
                         :error="authStore.errors.email"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
@@ -116,18 +137,18 @@ onMounted(() => {
                         type="password"
                         :label="t('auth.password')"
                         required
-                        :disabled="authStore.loading || redirecting"
+                        :disabled="isDisabled()"
                         :error="authStore.errors.password"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
                     />
 
                     <BaseInput
-                        v-model="password_confirmation"
+                        v-model="passwordConfirmation"
                         type="password"
                         :label="t('auth.passwordConfirm')"
                         required
-                        :disabled="authStore.loading || redirecting"
+                        :disabled="isDisabled()"
                         :error="authStore.errors.password_confirmation"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
@@ -136,11 +157,13 @@ onMounted(() => {
                     <BaseButton
                         type="submit"
                         class="w-100 mt-3"
-                        :loading="authStore.loading || redirecting"
+                        :loading="isDisabled()"
+                        :disabled="isDisabled()"
                     >
                         <template #loading>
                             {{ t('auth.registering') }}
                         </template>
+
                         {{ t('auth.register') }}
                     </BaseButton>
 
@@ -153,6 +176,9 @@ onMounted(() => {
                 </form>
 
             </div>
+
         </div>
+
     </div>
+
 </template>

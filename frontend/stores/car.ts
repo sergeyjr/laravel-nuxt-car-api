@@ -90,12 +90,25 @@ export const useCarStore = defineStore('car', {
             useAlertStore().add(type, message)
         },
 
-        clearErrors() {
+        resetErrors() {
             this.errors = {}
         },
 
         setError(field: string, message: string) {
             this.errors[field] = message
+        },
+
+        t(key?: string) {
+            const {$i18n} = useNuxtApp()
+            if (!key) {
+                return $i18n.t('common.error')
+            }
+            return $i18n.t(key)
+        },
+
+        resolveMessage(data: any, fallbackKey: string) {
+            const messageKey = data?.message || fallbackKey
+            return this.t(messageKey)
         },
 
         async fetch(page = 1, sort = '-id') {
@@ -217,7 +230,7 @@ export const useCarStore = defineStore('car', {
         },
 
         async submitCreateCarForm() {
-            this.clearErrors()
+            this.resetErrors()
 
             const authStore = useAuthStore()
 
@@ -272,17 +285,17 @@ export const useCarStore = defineStore('car', {
                     return null
                 }
 
-                if (status === 422) {
-                    this.showAlert('error', data?.message || 'Ошибка валидации.')
-
+                if (status === 422) { // Ошибка валидации
                     if (data?.errors) {
                         Object.entries(data.errors).forEach(([k, v]: any) => {
                             this.setError(k, v[0])
                         })
                     }
                 } else {
-                    this.showAlert('error', data?.message || 'Ошибка сервера.')
-                }
+                    this.showAlert(
+                        'error',
+                        this.resolveMessage(data, 'common.error')
+                    )                }
 
                 return null
             } finally {
@@ -290,6 +303,9 @@ export const useCarStore = defineStore('car', {
             }
         },
 
+        /**
+         * Это тестовый метод, тч перевод не нужен
+         */
         async generateCarForm() {
             this.generating = true
 
