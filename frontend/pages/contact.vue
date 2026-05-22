@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {computed} from 'vue'
+
+import {computed, onMounted, ref} from 'vue'
 
 import {useContactStore} from '~/stores/contact'
 import type {ContactPerson} from '~/types/contacts'
@@ -9,7 +10,9 @@ import BaseInput from '~/components/ui/base/BaseInput.vue'
 import BaseTextarea from '~/components/ui/base/BaseTextarea.vue'
 
 import {formatPhoneRU, formatPhoneRaw} from '~/utils/formatters'
+
 import {useI18n} from 'vue-i18n'
+
 import {useFormValidation} from '~/composables/useFormValidation'
 
 /* -----------------------------
@@ -28,10 +31,36 @@ const contactStore = useContactStore()
    validation
 ------------------------------*/
 
-const {
-    setNativeValidity,
-    clearNativeValidity,
-} = useFormValidation()
+const {setNativeValidity, clearNativeValidity} = useFormValidation()
+
+/* -----------------------------
+   hydration
+------------------------------*/
+
+const hydrated = ref(false)
+
+/* -----------------------------
+   retry state
+------------------------------*/
+
+if (import.meta.server) {
+    contactStore.restoreRetryState()
+}
+
+onMounted(() => {
+    hydrated.value = true
+
+    if (contactStore.retryUntil > 0) {
+        contactStore.startCountdown()
+        return
+    }
+
+    contactStore.restoreRetryState()
+})
+
+const isFormDisabled = computed(() => {
+    return contactStore.loading || contactStore.retryAfter > 0
+})
 
 /* -----------------------------
    locales
@@ -49,6 +78,7 @@ const contacts = computed(() => {
 const email = (key: string) => {
     const user = t(`contacts.people.${key}.email.user`)
     const domain = t(`contacts.people.${key}.email.domain`)
+
     return `${user}@${domain}`
 }
 
@@ -63,10 +93,13 @@ const mailto = (key: string) => {
 const onSubmit = async (e: Event) => {
     const form = e.currentTarget as HTMLFormElement
 
-    if (!form.reportValidity()) return
+    if (!form.reportValidity()) {
+        return
+    }
 
     await contactStore.submit('contactPage')
 }
+
 </script>
 
 <template>
@@ -81,10 +114,9 @@ const onSubmit = async (e: Event) => {
 
                 <div
                     v-for="c in contacts"
-                    :key="c.email"
+                    :key="c.key"
                     class="contact-item mb-4 p-3 border rounded"
                 >
-
                     <div class="fw-semibold mb-2">
                         {{ t(`contacts.people.${c.key}.name`) }}
                     </div>
@@ -111,7 +143,6 @@ const onSubmit = async (e: Event) => {
                         <i class="bi bi-geo-alt me-1"></i>
                         {{ t(`contacts.people.${c.key}.address`) }}
                     </div>
-
                 </div>
 
             </div>
@@ -122,8 +153,11 @@ const onSubmit = async (e: Event) => {
                     {{ t('contact.formTitle') }}
                 </h1>
 
-                <div v-if="contactStore.retryAfter > 0" class="alert alert-warning mt-4">
-                    {{ t('contact.retry', { sec: contactStore.retryAfter }) }}
+                <div
+                    v-if="contactStore.retryAfter > 0"
+                    class="alert alert-warning mt-4"
+                >
+                    {{ t('contact.retry', {sec: contactStore.retryAfter}) }}
                 </div>
 
                 <form @submit.prevent="onSubmit">
@@ -132,7 +166,7 @@ const onSubmit = async (e: Event) => {
                         v-model="contactStore.form.name"
                         :label="t('contact.name')"
                         required
-                        :disabled="contactStore.retryAfter > 0"
+                        :disabled="isFormDisabled"
                         :error="contactStore.errors.name"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
@@ -143,7 +177,7 @@ const onSubmit = async (e: Event) => {
                         type="email"
                         :label="t('contact.email')"
                         required
-                        :disabled="contactStore.retryAfter > 0"
+                        :disabled="isFormDisabled"
                         :error="contactStore.errors.email"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
@@ -153,7 +187,7 @@ const onSubmit = async (e: Event) => {
                         v-model="contactStore.form.subject"
                         :label="t('contact.subject')"
                         required
-                        :disabled="contactStore.retryAfter > 0"
+                        :disabled="isFormDisabled"
                         :error="contactStore.errors.subject"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
@@ -163,7 +197,7 @@ const onSubmit = async (e: Event) => {
                         v-model="contactStore.form.body"
                         :label="t('contact.message')"
                         required
-                        :disabled="contactStore.retryAfter > 0"
+                        :disabled="isFormDisabled"
                         :error="contactStore.errors.body"
                         @invalid="setNativeValidity"
                         @input="clearNativeValidity"
@@ -173,7 +207,7 @@ const onSubmit = async (e: Event) => {
                         type="submit"
                         class="w-100"
                         :loading="contactStore.loading"
-                        :disabled="contactStore.retryAfter > 0"
+                        :disabled="isFormDisabled"
                     >
                         <template #loading>
                             {{ t('contact.sending') }}

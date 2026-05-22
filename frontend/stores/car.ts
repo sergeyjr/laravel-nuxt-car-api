@@ -1,5 +1,4 @@
 import {defineStore} from 'pinia'
-import {nextTick} from 'vue'
 import type {Car, CarsResponse} from '~/types/car'
 import {useCartStore} from '~/stores/cart'
 import {useCarApi} from '~/services/api/car.api'
@@ -211,7 +210,6 @@ export const useCarStore = defineStore('car', {
             }
 
             this.latestLoading = true
-            await nextTick()
 
             const api = useCarApi()
 

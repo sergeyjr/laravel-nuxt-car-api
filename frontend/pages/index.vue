@@ -65,6 +65,10 @@ const swiperOptions = {
 
 const carStore = useCarStore()
 
+if (!carStore.latestLoaded && !carStore.latest.length) {
+    carStore.latestLoading = true
+}
+
 /* -----------------------------
    helpers
 ------------------------------*/
@@ -96,29 +100,29 @@ const quickLinks = [
     {
         to: '/catalog',
         icon: 'bi-grid-1x2',
-        label: 'Каталог',
-        hint: 'Все автомобили',
+        label: 'home.quickLinks.catalog.label',
+        hint: 'home.quickLinks.catalog.hint',
         auth: null,
     },
     {
         to: '/page/about',
         icon: 'bi-info-circle',
-        label: 'О проекте',
-        hint: 'Кратко о сервисе',
+        label: 'home.quickLinks.about.label',
+        hint: 'home.quickLinks.about.hint',
         auth: null,
     },
     {
         to: '/page/info',
         icon: 'bi-card-text',
-        label: 'Инфо',
-        hint: 'Полезные материалы',
+        label: 'home.quickLinks.info.label',
+        hint: 'home.quickLinks.info.hint',
         auth: null,
     },
     {
         to: '/contact',
         icon: 'bi-telephone',
-        label: 'Контакты',
-        hint: 'Связаться с нами',
+        label: 'home.quickLinks.contacts.label',
+        hint: 'home.quickLinks.contacts.hint',
         auth: null,
     },
 
@@ -126,22 +130,22 @@ const quickLinks = [
     {
         to: '/dashboard',
         icon: 'bi-person-badge',
-        label: 'Личный кабинет',
-        hint: 'Профиль и заказы',
+        label: 'home.quickLinks.dashboard.label',
+        hint: 'home.quickLinks.dashboard.hint',
         auth: true,
     },
     {
         to: '/dashboard/profile',
         icon: 'bi-person-circle',
-        label: 'Мой профиль',
-        hint: 'Настройки аккаунта',
+        label: 'home.quickLinks.profile.label',
+        hint: 'home.quickLinks.profile.hint',
         auth: true,
     },
     {
         to: '/cart',
         icon: 'bi-cart3',
-        label: 'Корзина',
-        hint: 'Выбранные авто',
+        label: 'home.quickLinks.cart.label',
+        hint: 'home.quickLinks.cart.hint',
         auth: true,
     },
 
@@ -149,15 +153,15 @@ const quickLinks = [
     {
         to: '/login',
         icon: 'bi-box-arrow-in-right',
-        label: 'Вход',
-        hint: 'Авторизация в системе',
+        label: 'home.quickLinks.login.label',
+        hint: 'home.quickLinks.login.hint',
         auth: false,
     },
     {
         to: '/register',
         icon: 'bi-person-plus',
-        label: 'Регистрация',
-        hint: 'Создать аккаунт',
+        label: 'home.quickLinks.register.label',
+        hint: 'home.quickLinks.register.hint',
         auth: false,
     },
 ] as const
@@ -212,10 +216,10 @@ const onLogout = async () => {
 
                             <div class="tile-content">
                                 <div class="tile-title">
-                                    {{ link.label }}
+                                    {{ t(link.label) }}
                                 </div>
                                 <div class="tile-hint">
-                                    {{ link.hint }}
+                                    {{ t(link.hint) }}
                                 </div>
                             </div>
 
@@ -235,10 +239,10 @@ const onLogout = async () => {
 
                             <div class="tile-content">
                                 <div class="tile-title">
-                                    Выход
+                                    {{ t('nav.logout') }}
                                 </div>
                                 <div class="tile-hint">
-                                    Завершить сессию
+                                    {{ t('home.quickLinks.logout.hint') }}
                                 </div>
                             </div>
                         </button>
@@ -250,71 +254,63 @@ const onLogout = async () => {
             <!-- CARS -->
             <div class="col-12 mt-5">
 
-                <h2 class="mb-0">
+                <h2 class="mb-4">
                     {{ t('home.newArrivals') }}
                 </h2>
 
+                <div v-if="carStore.latestLoading" class="alert alert-light mb-3">
+                    {{ t('home.loading') }}
+                </div>
+
                 <ClientOnly>
+                    <Swiper
+                        v-if="!carStore.latestLoading && carStore.latest.length"
+                        :modules="modules"
+                        v-bind="swiperOptions"
+                        class="swiper-custom"
+                    >
 
-                    <template v-if="carStore.latestLoading">
-                        <div class="alert alert-light mb-3">
-                            {{ t('home.loading') }}
-                        </div>
-                    </template>
-
-                    <template v-else>
-
-                        <Swiper
-                            v-if="carStore.latest.length"
-                            :modules="modules"
-                            v-bind="swiperOptions"
-                            class="swiper-custom"
+                        <SwiperSlide
+                            v-for="car in carStore.latest"
+                            :key="car.id"
                         >
 
-                            <SwiperSlide
-                                v-for="car in carStore.latest"
-                                :key="car.id"
+                            <div
+                                class="card h-100 text-center"
+                                style="cursor:pointer"
+                                @click="openCar(car.id)"
                             >
 
-                                <div
-                                    class="card h-100 text-center"
-                                    style="cursor:pointer"
-                                    @click="openCar(car.id)"
-                                >
+                                <img
+                                    :src="getImage(car)"
+                                    class="card-img-top"
+                                    alt=""
+                                    @error="onImgError"
+                                />
 
-                                    <img
-                                        :src="getImage(car)"
-                                        class="card-img-top"
-                                        alt=""
-                                        @error="onImgError"
-                                    />
+                                <div class="card-body">
 
-                                    <div class="card-body">
+                                    <h5 class="mb-3">
+                                        {{ car.title }}
+                                    </h5>
 
-                                        <h5 class="mb-3">
-                                            {{ car.title }}
-                                        </h5>
+                                    <p v-if="authStore.user && car.price" class="mb-0">
+                                        <span class="fs-5 fw-bold text-success">
+                                            {{ formatPrice(car.price) }}
+                                        </span>
+                                    </p>
 
-                                        <p v-if="authStore.user && car.price" class="mb-0">
-                                            <span class="fs-5 fw-bold text-success">
-                                                {{ formatPrice(car.price) }}
-                                            </span>
-                                        </p>
-
-                                        <p v-else class="text-muted">
-                                            {{ t('home.priceHint') }}
-                                        </p>
-
-                                    </div>
+                                    <p v-else class="text-muted">
+                                        {{ t('home.priceHint') }}
+                                    </p>
 
                                 </div>
 
-                            </SwiperSlide>
+                            </div>
 
-                        </Swiper>
+                        </SwiperSlide>
 
-                    </template>
-
+                    </Swiper>
                 </ClientOnly>
 
             </div>
@@ -332,25 +328,19 @@ const onLogout = async () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     gap: 10px;
-
     min-height: 170px;
     padding: 22px;
-
     border-radius: 18px;
     text-decoration: none;
     color: #0f172a;
-
     background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(248, 250, 252, .96));
     border: 1px solid rgba(148, 163, 184, .22);
-
     overflow: hidden;
     transition: transform .22s ease,
     box-shadow .22s ease,
     border-color .22s ease,
     background .22s ease;
-
     text-align: center;
 }
 
@@ -364,20 +354,16 @@ const onLogout = async () => {
 .tile-card:hover {
     transform: translateY(-4px);
     border-color: rgba(59, 130, 246, .35);
-    box-shadow: 0 10px 15px rgba(15, 23, 42, .12),
-    0 0 0 1px rgba(59, 130, 246, .08);
+    box-shadow: 0 10px 15px rgba(15, 23, 42, .12), 0 0 0 1px rgba(59, 130, 246, .08);
 }
 
 .tile-icon {
     width: 84px;
     height: 84px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 20px;
-
     color: #2563eb;
 }
 
@@ -439,7 +425,7 @@ const onLogout = async () => {
 /* SWIPER */
 
 .swiper-custom {
-    padding: 20px 0 40px 0;
+    padding: 0 0 40px 0;
 }
 
 .swiper-custom :deep(.swiper-wrapper) {

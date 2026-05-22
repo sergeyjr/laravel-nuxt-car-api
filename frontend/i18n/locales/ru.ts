@@ -182,6 +182,49 @@ export default {
         loggedIn: 'Вы авторизованы',
         newArrivals: 'Новинки',
         priceHint: 'Авторизуйтесь, чтобы увидеть цену',
+
+        quickLinks: {
+            catalog: {
+                label: 'Каталог',
+                hint: 'Все автомобили',
+            },
+            about: {
+                label: 'О проекте',
+                hint: 'Кратко о сервисе',
+            },
+            info: {
+                label: 'Инфо',
+                hint: 'Полезные материалы',
+            },
+            contacts: {
+                label: 'Контакты',
+                hint: 'Связаться с нами',
+            },
+            dashboard: {
+                label: 'Личный кабинет',
+                hint: 'Профиль и заказы',
+            },
+            profile: {
+                label: 'Мой профиль',
+                hint: 'Настройки аккаунта',
+            },
+            cart: {
+                label: 'Корзина',
+                hint: 'Выбранные авто',
+            },
+            login: {
+                label: 'Вход',
+                hint: 'Авторизация в системе',
+            },
+            register: {
+                label: 'Регистрация',
+                hint: 'Создать аккаунт',
+            },
+            logout: {
+                hint: 'Завершить сессию',
+            },
+        },
+
         quickActions: 'Быстрые действия',
         title: 'Главная страница',
         userStatusTitle: 'Статус пользователя',

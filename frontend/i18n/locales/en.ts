@@ -182,6 +182,49 @@ export default {
         loggedIn: 'You are logged in',
         newArrivals: 'New arrivals',
         priceHint: 'Log in to see price',
+
+        quickLinks: {
+            catalog: {
+                label: 'Catalog',
+                hint: 'All cars',
+            },
+            about: {
+                label: 'About project',
+                hint: 'Briefly about the service',
+            },
+            info: {
+                label: 'Info',
+                hint: 'Useful materials',
+            },
+            contacts: {
+                label: 'Contacts',
+                hint: 'Contact us',
+            },
+            dashboard: {
+                label: 'Dashboard',
+                hint: 'Profile and orders',
+            },
+            profile: {
+                label: 'My profile',
+                hint: 'Account settings',
+            },
+            cart: {
+                label: 'Cart',
+                hint: 'Selected cars',
+            },
+            login: {
+                label: 'Login',
+                hint: 'Authorization in the system',
+            },
+            register: {
+                label: 'Register',
+                hint: 'Create account',
+            },
+            logout: {
+                hint: 'End session',
+            },
+        },
+
         quickActions: 'Quick actions',
         title: 'Home page',
         userStatusTitle: 'User status',

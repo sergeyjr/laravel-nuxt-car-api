@@ -38,7 +38,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // Auth errors
         $exceptions->render(function (AuthenticationException $e, $request) {
             $hasToken = $request->bearerToken();
-
             return response()->json([
                 'success' => false,
                 'data' => null,
@@ -60,30 +59,26 @@ return Application::configure(basePath: dirname(__DIR__))
         // Throttle errors
         $exceptions->render(function (ThrottleRequestsException $e, $request) {
             $retryAfter = $e->getHeaders()['Retry-After'] ?? null;
-
             return response()->json([
                 'success' => false,
-                'retry_after' => $retryAfter,
+                'retry_after' => $retryAfter
             ], 429);
         });
 
         // HTTP errors
         $exceptions->render(function (HttpException $e, $request) {
-
             if ($e->getStatusCode() === 403) {
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage() ?: 'Доступ запрещен.',
                 ], 403);
             }
-
             if ($e->getStatusCode() === 404 && $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage() ?: 'Не найдено.',
                 ], 404);
             }
-
             return null;
         });
 

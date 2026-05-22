@@ -116,7 +116,8 @@ class SiteController extends Controller
      */
     protected function contactRetryAfter(Request $request): int
     {
-        return RateLimiter::availableIn($this->contactThrottleKey($request));
+        $key = $this->contactThrottleKey($request);
+        return RateLimiter::availableIn($key);
     }
 
     /**
@@ -130,9 +131,7 @@ class SiteController extends Controller
             return $this->error(
                 'contact.tooManyRequests',
                 429,
-                [
-                    'retry_after' => $this->contactRetryAfter($request),
-                ]
+                ['retry_after' => $this->contactRetryAfter($request)]
             );
         }
 

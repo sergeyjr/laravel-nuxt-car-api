@@ -17,6 +17,7 @@ export const useContactStore = defineStore('contact', {
         errors: {} as Record<string, string>,
         loading: false,
         retryAfter: 0,
+        retryUntil: 0,
         timer: null as ReturnType<typeof setInterval> | null,
         successCountdown: null as number | null,
         contexts: {
@@ -45,9 +46,9 @@ export const useContactStore = defineStore('contact', {
             return String($i18n.t(key, params))
         },
 
-        resolveMessage(data: any, fallbackKey: string) {
+        resolveMessage(data: any, fallbackKey: string, params: Record<string, any> = {}) {
             const messageKey = data?.message || fallbackKey
-            return this.t(messageKey)
+            return this.t(messageKey, params)
         },
 
         stopCountdown() {
@@ -55,6 +56,32 @@ export const useContactStore = defineStore('contact', {
                 clearInterval(this.timer)
                 this.timer = null
             }
+        },
+
+        getRetryCookie() {
+            return useCookie<number>('contact_retry_until', {
+                default: () => 0,
+                sameSite: 'lax',
+                maxAge: 60,
+            })
+        },
+
+        restoreRetryState() {
+            const retryCookie = this.getRetryCookie()
+            const retryUntil = Number(retryCookie.value || 0)
+
+            if (!retryUntil || retryUntil <= Date.now()) {
+                this.retryAfter = 0
+                this.retryUntil = 0
+                this.successCountdown = null
+                retryCookie.value = 0
+                this.stopCountdown()
+                return
+            }
+
+            this.retryUntil = retryUntil
+            this.retryAfter = Math.ceil((retryUntil - Date.now()) / 1000)
+            this.successCountdown = this.retryAfter
         },
 
         resetForm() {
@@ -80,17 +107,56 @@ export const useContactStore = defineStore('contact', {
             this.errors[field] = message
         },
 
+        setRetryAfter(seconds: number) {
+            const retryCookie = this.getRetryCookie()
+
+            this.retryAfter = Math.max(0, Number(seconds) || 0)
+
+            this.retryUntil = this.retryAfter > 0
+                ? Date.now() + (this.retryAfter * 1000)
+                : 0
+
+            this.successCountdown = this.retryAfter > 0
+                ? this.retryAfter
+                : null
+
+            retryCookie.value = this.retryUntil
+        },
+
         startCountdown() {
             this.stopCountdown()
 
-            this.timer = setInterval(() => {
-                if (this.retryAfter > 0) {
-                    this.retryAfter--
+            if (this.retryUntil <= 0) {
+                this.retryAfter = 0
+                this.retryUntil = 0
+                this.successCountdown = null
+                return
+            }
+
+            const sync = () => {
+                const remainingMs = this.retryUntil - Date.now()
+
+                if (remainingMs > 0) {
+                    this.retryAfter = Math.ceil(remainingMs / 1000)
+                    this.successCountdown = this.retryAfter
                     return
                 }
 
-                this.stopCountdown()
+                const retryCookie = this.getRetryCookie()
+
                 this.retryAfter = 0
+                this.retryUntil = 0
+                this.successCountdown = null
+
+                retryCookie.value = 0
+
+                this.stopCountdown()
+            }
+
+            sync()
+
+            this.timer = setInterval(() => {
+                sync()
             }, 1000)
         },
 
@@ -106,25 +172,31 @@ export const useContactStore = defineStore('contact', {
 
                 this.resetForm()
 
-                const message = this.resolveMessage(data, 'contact.sent')
+                const retryAfter = Number(data?.retry_after || 0)
+
+                this.setRetryAfter(retryAfter)
+
+                if (this.retryAfter > 0 && import.meta.client) {
+                    this.startCountdown()
+                }
+
+                const message = this.resolveMessage(
+                    data,
+                    'contact.sent',
+                    {sec: this.retryAfter},
+                )
 
                 this.contexts[context].successMessage = message
                 this.showAlert('success', message)
-
-                this.retryAfter = data?.retry_after ?? 60
-                this.startCountdown()
             } catch (e: any) {
-
                 const status = e?.status
                 const data = e?.data || e?.response?._data || e?.response?.data || {}
 
-                if (e?.status === 422 && data?.errors) { // Ошибка валидации
-                        Object.entries(data.errors).forEach(([k, v]: any) => {
-                            this.setError(k, v[0])
-                        })
-
+                if (status === 422 && data?.errors) {
+                    Object.entries(data.errors).forEach(([k, v]: any) => {
+                        this.setError(k, v[0])
+                    })
                 } else {
-
                     this.showAlert(
                         'error',
                         this.resolveMessage(data, 'common.error')
@@ -132,8 +204,11 @@ export const useContactStore = defineStore('contact', {
                 }
 
                 if (status === 429) {
-                    this.retryAfter = data?.retry_after ?? 60
-                    this.startCountdown()
+                    this.setRetryAfter(Number(data?.retry_after || 0))
+
+                    if (import.meta.client) {
+                        this.startCountdown()
+                    }
 
                     const message = this.t(
                         data?.message || 'contact.tooManyRequests',
@@ -144,17 +219,12 @@ export const useContactStore = defineStore('contact', {
                     return
                 }
 
-                // const message = this.resolveMessage(data, 'contact.error')
-                //
-                // this.contexts[context].errorMessage = message
-                // this.showAlert('error', message)
-
                 console.error(e)
             } finally {
                 this.loading = false
             }
-        },
+        }
 
-    },
+    }
 
 })
