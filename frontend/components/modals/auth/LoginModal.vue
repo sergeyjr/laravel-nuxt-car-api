@@ -1,6 +1,5 @@
 <script setup lang="ts">
-
-import {ref, watch, computed} from 'vue'
+import {ref, watch, computed, onBeforeUnmount} from 'vue'
 import {useI18n} from 'vue-i18n'
 
 import BaseButton from '~/components/ui/base/BaseButton.vue'
@@ -26,6 +25,51 @@ const password = ref('')
 
 const isLocked = computed(() => Boolean(props.processing))
 
+let scrollY = 0
+let prevHtmlOverflow = ''
+let prevBodyOverflow = ''
+let prevBodyPosition = ''
+let prevBodyTop = ''
+let prevBodyWidth = ''
+
+const lockScroll = () => {
+    if (!import.meta.client) return
+
+    const html = document.documentElement
+    const body = document.body
+
+    scrollY = window.scrollY || window.pageYOffset || 0
+
+    prevHtmlOverflow = html.style.overflow
+    prevBodyOverflow = body.style.overflow
+    prevBodyPosition = body.style.position
+    prevBodyTop = body.style.top
+    prevBodyWidth = body.style.width
+
+    html.style.overflow = 'hidden'
+    html.style.overscrollBehavior = 'none'
+    body.style.overflow = 'hidden'
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.width = '100%'
+}
+
+const unlockScroll = () => {
+    if (!import.meta.client) return
+
+    const html = document.documentElement
+    const body = document.body
+
+    html.style.overflow = prevHtmlOverflow
+    html.style.overscrollBehavior = ''
+    body.style.overflow = prevBodyOverflow
+    body.style.position = prevBodyPosition
+    body.style.top = prevBodyTop
+    body.style.width = prevBodyWidth
+
+    window.scrollTo(0, scrollY)
+}
+
 const close = () => {
     if (isLocked.value) {
         return
@@ -43,29 +87,36 @@ const confirm = () => {
     })
 }
 
-watch(() => props.show, (show) => {
-    if (!show) {
-        return
-    }
-    email.value = ''
-    password.value = ''
-})
+watch(
+    () => props.show,
+    (show) => {
+        if (show) {
+            email.value = ''
+            password.value = ''
+            lockScroll()
+        } else {
+            unlockScroll()
+        }
+    },
+    { immediate: true }
+)
 
+onBeforeUnmount(() => {
+    unlockScroll()
+})
 </script>
 
 <template>
     <div
         v-if="show"
-        class="modal fade show d-block"
+        class="modal fade show d-block modal-backdrop-fix"
         tabindex="-1"
-        style="background: rgba(0,0,0,.6);"
         @click.self="close"
     >
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
 
                 <div class="modal-header">
-
                     <h5 class="modal-title">
                         {{ t('modals.auth.loginTitle') }}
                     </h5>
@@ -77,11 +128,9 @@ watch(() => props.show, (show) => {
                         aria-label="Close"
                         @click="close"
                     />
-
                 </div>
 
                 <div class="modal-body">
-
                     <div
                         v-if="errors?.general"
                         class="alert alert-danger"
@@ -90,7 +139,6 @@ watch(() => props.show, (show) => {
                     </div>
 
                     <form @submit.prevent="confirm">
-
                         <BaseInput
                             v-model="email"
                             type="email"
@@ -120,12 +168,18 @@ watch(() => props.show, (show) => {
                             </template>
                             {{ t('modals.auth.login') }}
                         </BaseButton>
-
                     </form>
-
                 </div>
 
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.modal-backdrop-fix {
+    background: rgba(0, 0, 0, .6);
+    touch-action: none;
+    overscroll-behavior: none;
+}
+</style>

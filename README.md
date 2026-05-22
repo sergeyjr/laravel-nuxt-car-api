@@ -33,7 +33,40 @@
 Полноценный каталог автомобилей с карточками, изображениями, характеристиками и переходом к детальной странице автомобиля.
 
 ![Каталог](frontend/public/images/screenshots/laravel-catalog.png?v=1.1)
+![Каталог](frontend/public/images/screenshots/laravel-catalog-login.png?v=1.1)
 ![Каталог](frontend/public/images/screenshots/laravel-catalog-auth.png?v=1.1)
+![Каталог](frontend/public/images/screenshots/laravel-catalog-car.png?v=1.0)
+
+---
+
+# Корзина
+
+Поддерживается:
+
+* добавление товаров;
+* изменение количества;
+* удаление товаров;
+* оформление заказа;
+* модальные окна подтверждения действий.
+
+![Корзина](frontend/public/images/screenshots/laravel-cart.png?v=1.1)
+
+---
+
+# Заказы
+
+История оформленных заказов пользователя.
+
+![Заказы](frontend/public/images/screenshots/laravel-orders.png?v=1.0)
+![Заказы](frontend/public/images/screenshots/laravel-order-success.png?v=1.0)
+
+---
+
+# Детальная информация о заказе
+
+Страница просмотра конкретного заказа с товарами и общей информацией.
+
+![Информация о заказе](frontend/public/images/screenshots/laravel-order-info.png?v=1.1)
 
 ---
 
@@ -58,39 +91,9 @@
 
 ---
 
-# Корзина
-
-Поддерживается:
-
-* добавление товаров;
-* изменение количества;
-* удаление товаров;
-* оформление заказа;
-* модальные окна подтверждения действий.
-
-![Корзина](frontend/public/images/screenshots/laravel-cart.png?v=1.0)
-
----
-
-# Заказы
-
-История оформленных заказов пользователя.
-
-![Заказы](frontend/public/images/screenshots/laravel-orders.png?v=1.0)
-
----
-
-# Детальная информация о заказе
-
-Страница просмотра конкретного заказа с товарами и общей информацией.
-
-![Информация о заказе](frontend/public/images/screenshots/laravel-order-info.png?v=1.0)
-
----
-
 # Контакты
 
-Контактная форма для обратной связи.
+Контактная форма для обратной связи с возможностью блокировки по IP и таймером обратного отсчета.
 
 ![Контакты](frontend/public/images/screenshots/laravel-contacts.png?v=1.0)
 
