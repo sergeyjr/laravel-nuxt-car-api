@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import {ref, watch, computed, onBeforeUnmount} from 'vue'
 import {useI18n} from 'vue-i18n'
 
@@ -98,12 +99,13 @@ watch(
             unlockScroll()
         }
     },
-    { immediate: true }
+    {immediate: true}
 )
 
 onBeforeUnmount(() => {
     unlockScroll()
 })
+
 </script>
 
 <template>
@@ -177,9 +179,11 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+
 .modal-backdrop-fix {
     background: rgba(0, 0, 0, .6);
     touch-action: none;
     overscroll-behavior: none;
 }
+
 </style>

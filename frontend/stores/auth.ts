@@ -12,6 +12,7 @@ export const useAuthStore = defineStore('auth', {
 
         initialized: false,
         initializing: false,
+        initPromise: null as Promise<boolean> | null,
 
         loading: false,
         loggingOut: false,
@@ -90,24 +91,30 @@ export const useAuthStore = defineStore('auth', {
         async initAuth() {
             debugLog('[Auth Store] initAuth')
 
-            if (
-                this.initialized ||
-                this.initializing
-            ) {
+            if (this.initialized) {
                 return this.isAuth
+            }
+
+            if (this.initPromise) {
+                return this.initPromise
             }
 
             this.initializing = true
 
-            try {
-                const ok = await this.fetchUser()
+            this.initPromise = (async () => {
+                try {
+                    const ok = await this.fetchUser()
 
-                this.initialized = true
+                    this.initialized = true
 
-                return ok
-            } finally {
-                this.initializing = false
-            }
+                    return ok
+                } finally {
+                    this.initializing = false
+                    this.initPromise = null
+                }
+            })()
+
+            return this.initPromise
         },
 
         /* -----------------------------
@@ -148,8 +155,6 @@ export const useAuthStore = defineStore('auth', {
                     e?.response?._data ||
                     e?.response?.data ||
                     {}
-
-                // debugLog(data, e?.status)
 
                 if (e?.status === 422 && data?.errors) {
                     Object.entries(data.errors).forEach(([k, v]: any) => {
@@ -204,8 +209,6 @@ export const useAuthStore = defineStore('auth', {
                     e?.response?._data ||
                     e?.response?.data ||
                     {}
-
-                // debugLog(data)
 
                 if (e?.status === 422 && data?.errors) {
                     Object.entries(data.errors).forEach(([k, v]: any) => {
