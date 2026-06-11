@@ -285,12 +285,19 @@ export default defineNuxtConfig({
 
                 // polling = Vite сам опрашивает файловую систему
                 // нужно если file events не работают (Docker/WSL/VM)
-                usePolling: true,
+                usePolling: false,
 
                 // интервал опроса файлов (мс)
                 // меньше = быстрее реакция HMR
                 // больше = меньше нагрузка на CPU
-                interval: 500,
+                interval: 1000,
+
+                ignored: [
+                    '**/node_modules/**',
+                    '**/.git/**',
+                    '**/.nuxt/**',
+                    '**/storage/**',
+                ],
             }
         }
     }

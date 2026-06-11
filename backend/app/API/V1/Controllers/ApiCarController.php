@@ -113,7 +113,7 @@ class ApiCarController extends Controller
             );
         }
 
-        if (($car['user_id'] ?? null) !== auth()->id()) {
+        if (isset($car['user_id']) && $car['user_id'] !== auth()->id()) {
             return $this->error(
                 self::ACCESS_DENIDED,
                 403

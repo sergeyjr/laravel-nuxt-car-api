@@ -77,7 +77,7 @@ class CarRepository implements CarRepositoryInterface
             // Обновление опций (перезапись)
             if (!empty($data['options'])) {
 
-                $car->option()->delete();
+                $car->options()->delete();
 
                 $this->optionRepository->saveOptions($car->id, $data['options']);
             }
@@ -112,7 +112,7 @@ class CarRepository implements CarRepositoryInterface
             // Частичное обновление опций
             if (!empty($data['options'])) {
 
-                $car->option()->updateOrCreate([],
+                $car->options()->updateOrCreate([],
                     array_filter([
                         'brand' => $data['options']['brand'] ?? null,
                         'model' => $data['options']['model'] ?? null,
@@ -142,7 +142,7 @@ class CarRepository implements CarRepositoryInterface
             }
 
             // Удаление опций автомобиля
-            $car->option()->delete();
+            $car->options()->delete();
 
             // Удаление автомобиля
             $car->delete();

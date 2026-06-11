@@ -92,7 +92,7 @@ class CarService
             return 'not_found';
         }
 
-        if (($car['user_id'] ?? null) !== auth()->id()) {
+        if (isset($car['user_id']) && $car['user_id'] !== auth()->id()) {
             return 'forbidden';
         }
 
@@ -128,7 +128,7 @@ class CarService
             return 'not_found';
         }
 
-        if (($car['user_id'] ?? null) !== auth()->id()) {
+        if (isset($car['user_id']) && $car['user_id'] !== auth()->id()) {
             return 'forbidden';
         }
 
@@ -165,7 +165,7 @@ class CarService
             return 'not_found';
         }
 
-        if (($car['user_id'] ?? null) !== auth()->id()) {
+        if (isset($car['user_id']) && $car['user_id'] !== auth()->id()) {
             return 'forbidden';
         }
 
